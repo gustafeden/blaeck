@@ -11,7 +11,7 @@ A component-based terminal UI framework for Rust — flexbox layout, async-first
 
 ## Preview
 
-![Preview](preview.gif)
+![Preview](https://raw.githubusercontent.com/gustafeden/blaeck/main/preview.gif)
 
 ---
 
