@@ -99,7 +99,6 @@ impl std::fmt::Debug for FocusManager {
     }
 }
 
-
 impl FocusManager {
     pub fn new() -> Self {
         Self::default()

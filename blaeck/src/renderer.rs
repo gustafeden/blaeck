@@ -62,11 +62,10 @@ fn strip_ansi_escapes(s: &str) -> String {
                         if ch == '\x07' {
                             break;
                         }
-                        if ch == '\x1b'
-                            && chars.peek() == Some(&'\\') {
-                                chars.next();
-                                break;
-                            }
+                        if ch == '\x1b' && chars.peek() == Some(&'\\') {
+                            chars.next();
+                            break;
+                        }
                     }
                 }
                 _ => {

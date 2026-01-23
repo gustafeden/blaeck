@@ -147,8 +147,7 @@ impl BarStyle {
                 result
             }
             _ => {
-                let filled_str: String =
-                    std::iter::repeat_n(self.filled_char(), filled).collect();
+                let filled_str: String = std::iter::repeat_n(self.filled_char(), filled).collect();
                 let empty_str: String = std::iter::repeat_n(self.empty_char(), empty).collect();
                 format!("{}{}", filled_str, empty_str)
             }

@@ -22,8 +22,7 @@ use crate::style::{Color, Modifier, Style};
 use super::BorderStyle;
 
 /// Width specification for table columns.
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub enum ColumnWidth {
     /// Fixed character width.
     Fixed(u16),
@@ -33,7 +32,6 @@ pub enum ColumnWidth {
     #[default]
     Auto,
 }
-
 
 /// Text alignment within a cell.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -45,8 +43,7 @@ pub enum CellAlign {
 }
 
 /// A single cell in a table.
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct TableCell {
     /// Cell content.
     pub content: String,
@@ -63,7 +60,6 @@ pub struct TableCell {
     /// Cell alignment (overrides column default).
     pub align: Option<CellAlign>,
 }
-
 
 impl TableCell {
     /// Create a new cell with content.
@@ -129,8 +125,7 @@ impl<S: Into<String>> From<S> for TableCell {
 }
 
 /// A row in a table.
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Row {
     /// Cells in this row.
     pub cells: Vec<TableCell>,
@@ -139,7 +134,6 @@ pub struct Row {
     /// Row text style (applied to all cells unless overridden).
     pub style: Option<Style>,
 }
-
 
 impl Row {
     /// Create a new row with cells.
