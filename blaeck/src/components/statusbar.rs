@@ -504,8 +504,8 @@ mod tests {
 
     #[test]
     fn test_props_with_icon() {
-        let props = StatusBarProps::new(Vec::<&str>::new())
-            .with_icon(icons::CHECK, "done", Color::Green);
+        let props =
+            StatusBarProps::new(Vec::<&str>::new()).with_icon(icons::CHECK, "done", Color::Green);
 
         assert_eq!(props.segments.len(), 1);
         assert_eq!(props.segments[0].icon, Some("✓".to_string()));

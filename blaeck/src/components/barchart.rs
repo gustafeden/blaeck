@@ -147,7 +147,8 @@ impl BarStyle {
                 result
             }
             _ => {
-                let filled_str: String = std::iter::repeat(self.filled_char()).take(filled).collect();
+                let filled_str: String =
+                    std::iter::repeat(self.filled_char()).take(filled).collect();
                 let empty_str: String = std::iter::repeat(self.empty_char()).take(empty).collect();
                 format!("{}{}", filled_str, empty_str)
             }
@@ -430,7 +431,11 @@ impl Component for BarChart {
         if props.show_scale {
             let scale_offset = label_width + props.label_gap + if props.brackets { 1 } else { 0 };
             let mut scale_line = " ".repeat(scale_offset);
-            scale_line.push_str(&format!("0{:>width$}", max_value, width = props.bar_width - 1));
+            scale_line.push_str(&format!(
+                "0{:>width$}",
+                max_value,
+                width = props.bar_width - 1
+            ));
             if props.brackets {
                 scale_line.push(' ');
             }

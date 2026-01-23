@@ -363,8 +363,7 @@ impl IndicatorStyle {
                 }
             }
             IndicatorStyle::SpinnerDots => {
-                const FRAMES: [&str; 10] =
-                    ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+                const FRAMES: [&str; 10] = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
                 FRAMES[timer.cycle(10, 80)]
             }
             IndicatorStyle::SpinnerLine => {

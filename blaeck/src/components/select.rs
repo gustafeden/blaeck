@@ -275,7 +275,13 @@ impl SelectProps {
                     // Format: "❯ 1. Label" or "  2. Label"
                     let num = idx + 1;
                     let num_str = format!("{:>width$}", num, width = max_num_width);
-                    format!("{} {}. {}{}", indicator, num_str, item.label, " ".repeat(padding))
+                    format!(
+                        "{} {}. {}{}",
+                        indicator,
+                        num_str,
+                        item.label,
+                        " ".repeat(padding)
+                    )
                 } else {
                     format!("{} {}{}", indicator, item.label, " ".repeat(padding))
                 };

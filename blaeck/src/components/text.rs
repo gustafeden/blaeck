@@ -219,10 +219,7 @@ mod tests {
 
     #[test]
     fn test_text_props_to_style() {
-        let props = TextProps::new("Test")
-            .color(Color::Green)
-            .bold()
-            .italic();
+        let props = TextProps::new("Test").color(Color::Green).bold().italic();
 
         let style = props.to_style();
         assert_eq!(style.fg, Color::Green);

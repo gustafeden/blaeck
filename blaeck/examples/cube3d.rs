@@ -5,9 +5,9 @@
 //! - ASCII line drawing (Bresenham's algorithm)
 //! - Animation with Blaeck's async runtime
 
-use crossterm::event::KeyCode;
 use blaeck::prelude::*;
 use blaeck::{AppEvent, AsyncApp, AsyncAppConfig};
+use crossterm::event::KeyCode;
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::io;
@@ -188,11 +188,20 @@ fn cube_vertices() -> [Vec3; 8] {
 fn cube_edges() -> [(usize, usize); 12] {
     [
         // Back face
-        (0, 1), (1, 2), (2, 3), (3, 0),
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0),
         // Front face
-        (4, 5), (5, 6), (6, 7), (7, 4),
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 4),
         // Connecting edges
-        (0, 4), (1, 5), (2, 6), (3, 7),
+        (0, 4),
+        (1, 5),
+        (2, 6),
+        (3, 7),
     ]
 }
 
@@ -295,39 +304,37 @@ async fn main() -> io::Result<()> {
             let s = state_render.borrow();
             build_ui(&s)
         },
-        move |app, event| {
-            match event {
-                AppEvent::Key(key) => {
-                    if key.is_char('q') || key.is_char('Q') {
-                        app.exit();
-                    } else if key.is_char(' ') {
-                        let mut s = state_handle.borrow_mut();
-                        s.auto_rotate = !s.auto_rotate;
-                    } else if key.is_char('r') || key.is_char('R') {
-                        let mut s = state_handle.borrow_mut();
-                        s.angle_x = 0.3;
-                        s.angle_y = 0.5;
-                        s.angle_z = 0.0;
-                    } else if key.code == KeyCode::Up {
-                        state_handle.borrow_mut().angle_x -= 0.1;
-                    } else if key.code == KeyCode::Down {
-                        state_handle.borrow_mut().angle_x += 0.1;
-                    } else if key.code == KeyCode::Left {
-                        state_handle.borrow_mut().angle_y -= 0.1;
-                    } else if key.code == KeyCode::Right {
-                        state_handle.borrow_mut().angle_y += 0.1;
-                    }
-                }
-                AppEvent::Tick => {
+        move |app, event| match event {
+            AppEvent::Key(key) => {
+                if key.is_char('q') || key.is_char('Q') {
+                    app.exit();
+                } else if key.is_char(' ') {
                     let mut s = state_handle.borrow_mut();
-                    if s.auto_rotate {
-                        s.angle_y += 0.03;
-                        s.angle_x += 0.01;
-                    }
+                    s.auto_rotate = !s.auto_rotate;
+                } else if key.is_char('r') || key.is_char('R') {
+                    let mut s = state_handle.borrow_mut();
+                    s.angle_x = 0.3;
+                    s.angle_y = 0.5;
+                    s.angle_z = 0.0;
+                } else if key.code == KeyCode::Up {
+                    state_handle.borrow_mut().angle_x -= 0.1;
+                } else if key.code == KeyCode::Down {
+                    state_handle.borrow_mut().angle_x += 0.1;
+                } else if key.code == KeyCode::Left {
+                    state_handle.borrow_mut().angle_y -= 0.1;
+                } else if key.code == KeyCode::Right {
+                    state_handle.borrow_mut().angle_y += 0.1;
                 }
-                AppEvent::Exit => app.exit(),
-                _ => {}
             }
+            AppEvent::Tick => {
+                let mut s = state_handle.borrow_mut();
+                if s.auto_rotate {
+                    s.angle_y += 0.03;
+                    s.angle_x += 0.01;
+                }
+            }
+            AppEvent::Exit => app.exit(),
+            _ => {}
         },
     )
     .await?;

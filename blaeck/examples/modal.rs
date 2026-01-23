@@ -28,11 +28,20 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             // Info alert
-            alert("Information", "This is an informational message.\nIt can span multiple lines."),
+            alert(
+                "Information",
+                "This is an informational message.\nIt can span multiple lines.",
+            ),
             // Confirm dialog
-            confirm_modal("Confirm Action", "Are you sure you want to proceed?\nThis action cannot be undone."),
+            confirm_modal(
+                "Confirm Action",
+                "Are you sure you want to proceed?\nThis action cannot be undone.",
+            ),
             // Error modal
-            error_modal("Error Occurred", "Failed to connect to the server.\nPlease check your network."),
+            error_modal(
+                "Error Occurred",
+                "Failed to connect to the server.\nPlease check your network.",
+            ),
             // Success modal
             success_modal("Success!", "Your changes have been saved."),
             // Custom modal

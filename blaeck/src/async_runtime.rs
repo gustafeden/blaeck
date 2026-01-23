@@ -19,8 +19,8 @@
 //! 4. Handle messages alongside keyboard events in the event loop
 
 use crate::element::Element;
-use crate::renderer::Blaeck;
 use crate::input::Key;
+use crate::renderer::Blaeck;
 use crossterm::event::{Event, EventStream};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use futures::StreamExt;
@@ -175,10 +175,7 @@ impl<W: Write, M: Send + 'static> AsyncApp<W, M> {
         let mut event_stream = EventStream::new();
 
         // Create tick interval if configured
-        let mut tick_interval: Option<Interval> = self
-            .config
-            .tick_interval
-            .map(|d| interval(d));
+        let mut tick_interval: Option<Interval> = self.config.tick_interval.map(|d| interval(d));
 
         // Main event loop
         loop {
@@ -313,7 +310,12 @@ pub async fn read_key_async() -> Result<Key> {
             Some(Ok(Event::Key(key_event))) => return Ok(Key::from(key_event)),
             Some(Ok(_)) => continue,
             Some(Err(e)) => return Err(e),
-            None => return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Event stream ended")),
+            None => {
+                return Err(io::Error::new(
+                    io::ErrorKind::UnexpectedEof,
+                    "Event stream ended",
+                ))
+            }
         }
     }
 }

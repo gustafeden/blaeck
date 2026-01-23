@@ -28,9 +28,9 @@
 //! );
 //! ```
 
+use crate::components::box_component::BorderStyle;
 use crate::element::{Component, Element};
 use crate::style::{Color, Modifier, Style};
-use crate::components::box_component::BorderStyle;
 
 /// Modal visual style.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -341,9 +341,7 @@ impl Component for Modal {
                 .map(|c| Style::new().fg(c).add_modifier(Modifier::DIM))
                 .unwrap_or_else(|| Style::new().add_modifier(Modifier::DIM))
         } else {
-            border_color
-                .map(|c| Style::new().fg(c))
-                .unwrap_or_default()
+            border_color.map(|c| Style::new().fg(c)).unwrap_or_default()
         };
 
         // Top border line
@@ -356,9 +354,10 @@ impl Component for Modal {
         lines.push(Element::styled_text(&top_line, border_style));
 
         // Title line
-        let mut title_segments = vec![
-            Element::styled_text(&chars.vertical.to_string(), border_style),
-        ];
+        let mut title_segments = vec![Element::styled_text(
+            &chars.vertical.to_string(),
+            border_style,
+        )];
 
         let title_style = title_color
             .map(|c| Style::new().fg(c).add_modifier(Modifier::BOLD))
@@ -378,7 +377,10 @@ impl Component for Modal {
             title_segments.push(Element::styled_text(&title, title_style));
             title_segments.push(Element::text(&right_pad));
         }
-        title_segments.push(Element::styled_text(&chars.vertical.to_string(), border_style));
+        title_segments.push(Element::styled_text(
+            &chars.vertical.to_string(),
+            border_style,
+        ));
         lines.push(Element::Fragment(title_segments));
 
         // Separator line under title
@@ -443,9 +445,10 @@ impl Component for Modal {
             lines.push(Element::styled_text(&sep_line, border_style));
 
             // Button line
-            let mut button_segments: Vec<Element> = vec![
-                Element::styled_text(&chars.vertical.to_string(), border_style),
-            ];
+            let mut button_segments: Vec<Element> = vec![Element::styled_text(
+                &chars.vertical.to_string(),
+                border_style,
+            )];
 
             // Calculate button string
             let mut button_parts: Vec<Element> = Vec::new();
@@ -459,9 +462,7 @@ impl Component for Modal {
                         .map(|c| Style::new().fg(c).add_modifier(Modifier::BOLD))
                         .unwrap_or_else(|| Style::new().add_modifier(Modifier::BOLD))
                 } else {
-                    btn.color
-                        .map(|c| Style::new().fg(c))
-                        .unwrap_or_default()
+                    btn.color.map(|c| Style::new().fg(c)).unwrap_or_default()
                 };
                 button_parts.push(Element::styled_text(&btn_text, btn_style));
             }
@@ -480,7 +481,10 @@ impl Component for Modal {
             button_segments.push(Element::text(&" ".repeat(left_pad)));
             button_segments.extend(button_parts);
             button_segments.push(Element::text(&" ".repeat(right_pad)));
-            button_segments.push(Element::styled_text(&chars.vertical.to_string(), border_style));
+            button_segments.push(Element::styled_text(
+                &chars.vertical.to_string(),
+                border_style,
+            ));
             lines.push(Element::Fragment(button_segments));
         }
 

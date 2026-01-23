@@ -75,11 +75,22 @@ fn main() -> io::Result<()> {
                             },
                             vec![],
                         ),
-                        animated_indicator_colored(IndicatorStyle::SpinnerDots, &timer, Color::Cyan),
-                        animated_indicator_colored(IndicatorStyle::SpinnerLine, &timer, Color::Magenta),
+                        animated_indicator_colored(
+                            IndicatorStyle::SpinnerDots,
+                            &timer,
+                            Color::Cyan,
+                        ),
+                        animated_indicator_colored(
+                            IndicatorStyle::SpinnerLine,
+                            &timer,
+                            Color::Magenta,
+                        ),
                         Element::node::<Text>(
                             TextProps {
-                                content: format!("Dots{}", IndicatorStyle::GrowingDots.render(&timer)),
+                                content: format!(
+                                    "Dots{}",
+                                    IndicatorStyle::GrowingDots.render(&timer)
+                                ),
                                 color: Some(Color::Blue),
                                 ..Default::default()
                             },
@@ -159,17 +170,15 @@ fn main() -> io::Result<()> {
             border_color: Some(Color::Green),
             ..Default::default()
         },
-        vec![
-            Element::node::<Text>(
-                TextProps {
-                    content: "● Animation complete!".into(),
-                    color: Some(Color::Green),
-                    bold: true,
-                    ..Default::default()
-                },
-                vec![],
-            ),
-        ],
+        vec![Element::node::<Text>(
+            TextProps {
+                content: "● Animation complete!".into(),
+                color: Some(Color::Green),
+                bold: true,
+                ..Default::default()
+            },
+            vec![],
+        )],
     );
 
     blaeck.render(final_ui)?;

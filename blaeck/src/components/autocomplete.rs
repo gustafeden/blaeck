@@ -600,8 +600,7 @@ mod tests {
 
     #[test]
     fn test_max_suggestions() {
-        let props = AutocompleteProps::new(vec!["a", "b", "c", "d", "e", "f"])
-            .max_suggestions(3);
+        let props = AutocompleteProps::new(vec!["a", "b", "c", "d", "e", "f"]).max_suggestions(3);
 
         let filtered = props.filtered_suggestions();
         assert_eq!(filtered.len(), 3);
@@ -609,8 +608,7 @@ mod tests {
 
     #[test]
     fn test_selected_suggestion() {
-        let props = AutocompleteProps::new(vec!["apple", "banana", "cherry"])
-            .selected(1);
+        let props = AutocompleteProps::new(vec!["apple", "banana", "cherry"]).selected(1);
 
         assert_eq!(props.selected_suggestion().unwrap().label, "banana");
     }

@@ -181,7 +181,11 @@ impl CheckboxProps {
     /// Build the display string.
     pub fn render_string(&self) -> String {
         let (checked_str, unchecked_str) = self.style.chars();
-        let indicator = if self.checked { checked_str } else { unchecked_str };
+        let indicator = if self.checked {
+            checked_str
+        } else {
+            unchecked_str
+        };
 
         let focus_prefix = if self.focused {
             self.focus_indicator.as_deref().unwrap_or("")
@@ -355,9 +359,7 @@ mod tests {
 
     #[test]
     fn test_checkbox_render_string_no_label() {
-        let props = CheckboxProps::new()
-            .checked(true)
-            .no_focus_indicator();
+        let props = CheckboxProps::new().checked(true).no_focus_indicator();
         assert_eq!(props.render_string(), "[x]");
     }
 
@@ -393,8 +395,16 @@ mod tests {
 
         for style in &styles {
             let (checked, unchecked) = style.chars();
-            assert!(!checked.is_empty(), "Style {:?} has empty checked char", style);
-            assert!(!unchecked.is_empty(), "Style {:?} has empty unchecked char", style);
+            assert!(
+                !checked.is_empty(),
+                "Style {:?} has empty checked char",
+                style
+            );
+            assert!(
+                !unchecked.is_empty(),
+                "Style {:?} has empty unchecked char",
+                style
+            );
         }
     }
 }

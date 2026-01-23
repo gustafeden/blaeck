@@ -523,8 +523,7 @@ mod tests {
 
     #[test]
     fn test_breadcrumbs_truncation() {
-        let props =
-            BreadcrumbsProps::new(["a", "b", "c", "d", "e", "f"]).max_items(3);
+        let props = BreadcrumbsProps::new(["a", "b", "c", "d", "e", "f"]).max_items(3);
         let result = props.render_string();
         // Should show: a / ... / e / f
         assert!(result.contains("a"));

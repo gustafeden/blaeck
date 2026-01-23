@@ -331,7 +331,10 @@ mod tests {
     fn test_style_to_ansi_fg_colors() {
         // Test basic colors
         assert!(Style::new().fg(Color::Red).to_ansi_string().contains("31"));
-        assert!(Style::new().fg(Color::Green).to_ansi_string().contains("32"));
+        assert!(Style::new()
+            .fg(Color::Green)
+            .to_ansi_string()
+            .contains("32"));
         assert!(Style::new().fg(Color::Blue).to_ansi_string().contains("34"));
     }
 
@@ -339,7 +342,10 @@ mod tests {
     fn test_style_to_ansi_bg_colors() {
         // Test background colors (should be 40-47 range)
         assert!(Style::new().bg(Color::Red).to_ansi_string().contains("41"));
-        assert!(Style::new().bg(Color::Green).to_ansi_string().contains("42"));
+        assert!(Style::new()
+            .bg(Color::Green)
+            .to_ansi_string()
+            .contains("42"));
     }
 
     #[test]

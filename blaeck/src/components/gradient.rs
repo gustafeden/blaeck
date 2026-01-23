@@ -498,10 +498,7 @@ mod tests {
 
     #[test]
     fn test_gradient_props_builder() {
-        let props = GradientProps::new("test")
-            .bold()
-            .italic()
-            .underline();
+        let props = GradientProps::new("test").bold().italic().underline();
         assert!(props.bold);
         assert!(props.italic);
         assert!(props.underline);

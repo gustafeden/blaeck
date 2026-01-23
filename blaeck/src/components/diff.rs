@@ -329,11 +329,7 @@ impl DiffProps {
 
     /// Render a single line to a string.
     fn render_line(&self, line: &DiffLine, line_width: usize) -> String {
-        let prefix = if self.show_prefix {
-            line.prefix()
-        } else {
-            ""
-        };
+        let prefix = if self.show_prefix { line.prefix() } else { "" };
 
         match self.style {
             DiffStyle::Minimal => {
@@ -530,10 +526,7 @@ mod tests {
 
     #[test]
     fn test_diff_props_builder() {
-        let props = DiffProps::new()
-            .removed("old")
-            .added("new")
-            .context("same");
+        let props = DiffProps::new().removed("old").added("new").context("same");
 
         assert_eq!(props.lines.len(), 3);
         assert_eq!(props.lines[0].line_type, DiffLineType::Removed);
@@ -634,9 +627,7 @@ mod tests {
 
     #[test]
     fn test_diff_component_render_has_styles() {
-        let props = DiffProps::new()
-            .removed("old line")
-            .added("new line");
+        let props = DiffProps::new().removed("old line").added("new line");
         let elem = Diff::render(&props);
 
         if let crate::Element::Fragment(children) = elem {

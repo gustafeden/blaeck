@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example tabs
 
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use blaeck::input::poll_key;
 use blaeck::prelude::*;
 use blaeck::Blaeck;
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use std::time::Duration;
 

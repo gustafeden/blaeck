@@ -281,8 +281,7 @@ mod tests {
         let elem = Element::styled_text("Styled", style);
         match &elem {
             Element::Text {
-                content,
-                style: s, ..
+                content, style: s, ..
             } => {
                 assert_eq!(content, "Styled");
                 assert_eq!(s.fg, Color::Red);

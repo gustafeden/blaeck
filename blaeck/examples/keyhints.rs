@@ -38,11 +38,7 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<KeyHints>(
-                KeyHintsProps::new([
-                    ("^C", "exit"),
-                    ("↑↓", "navigate"),
-                    ("Enter", "select"),
-                ]),
+                KeyHintsProps::new([("^C", "exit"), ("↑↓", "navigate"), ("Enter", "select")]),
                 vec![],
             ),
             Element::text(""),
@@ -56,12 +52,8 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<KeyHints>(
-                KeyHintsProps::new([
-                    ("q", "quit"),
-                    ("?", "help"),
-                    ("Tab", "switch"),
-                ])
-                .style(KeyHintStyle::Bracketed),
+                KeyHintsProps::new([("q", "quit"), ("?", "help"), ("Tab", "switch")])
+                    .style(KeyHintStyle::Bracketed),
                 vec![],
             ),
             Element::text(""),
@@ -75,13 +67,9 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<KeyHints>(
-                KeyHintsProps::new([
-                    ("Space", "toggle"),
-                    ("a", "select all"),
-                    ("Esc", "cancel"),
-                ])
-                .style(KeyHintStyle::Colon)
-                .separator(KeyHintSeparator::Pipe),
+                KeyHintsProps::new([("Space", "toggle"), ("a", "select all"), ("Esc", "cancel")])
+                    .style(KeyHintStyle::Colon)
+                    .separator(KeyHintSeparator::Pipe),
                 vec![],
             ),
             Element::text(""),
@@ -95,13 +83,9 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<KeyHints>(
-                KeyHintsProps::new([
-                    ("^S", "save"),
-                    ("^Z", "undo"),
-                    ("^Y", "redo"),
-                ])
-                .style(KeyHintStyle::ActionFirst)
-                .separator(KeyHintSeparator::Slash),
+                KeyHintsProps::new([("^S", "save"), ("^Z", "undo"), ("^Y", "redo")])
+                    .style(KeyHintStyle::ActionFirst)
+                    .separator(KeyHintSeparator::Slash),
                 vec![],
             ),
             Element::text(""),
@@ -115,13 +99,9 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<KeyHints>(
-                KeyHintsProps::new([
-                    ("F1", "docs"),
-                    ("F5", "refresh"),
-                    ("F12", "debug"),
-                ])
-                .key_color(Color::Yellow)
-                .separator(KeyHintSeparator::DoubleSpace),
+                KeyHintsProps::new([("F1", "docs"), ("F5", "refresh"), ("F12", "debug")])
+                    .key_color(Color::Yellow)
+                    .separator(KeyHintSeparator::DoubleSpace),
                 vec![],
             ),
             Element::text(""),

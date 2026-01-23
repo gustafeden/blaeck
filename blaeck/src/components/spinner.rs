@@ -62,9 +62,9 @@ impl SpinnerStyle {
             SpinnerStyle::Circle => &["◐", "◓", "◑", "◒"],
             SpinnerStyle::GrowingDots => &[".  ", ".. ", "...", " ..", "  .", "   "],
             SpinnerStyle::Arrow => &["←", "↖", "↑", "↗", "→", "↘", "↓", "↙"],
-            SpinnerStyle::BouncingBar => &[
-                "[=   ]", "[ =  ]", "[  = ]", "[   =]", "[  = ]", "[ =  ]",
-            ],
+            SpinnerStyle::BouncingBar => {
+                &["[=   ]", "[ =  ]", "[  = ]", "[   =]", "[  = ]", "[ =  ]"]
+            }
             SpinnerStyle::Arc => &["◜", "◝", "◞", "◟"],
             SpinnerStyle::BoxCorners => &["◰", "◳", "◲", "◱"],
             SpinnerStyle::Triangle => &["◢", "◣", "◤", "◥"],
@@ -343,9 +343,7 @@ mod tests {
 
     #[test]
     fn test_spinner_current_frame() {
-        let props = SpinnerProps::new()
-            .style(SpinnerStyle::Line)
-            .frame(2);
+        let props = SpinnerProps::new().style(SpinnerStyle::Line).frame(2);
         assert_eq!(props.current_frame(), "-");
     }
 
@@ -379,9 +377,7 @@ mod tests {
 
     #[test]
     fn test_spinner_render_with_label() {
-        let props = SpinnerProps::new()
-            .frame(0)
-            .label("Loading...");
+        let props = SpinnerProps::new().frame(0).label("Loading...");
         let elem = Spinner::render(&props);
         match elem {
             Element::Text { content, .. } => {
@@ -412,8 +408,16 @@ mod tests {
         ];
 
         for style in &styles {
-            assert!(style.frames().len() >= 2, "Style {:?} has too few frames", style);
-            assert!(style.interval_ms() > 0, "Style {:?} has invalid interval", style);
+            assert!(
+                style.frames().len() >= 2,
+                "Style {:?} has too few frames",
+                style
+            );
+            assert!(
+                style.interval_ms() > 0,
+                "Style {:?} has invalid interval",
+                style
+            );
         }
     }
 }

@@ -13,7 +13,7 @@
 //! Run with: cargo run --example async_app
 
 use blaeck::prelude::*;
-use blaeck::{poll_key, Key, Blaeck};
+use blaeck::{poll_key, Blaeck, Key};
 use std::io::stdout;
 use std::time::{Duration, Instant};
 use tokio::sync::mpsc;

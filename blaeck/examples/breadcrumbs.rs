@@ -127,8 +127,7 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<Breadcrumbs>(
-                BreadcrumbsProps::new(["home", "user", "docs"])
-                    .show_root(true),
+                BreadcrumbsProps::new(["home", "user", "docs"]).show_root(true),
                 vec![],
             ),
             Element::text(""),
@@ -142,8 +141,7 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<Breadcrumbs>(
-                BreadcrumbsProps::new(["a", "b", "c", "d", "e", "f", "g", "h"])
-                    .max_items(4),
+                BreadcrumbsProps::new(["a", "b", "c", "d", "e", "f", "g", "h"]).max_items(4),
                 vec![],
             ),
             Element::text(""),

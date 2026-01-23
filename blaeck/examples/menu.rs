@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example menu
 
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use blaeck::input::poll_key;
 use blaeck::prelude::*;
 use blaeck::{Blaeck, SelectIndicator, SelectItem, SelectProps, SelectState};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use std::time::Duration;
 
@@ -47,14 +47,23 @@ fn main() -> io::Result<()> {
                     vec![],
                 ),
                 Element::text(""),
-                Element::node::<Divider>(DividerProps::new().width(30).color(Color::DarkGray), vec![]),
-                Element::text(""),
-                Element::node::<Select>(
-                    props.clone().selected(state.selected).scroll_offset(state.scroll_offset),
+                Element::node::<Divider>(
+                    DividerProps::new().width(30).color(Color::DarkGray),
                     vec![],
                 ),
                 Element::text(""),
-                Element::node::<Divider>(DividerProps::new().width(30).color(Color::DarkGray), vec![]),
+                Element::node::<Select>(
+                    props
+                        .clone()
+                        .selected(state.selected)
+                        .scroll_offset(state.scroll_offset),
+                    vec![],
+                ),
+                Element::text(""),
+                Element::node::<Divider>(
+                    DividerProps::new().width(30).color(Color::DarkGray),
+                    vec![],
+                ),
                 Element::text(""),
                 Element::node::<Text>(
                     TextProps {

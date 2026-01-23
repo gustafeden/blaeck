@@ -72,7 +72,11 @@ impl Key {
     /// Get the character if this is a character key (no modifiers except shift)
     pub fn as_char(&self) -> Option<char> {
         match self.code {
-            KeyCode::Char(c) if self.modifiers.is_empty() || self.modifiers == KeyModifiers::SHIFT => Some(c),
+            KeyCode::Char(c)
+                if self.modifiers.is_empty() || self.modifiers == KeyModifiers::SHIFT =>
+            {
+                Some(c)
+            }
             _ => None,
         }
     }

@@ -291,10 +291,8 @@ impl Component for Markdown {
                     if let Some(ref url) = style_state.link_url {
                         if props.enable_hyperlinks {
                             // OSC 8 format: \x1b]8;;URL\x1b\\TEXT\x1b]8;;\x1b\\
-                            let hyperlink = format!(
-                                "\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\",
-                                url, text_str
-                            );
+                            let hyperlink =
+                                format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, text_str);
                             current_line.push((hyperlink, style));
                         } else {
                             // Fallback: show as [text](url)
@@ -355,7 +353,10 @@ impl Component for Markdown {
                         current_line.clear();
                     }
                     let hr_style = Style::new().fg(Color::DarkGray);
-                    lines.push(Element::styled_text("────────────────────────────────", hr_style));
+                    lines.push(Element::styled_text(
+                        "────────────────────────────────",
+                        hr_style,
+                    ));
                 }
                 _ => {}
             }
@@ -529,9 +530,7 @@ mod tests {
                 Element::Text { style, content } => {
                     style.fg == Color::Yellow && content.contains("code")
                 }
-                Element::Fragment(children) => {
-                    children.iter().any(|c| find_code_in_element(c))
-                }
+                Element::Fragment(children) => children.iter().any(|c| find_code_in_element(c)),
                 _ => false,
             }
         }

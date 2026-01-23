@@ -208,7 +208,9 @@ impl TextInputProps {
             }
         } else {
             let display_value = if self.mask {
-                self.mask_char.to_string().repeat(self.value.chars().count())
+                self.mask_char
+                    .to_string()
+                    .repeat(self.value.chars().count())
             } else {
                 self.value.clone()
             };
@@ -224,7 +226,11 @@ impl TextInputProps {
 
                     // Build string with selection markers [selected]
                     let before: String = display_value.chars().take(sel_start).collect();
-                    let selected: String = display_value.chars().skip(sel_start).take(sel_end - sel_start).collect();
+                    let selected: String = display_value
+                        .chars()
+                        .skip(sel_start)
+                        .take(sel_end - sel_start)
+                        .collect();
                     let after: String = display_value.chars().skip(sel_end).collect();
 
                     // Show cursor position within the selection context
@@ -334,7 +340,11 @@ impl TextInputState {
     pub fn with_value(value: impl Into<String>) -> Self {
         let value = value.into();
         let cursor = value.len();
-        Self { value, cursor, selection_anchor: None }
+        Self {
+            value,
+            cursor,
+            selection_anchor: None,
+        }
     }
 
     /// Insert a character at the cursor position.
@@ -458,9 +468,8 @@ impl TextInputState {
 
     /// Get the selected text.
     pub fn selected_text(&self) -> Option<&str> {
-        self.selection_range().map(|(start, end)| {
-            &self.value[start..end]
-        })
+        self.selection_range()
+            .map(|(start, end)| &self.value[start..end])
     }
 
     /// Clear the selection without deleting text.

@@ -173,22 +173,14 @@ impl SparklineProps {
 
     /// Get the effective min value.
     pub fn effective_min(&self) -> f64 {
-        self.min.unwrap_or_else(|| {
-            self.data
-                .iter()
-                .copied()
-                .fold(f64::INFINITY, f64::min)
-        })
+        self.min
+            .unwrap_or_else(|| self.data.iter().copied().fold(f64::INFINITY, f64::min))
     }
 
     /// Get the effective max value.
     pub fn effective_max(&self) -> f64 {
-        self.max.unwrap_or_else(|| {
-            self.data
-                .iter()
-                .copied()
-                .fold(f64::NEG_INFINITY, f64::max)
-        })
+        self.max
+            .unwrap_or_else(|| self.data.iter().copied().fold(f64::NEG_INFINITY, f64::max))
     }
 
     /// Render the sparkline string.

@@ -260,12 +260,26 @@ impl MultiSelectProps {
                 let is_cursor = *idx == self.cursor;
                 let is_checked = self.selected.contains(idx);
 
-                let cursor_char = if is_cursor { self.cursor_indicator } else { " " };
-                let checkbox = if is_checked { checked_char } else { unchecked_char };
+                let cursor_char = if is_cursor {
+                    self.cursor_indicator
+                } else {
+                    " "
+                };
+                let checkbox = if is_checked {
+                    checked_char
+                } else {
+                    unchecked_char
+                };
 
                 // Pad to max width
                 let padding = max_label_width.saturating_sub(item.label.chars().count());
-                let line = format!("{} {} {}{}", cursor_char, checkbox, item.label, " ".repeat(padding));
+                let line = format!(
+                    "{} {} {}{}",
+                    cursor_char,
+                    checkbox,
+                    item.label,
+                    " ".repeat(padding)
+                );
 
                 let mut style = Style::new();
                 if item.disabled {

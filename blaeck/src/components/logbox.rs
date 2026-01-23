@@ -424,8 +424,7 @@ mod tests {
 
     #[test]
     fn test_logbox_visible_lines_over_max() {
-        let props = LogBoxProps::with_lines(vec!["a", "b", "c", "d", "e", "f", "g"])
-            .max_lines(3);
+        let props = LogBoxProps::with_lines(vec!["a", "b", "c", "d", "e", "f", "g"]).max_lines(3);
         let (visible, overflow) = props.visible_lines();
         assert_eq!(visible.len(), 3);
         assert_eq!(overflow, 4);

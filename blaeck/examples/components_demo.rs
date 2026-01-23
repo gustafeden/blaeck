@@ -45,7 +45,6 @@ fn main() -> io::Result<()> {
                     vec![],
                 ),
                 Element::text(""),
-
                 // Spinners section
                 Element::node::<Text>(
                     TextProps {
@@ -100,7 +99,6 @@ fn main() -> io::Result<()> {
                     ],
                 ),
                 Element::text(""),
-
                 // Progress bars section
                 Element::node::<Text>(
                     TextProps {
@@ -221,7 +219,6 @@ fn main() -> io::Result<()> {
                     ],
                 ),
                 Element::text(""),
-
                 // Helper functions demo
                 Element::node::<Text>(
                     TextProps {
@@ -240,14 +237,21 @@ fn main() -> io::Result<()> {
                     vec![
                         Element::node::<Text>(
                             TextProps {
-                                content: format!("progress_bar({}, 20):     {}", percent, progress_bar(percent, 20)),
+                                content: format!(
+                                    "progress_bar({}, 20):     {}",
+                                    percent,
+                                    progress_bar(percent, 20)
+                                ),
                                 ..Default::default()
                             },
                             vec![],
                         ),
                         Element::node::<Text>(
                             TextProps {
-                                content: format!("progress_bar_bracketed: {}", progress_bar_bracketed(percent, 20)),
+                                content: format!(
+                                    "progress_bar_bracketed: {}",
+                                    progress_bar_bracketed(percent, 20)
+                                ),
                                 ..Default::default()
                             },
                             vec![],
@@ -255,7 +259,6 @@ fn main() -> io::Result<()> {
                     ],
                 ),
                 Element::text(""),
-
                 // Footer
                 Element::node::<Text>(
                     TextProps {

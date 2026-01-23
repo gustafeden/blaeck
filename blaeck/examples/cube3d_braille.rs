@@ -9,9 +9,9 @@
 //! - Z-buffer for depth sorting
 //! - Triangle rasterization
 
-use crossterm::event::KeyCode;
 use blaeck::prelude::*;
 use blaeck::{AppEvent, AsyncApp, AsyncAppConfig};
+use crossterm::event::KeyCode;
 use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
@@ -225,7 +225,7 @@ impl BrailleBuffer {
         }
     }
 
-        /// Convert pixel buffer to braille characters with colors
+    /// Convert pixel buffer to braille characters with colors
     fn to_lines(&self) -> Vec<(String, Vec<Rgb>)> {
         let char_width = self.width / 2;
         let char_height = self.height / 4;
@@ -240,8 +240,14 @@ impl BrailleBuffer {
                 let py = cy * 4;
 
                 let dot_positions = [
-                    (0, 0, 0), (0, 1, 1), (0, 2, 2), (1, 0, 3),
-                    (1, 1, 4), (1, 2, 5), (0, 3, 6), (1, 3, 7),
+                    (0, 0, 0),
+                    (0, 1, 1),
+                    (0, 2, 2),
+                    (1, 0, 3),
+                    (1, 1, 4),
+                    (1, 2, 5),
+                    (0, 3, 6),
+                    (1, 3, 7),
                 ];
 
                 let mut dots = 0u8;
@@ -290,7 +296,13 @@ fn edge_function(x0: f32, y0: f32, x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
 }
 
 /// Create cube triangles with proper face shading
-fn cube_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_color: Rgb) -> Vec<Triangle> {
+fn cube_triangles(
+    size: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
+    base_color: Rgb,
+) -> Vec<Triangle> {
     let s = size;
 
     // Cube vertices
@@ -313,18 +325,23 @@ fn cube_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_colo
 
     // Face definitions with outward normals
     let faces: [([usize; 3], [usize; 3], Vec3); 6] = [
-        ([4, 5, 6], [4, 6, 7], Vec3::new(0.0, 0.0, 1.0)),   // Front +Z
-        ([0, 3, 2], [0, 2, 1], Vec3::new(0.0, 0.0, -1.0)),  // Back -Z
-        ([3, 7, 6], [3, 6, 2], Vec3::new(0.0, 1.0, 0.0)),   // Top +Y
-        ([0, 1, 5], [0, 5, 4], Vec3::new(0.0, -1.0, 0.0)),  // Bottom -Y
-        ([1, 2, 6], [1, 6, 5], Vec3::new(1.0, 0.0, 0.0)),   // Right +X
-        ([0, 4, 7], [0, 7, 3], Vec3::new(-1.0, 0.0, 0.0)),  // Left -X
+        ([4, 5, 6], [4, 6, 7], Vec3::new(0.0, 0.0, 1.0)), // Front +Z
+        ([0, 3, 2], [0, 2, 1], Vec3::new(0.0, 0.0, -1.0)), // Back -Z
+        ([3, 7, 6], [3, 6, 2], Vec3::new(0.0, 1.0, 0.0)), // Top +Y
+        ([0, 1, 5], [0, 5, 4], Vec3::new(0.0, -1.0, 0.0)), // Bottom -Y
+        ([1, 2, 6], [1, 6, 5], Vec3::new(1.0, 0.0, 0.0)), // Right +X
+        ([0, 4, 7], [0, 7, 3], Vec3::new(-1.0, 0.0, 0.0)), // Left -X
     ];
 
     // Light direction (from upper-right-front)
     let light_dir = Vec3::new(0.5, 0.7, -0.5);
-    let light_len = (light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z).sqrt();
-    let light_dir = Vec3::new(light_dir.x / light_len, light_dir.y / light_len, light_dir.z / light_len);
+    let light_len =
+        (light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z).sqrt();
+    let light_dir = Vec3::new(
+        light_dir.x / light_len,
+        light_dir.y / light_len,
+        light_dir.z / light_len,
+    );
 
     let mut triangles = Vec::new();
 
@@ -333,7 +350,9 @@ fn cube_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_colo
         let rotated_normal = normal.rotate_x(angle_x).rotate_y(angle_y).rotate_z(angle_z);
 
         // Calculate lighting (dot product with light direction)
-        let dot = rotated_normal.x * light_dir.x + rotated_normal.y * light_dir.y + rotated_normal.z * light_dir.z;
+        let dot = rotated_normal.x * light_dir.x
+            + rotated_normal.y * light_dir.y
+            + rotated_normal.z * light_dir.z;
 
         // Map to brightness: ambient (0.3) + diffuse (0.7 * max(0, dot))
         let brightness = 0.3 + 0.7 * dot.max(0.0);
@@ -378,12 +397,54 @@ const SHAPES: [(Shape, &str); 3] = [
 
 /// Color presets
 const COLOR_PRESETS: [(Rgb, &str); 6] = [
-    (Rgb { r: 0, g: 200, b: 255 }, "Cyan"),
-    (Rgb { r: 255, g: 100, b: 150 }, "Pink"),
-    (Rgb { r: 150, g: 255, b: 100 }, "Lime"),
-    (Rgb { r: 255, g: 180, b: 50 }, "Orange"),
-    (Rgb { r: 180, g: 100, b: 255 }, "Purple"),
-    (Rgb { r: 255, g: 255, b: 255 }, "White"),
+    (
+        Rgb {
+            r: 0,
+            g: 200,
+            b: 255,
+        },
+        "Cyan",
+    ),
+    (
+        Rgb {
+            r: 255,
+            g: 100,
+            b: 150,
+        },
+        "Pink",
+    ),
+    (
+        Rgb {
+            r: 150,
+            g: 255,
+            b: 100,
+        },
+        "Lime",
+    ),
+    (
+        Rgb {
+            r: 255,
+            g: 180,
+            b: 50,
+        },
+        "Orange",
+    ),
+    (
+        Rgb {
+            r: 180,
+            g: 100,
+            b: 255,
+        },
+        "Purple",
+    ),
+    (
+        Rgb {
+            r: 255,
+            g: 255,
+            b: 255,
+        },
+        "White",
+    ),
 ];
 
 /// Application state
@@ -434,7 +495,12 @@ impl AppState {
 }
 
 /// Get projected cube edges for drawing - silhouette and visible ridges only
-fn cube_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f32, f32), (f32, f32))> {
+fn cube_edges(
+    size: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
+) -> Vec<((f32, f32), (f32, f32))> {
     let s = size;
 
     let vertices = [
@@ -461,9 +527,18 @@ fn cube_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f32,
         .collect();
 
     let edge_defs: [(usize, usize); 12] = [
-        (0, 1), (1, 2), (2, 3), (3, 0), // Back face
-        (4, 5), (5, 6), (6, 7), (7, 4), // Front face
-        (0, 4), (1, 5), (2, 6), (3, 7), // Connecting edges
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0), // Back face
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 4), // Front face
+        (0, 4),
+        (1, 5),
+        (2, 6),
+        (3, 7), // Connecting edges
     ];
 
     let mut edges = Vec::new();
@@ -476,16 +551,22 @@ fn cube_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f32,
 }
 
 /// Create pyramid (tetrahedron) triangles with shading
-fn pyramid_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_color: Rgb) -> Vec<Triangle> {
+fn pyramid_triangles(
+    size: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
+    base_color: Rgb,
+) -> Vec<Triangle> {
     let s = size;
     let h = s * 1.5; // Height
 
     // Tetrahedron vertices (base triangle + apex)
     let vertices = [
-        Vec3::new(0.0, h * 0.5, 0.0),           // 0: Apex (top)
-        Vec3::new(-s, -h * 0.5, s * 0.577),     // 1: Base front-left
-        Vec3::new(s, -h * 0.5, s * 0.577),      // 2: Base front-right
-        Vec3::new(0.0, -h * 0.5, -s * 1.155),   // 3: Base back
+        Vec3::new(0.0, h * 0.5, 0.0),         // 0: Apex (top)
+        Vec3::new(-s, -h * 0.5, s * 0.577),   // 1: Base front-left
+        Vec3::new(s, -h * 0.5, s * 0.577),    // 2: Base front-right
+        Vec3::new(0.0, -h * 0.5, -s * 1.155), // 3: Base back
     ];
 
     let transformed: Vec<Vec3> = vertices
@@ -502,13 +583,20 @@ fn pyramid_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_c
     ];
 
     let light_dir = Vec3::new(0.5, 0.7, -0.5);
-    let light_len = (light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z).sqrt();
-    let light_dir = Vec3::new(light_dir.x / light_len, light_dir.y / light_len, light_dir.z / light_len);
+    let light_len =
+        (light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z).sqrt();
+    let light_dir = Vec3::new(
+        light_dir.x / light_len,
+        light_dir.y / light_len,
+        light_dir.z / light_len,
+    );
 
     let mut triangles = Vec::new();
     for (tri, normal) in faces {
         let rotated_normal = normal.rotate_x(angle_x).rotate_y(angle_y).rotate_z(angle_z);
-        let dot = rotated_normal.x * light_dir.x + rotated_normal.y * light_dir.y + rotated_normal.z * light_dir.z;
+        let dot = rotated_normal.x * light_dir.x
+            + rotated_normal.y * light_dir.y
+            + rotated_normal.z * light_dir.z;
         let brightness = 0.3 + 0.7 * dot.max(0.0);
 
         let shaded_color = Rgb::new(
@@ -528,7 +616,12 @@ fn pyramid_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_c
 }
 
 /// Get pyramid edges
-fn pyramid_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f32, f32), (f32, f32))> {
+fn pyramid_edges(
+    size: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
+) -> Vec<((f32, f32), (f32, f32))> {
     let s = size;
     let h = s * 1.5;
 
@@ -550,8 +643,12 @@ fn pyramid_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f
         .collect();
 
     let edge_indices = [
-        (0, 1), (0, 2), (0, 3), // Apex to base
-        (1, 2), (2, 3), (3, 1), // Base triangle
+        (0, 1),
+        (0, 2),
+        (0, 3), // Apex to base
+        (1, 2),
+        (2, 3),
+        (3, 1), // Base triangle
     ];
 
     let mut edges = Vec::new();
@@ -564,7 +661,13 @@ fn pyramid_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f
 }
 
 /// Create octahedron triangles with shading
-fn octahedron_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, base_color: Rgb) -> Vec<Triangle> {
+fn octahedron_triangles(
+    size: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
+    base_color: Rgb,
+) -> Vec<Triangle> {
     let s = size;
 
     // Octahedron vertices (6 points: +/- on each axis)
@@ -584,26 +687,33 @@ fn octahedron_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, bas
 
     // 8 triangular faces
     let faces: [([usize; 3], Vec3); 8] = [
-        ([0, 4, 2], Vec3::new(1.0, 1.0, 1.0)),   // Top-front-right
-        ([0, 2, 5], Vec3::new(1.0, 1.0, -1.0)),  // Top-back-right
-        ([0, 5, 3], Vec3::new(-1.0, 1.0, -1.0)), // Top-back-left
-        ([0, 3, 4], Vec3::new(-1.0, 1.0, 1.0)),  // Top-front-left
-        ([1, 2, 4], Vec3::new(1.0, -1.0, 1.0)),  // Bottom-front-right
-        ([1, 5, 2], Vec3::new(1.0, -1.0, -1.0)), // Bottom-back-right
-        ([1, 3, 5], Vec3::new(-1.0, -1.0, -1.0)),// Bottom-back-left
-        ([1, 4, 3], Vec3::new(-1.0, -1.0, 1.0)), // Bottom-front-left
+        ([0, 4, 2], Vec3::new(1.0, 1.0, 1.0)),    // Top-front-right
+        ([0, 2, 5], Vec3::new(1.0, 1.0, -1.0)),   // Top-back-right
+        ([0, 5, 3], Vec3::new(-1.0, 1.0, -1.0)),  // Top-back-left
+        ([0, 3, 4], Vec3::new(-1.0, 1.0, 1.0)),   // Top-front-left
+        ([1, 2, 4], Vec3::new(1.0, -1.0, 1.0)),   // Bottom-front-right
+        ([1, 5, 2], Vec3::new(1.0, -1.0, -1.0)),  // Bottom-back-right
+        ([1, 3, 5], Vec3::new(-1.0, -1.0, -1.0)), // Bottom-back-left
+        ([1, 4, 3], Vec3::new(-1.0, -1.0, 1.0)),  // Bottom-front-left
     ];
 
     let light_dir = Vec3::new(0.5, 0.7, -0.5);
-    let light_len = (light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z).sqrt();
-    let light_dir = Vec3::new(light_dir.x / light_len, light_dir.y / light_len, light_dir.z / light_len);
+    let light_len =
+        (light_dir.x * light_dir.x + light_dir.y * light_dir.y + light_dir.z * light_dir.z).sqrt();
+    let light_dir = Vec3::new(
+        light_dir.x / light_len,
+        light_dir.y / light_len,
+        light_dir.z / light_len,
+    );
 
     let mut triangles = Vec::new();
     for (tri, normal) in faces {
         let n_len = (normal.x * normal.x + normal.y * normal.y + normal.z * normal.z).sqrt();
         let normal = Vec3::new(normal.x / n_len, normal.y / n_len, normal.z / n_len);
         let rotated_normal = normal.rotate_x(angle_x).rotate_y(angle_y).rotate_z(angle_z);
-        let dot = rotated_normal.x * light_dir.x + rotated_normal.y * light_dir.y + rotated_normal.z * light_dir.z;
+        let dot = rotated_normal.x * light_dir.x
+            + rotated_normal.y * light_dir.y
+            + rotated_normal.z * light_dir.z;
         let brightness = 0.3 + 0.7 * dot.max(0.0);
 
         let shaded_color = Rgb::new(
@@ -623,7 +733,12 @@ fn octahedron_triangles(size: f32, angle_x: f32, angle_y: f32, angle_z: f32, bas
 }
 
 /// Get octahedron edges
-fn octahedron_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<((f32, f32), (f32, f32))> {
+fn octahedron_edges(
+    size: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
+) -> Vec<((f32, f32), (f32, f32))> {
     let s = size;
 
     let vertices = [
@@ -647,9 +762,18 @@ fn octahedron_edges(size: f32, angle_x: f32, angle_y: f32, angle_z: f32) -> Vec<
 
     // 12 edges
     let edge_indices = [
-        (0, 2), (0, 3), (0, 4), (0, 5), // Top to middle
-        (1, 2), (1, 3), (1, 4), (1, 5), // Bottom to middle
-        (2, 4), (4, 3), (3, 5), (5, 2), // Middle ring
+        (0, 2),
+        (0, 3),
+        (0, 4),
+        (0, 5), // Top to middle
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (1, 5), // Bottom to middle
+        (2, 4),
+        (4, 3),
+        (3, 5),
+        (5, 2), // Middle ring
     ];
 
     let mut edges = Vec::new();
@@ -718,8 +842,7 @@ fn build_ui(state: &AppState) -> Element {
             vec![],
         ),
         Element::node::<Text>(
-            TextProps::new("  Using Unicode braille for 8x subpixel resolution")
-                .color(Color::Gray),
+            TextProps::new("  Using Unicode braille for 8x subpixel resolution").color(Color::Gray),
             vec![],
         ),
         Element::node::<Spacer>(SpacerProps::lines(1), vec![]),

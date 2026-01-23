@@ -185,7 +185,11 @@ fn main() -> io::Result<()> {
                 TextProps {
                     content: format!(
                         "BRANCH: {} CHECK: {} CROSS: {} WARNING: {} INFO: {}",
-                        icons::BRANCH, icons::CHECK, icons::CROSS, icons::WARNING, icons::INFO
+                        icons::BRANCH,
+                        icons::CHECK,
+                        icons::CROSS,
+                        icons::WARNING,
+                        icons::INFO
                     ),
                     color: Some(Color::Cyan),
                     ..Default::default()
@@ -196,7 +200,12 @@ fn main() -> io::Result<()> {
                 TextProps {
                     content: format!(
                         "CLOCK: {} USER: {} SYNC: {} PLUS: {} MINUS: {} MODIFIED: {}",
-                        icons::CLOCK, icons::USER, icons::SYNC, icons::PLUS, icons::MINUS, icons::MODIFIED
+                        icons::CLOCK,
+                        icons::USER,
+                        icons::SYNC,
+                        icons::PLUS,
+                        icons::MINUS,
+                        icons::MODIFIED
                     ),
                     color: Some(Color::Cyan),
                     ..Default::default()
@@ -207,7 +216,12 @@ fn main() -> io::Result<()> {
                 TextProps {
                     content: format!(
                         "ARROW_UP: {} ARROW_DOWN: {} FOLDER: {} FILE: {} LOCK: {} UNLOCK: {}",
-                        icons::ARROW_UP, icons::ARROW_DOWN, icons::FOLDER, icons::FILE, icons::LOCK, icons::UNLOCK
+                        icons::ARROW_UP,
+                        icons::ARROW_DOWN,
+                        icons::FOLDER,
+                        icons::FILE,
+                        icons::LOCK,
+                        icons::UNLOCK
                     ),
                     color: Some(Color::Cyan),
                     ..Default::default()

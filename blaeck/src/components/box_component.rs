@@ -62,7 +62,9 @@
 //! renders nothing, preventing layout shifts when it appears.
 
 use crate::element::{Component, Element};
-use crate::layout::{AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutStyle};
+use crate::layout::{
+    AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutStyle,
+};
 use crate::style::Color;
 
 /// Border character set for drawing box borders.
@@ -563,7 +565,10 @@ impl BoxProps {
         let border_right: f32 = if sides.right { 1.0 } else { 0.0 };
 
         // For the base padding, we use the maximum border size if no per-side padding is set
-        let max_border = border_top.max(border_bottom).max(border_left).max(border_right);
+        let max_border = border_top
+            .max(border_bottom)
+            .max(border_left)
+            .max(border_right);
 
         LayoutStyle {
             width: self.width,

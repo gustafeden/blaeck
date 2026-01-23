@@ -573,7 +573,12 @@ fn render_cell_text(
             CellAlign::Center => {
                 let left_pad = padding / 2;
                 let right_pad = padding - left_pad;
-                format!("{}{}{}", " ".repeat(left_pad), content, " ".repeat(right_pad))
+                format!(
+                    "{}{}{}",
+                    " ".repeat(left_pad),
+                    content,
+                    " ".repeat(right_pad)
+                )
             }
         }
     };

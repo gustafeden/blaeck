@@ -16,7 +16,11 @@
 //!
 //! See `ARCHITECTURE.md` for the full mental model.
 
-use crate::components::{Autocomplete, Badge, BarChart, BoxProps, Breadcrumbs, Checkbox, Confirm, Diff, Divider, Gradient, KeyHints, Link, LogBox, Markdown, Modal, MultiSelect, Progress, Select, Sparkline, Spinner, StatusBar, SyntaxHighlight, Table, Tabs, TextInput, Timer, TreeView};
+use crate::components::{
+    Autocomplete, Badge, BarChart, BoxProps, Breadcrumbs, Checkbox, Confirm, Diff, Divider,
+    Gradient, KeyHints, Link, LogBox, Markdown, Modal, MultiSelect, Progress, Select, Sparkline,
+    Spinner, StatusBar, SyntaxHighlight, Table, Tabs, TextInput, Timer, TreeView,
+};
 use crate::element::Element;
 use crate::layout::{LayoutStyle, LayoutTree};
 use crate::log_update::LogUpdate;
@@ -234,8 +238,7 @@ impl<W: Write> Blaeck<W> {
         let mut node_elements: HashMap<NodeId, &Element> = HashMap::new();
 
         // Create layout tree recursively
-        let root_node =
-            self.build_layout_tree(&mut layout_tree, element, &mut node_elements)?;
+        let root_node = self.build_layout_tree(&mut layout_tree, element, &mut node_elements)?;
 
         // Compute layout
         layout_tree.compute(root_node, self.width as f32, self.height as f32);
@@ -364,13 +367,23 @@ impl<W: Write> Blaeck<W> {
                     // Handle Fragment (for Gradient/Breadcrumbs/StatusBar/Diff/Markdown/LogBox/TreeView/BarChart/SyntaxHighlight/Modal/Spacer component)
                     if let Element::Fragment(children) = &rendered {
                         // Diff, Markdown, LogBox, TreeView, BarChart, SyntaxHighlight, Modal, Spacer render vertically - each child is a separate line
-                        if *type_id == TypeId::of::<Diff>() || *type_id == TypeId::of::<Markdown>() || *type_id == TypeId::of::<LogBox>() || *type_id == TypeId::of::<TreeView>() || *type_id == TypeId::of::<BarChart>() || *type_id == TypeId::of::<SyntaxHighlight>() || *type_id == TypeId::of::<Modal>() || *type_id == TypeId::of::<crate::components::Spacer>() {
+                        if *type_id == TypeId::of::<Diff>()
+                            || *type_id == TypeId::of::<Markdown>()
+                            || *type_id == TypeId::of::<LogBox>()
+                            || *type_id == TypeId::of::<TreeView>()
+                            || *type_id == TypeId::of::<BarChart>()
+                            || *type_id == TypeId::of::<SyntaxHighlight>()
+                            || *type_id == TypeId::of::<Modal>()
+                            || *type_id == TypeId::of::<crate::components::Spacer>()
+                        {
                             let mut max_width: f32 = 0.0;
                             for child in children {
                                 match child {
                                     Element::Text { content, .. } => {
                                         let stripped = strip_ansi_escapes(content);
-                                        let w = unicode_width::UnicodeWidthStr::width(stripped.as_str()) as f32;
+                                        let w = unicode_width::UnicodeWidthStr::width(
+                                            stripped.as_str(),
+                                        ) as f32;
                                         max_width = max_width.max(w);
                                     }
                                     Element::Fragment(inline_children) => {
@@ -379,7 +392,10 @@ impl<W: Write> Blaeck<W> {
                                         for inline_child in inline_children {
                                             if let Element::Text { content, .. } = inline_child {
                                                 let stripped = strip_ansi_escapes(content);
-                                                line_width += unicode_width::UnicodeWidthStr::width(stripped.as_str()) as f32;
+                                                line_width += unicode_width::UnicodeWidthStr::width(
+                                                    stripped.as_str(),
+                                                )
+                                                    as f32;
                                             }
                                         }
                                         max_width = max_width.max(line_width);
@@ -457,10 +473,14 @@ impl<W: Write> Blaeck<W> {
                         layout_style.clone()
                     }
                 } else if *type_id == TypeId::of::<crate::components::Spacer>() {
-                    if let Some(spacer_props) = props.downcast_ref::<crate::components::SpacerProps>() {
+                    if let Some(spacer_props) =
+                        props.downcast_ref::<crate::components::SpacerProps>()
+                    {
                         crate::components::Spacer::layout_style(spacer_props)
                     } else {
-                        crate::components::Spacer::layout_style(&crate::components::SpacerProps::default())
+                        crate::components::Spacer::layout_style(
+                            &crate::components::SpacerProps::default(),
+                        )
                     }
                 } else {
                     layout_style.clone()
@@ -550,7 +570,15 @@ impl<W: Write> Blaeck<W> {
                     // Handle Fragment (for Gradient/Breadcrumbs/StatusBar/Diff/Markdown/LogBox/TreeView/BarChart/SyntaxHighlight/Modal/Spacer component)
                     if let Element::Fragment(children) = &rendered {
                         // Diff, Markdown, LogBox, TreeView, BarChart, SyntaxHighlight, Modal, Spacer render vertically (each line on new row)
-                        if *type_id == TypeId::of::<Diff>() || *type_id == TypeId::of::<Markdown>() || *type_id == TypeId::of::<LogBox>() || *type_id == TypeId::of::<TreeView>() || *type_id == TypeId::of::<BarChart>() || *type_id == TypeId::of::<SyntaxHighlight>() || *type_id == TypeId::of::<Modal>() || *type_id == TypeId::of::<crate::components::Spacer>() {
+                        if *type_id == TypeId::of::<Diff>()
+                            || *type_id == TypeId::of::<Markdown>()
+                            || *type_id == TypeId::of::<LogBox>()
+                            || *type_id == TypeId::of::<TreeView>()
+                            || *type_id == TypeId::of::<BarChart>()
+                            || *type_id == TypeId::of::<SyntaxHighlight>()
+                            || *type_id == TypeId::of::<Modal>()
+                            || *type_id == TypeId::of::<crate::components::Spacer>()
+                        {
                             let mut line_y = y as u16;
                             for child in children {
                                 match child {
@@ -565,7 +593,10 @@ impl<W: Write> Blaeck<W> {
                                             if let Element::Text { content, style } = inline_child {
                                                 let stripped = strip_ansi_escapes(content);
                                                 output.write(char_x, line_y, content, *style);
-                                                let char_width = unicode_width::UnicodeWidthStr::width(stripped.as_str());
+                                                let char_width =
+                                                    unicode_width::UnicodeWidthStr::width(
+                                                        stripped.as_str(),
+                                                    );
                                                 char_x += char_width as u16;
                                             }
                                         }
@@ -581,7 +612,8 @@ impl<W: Write> Blaeck<W> {
                         for child in children {
                             if let Element::Text { content, style } = child {
                                 output.write(char_x, y as u16, content, *style);
-                                let char_width = unicode_width::UnicodeWidthStr::width(content.as_str());
+                                let char_width =
+                                    unicode_width::UnicodeWidthStr::width(content.as_str());
                                 char_x += char_width as u16;
                             }
                         }
@@ -724,7 +756,12 @@ impl<W: Write> Blaeck<W> {
                 output.write(x, y + row, &chars.vertical.to_string(), left_style);
             }
             if sides.right {
-                output.write(x + width - 1, y + row, &chars.vertical.to_string(), right_style);
+                output.write(
+                    x + width - 1,
+                    y + row,
+                    &chars.vertical.to_string(),
+                    right_style,
+                );
             }
         }
 
@@ -732,7 +769,12 @@ impl<W: Write> Blaeck<W> {
         if sides.bottom {
             // Bottom-left corner
             if sides.left || sides.bottom {
-                output.write(x, y + height - 1, &bottom_left_char.to_string(), bottom_style);
+                output.write(
+                    x,
+                    y + height - 1,
+                    &bottom_left_char.to_string(),
+                    bottom_style,
+                );
             }
 
             // Bottom horizontal line
@@ -741,7 +783,12 @@ impl<W: Write> Blaeck<W> {
 
             // Bottom-right corner
             if sides.right || sides.bottom {
-                output.write(x + width - 1, y + height - 1, &bottom_right_char.to_string(), bottom_style);
+                output.write(
+                    x + width - 1,
+                    y + height - 1,
+                    &bottom_right_char.to_string(),
+                    bottom_style,
+                );
             }
         }
 
@@ -758,7 +805,12 @@ impl<W: Write> Blaeck<W> {
             output.write(x + width - 1, y, &top_right_char.to_string(), right_style);
         }
         if sides.right && !sides.bottom {
-            output.write(x + width - 1, y + height - 1, &bottom_right_char.to_string(), right_style);
+            output.write(
+                x + width - 1,
+                y + height - 1,
+                &bottom_right_char.to_string(),
+                right_style,
+            );
         }
     }
 
@@ -1111,10 +1163,7 @@ mod tests {
                         },
                         vec![],
                     ),
-                    Element::node::<Spacer>(
-                        crate::components::SpacerProps::default(),
-                        vec![],
-                    ),
+                    Element::node::<Spacer>(crate::components::SpacerProps::default(), vec![]),
                     Element::node::<Text>(
                         TextProps {
                             content: "Right".into(),
@@ -1195,14 +1244,20 @@ mod tests {
 
             // First render goes through
             let elem1 = Element::node::<Text>(
-                TextProps { content: "First".into(), ..Default::default() },
+                TextProps {
+                    content: "First".into(),
+                    ..Default::default()
+                },
                 vec![],
             );
             blaeck.render(elem1).unwrap();
 
             // Second render immediately after should be skipped
             let elem2 = Element::node::<Text>(
-                TextProps { content: "Second".into(), ..Default::default() },
+                TextProps {
+                    content: "Second".into(),
+                    ..Default::default()
+                },
                 vec![],
             );
             blaeck.render(elem2).unwrap();
@@ -1223,14 +1278,20 @@ mod tests {
 
             // First render
             let elem1 = Element::node::<Text>(
-                TextProps { content: "First".into(), ..Default::default() },
+                TextProps {
+                    content: "First".into(),
+                    ..Default::default()
+                },
                 vec![],
             );
             blaeck.render(elem1).unwrap();
 
             // Force render bypasses throttle
             let elem2 = Element::node::<Text>(
-                TextProps { content: "Forced".into(), ..Default::default() },
+                TextProps {
+                    content: "Forced".into(),
+                    ..Default::default()
+                },
                 vec![],
             );
             blaeck.render_force(elem2).unwrap();

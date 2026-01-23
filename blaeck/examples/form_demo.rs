@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example form_demo
 
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use blaeck::input::{poll_key, Key};
 use blaeck::prelude::*;
 use blaeck::Blaeck;
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use std::time::Duration;
 
@@ -66,7 +66,10 @@ impl FormState {
         match key.code {
             crossterm::event::KeyCode::Esc => return true,
             crossterm::event::KeyCode::Tab => {
-                if key.modifiers.contains(crossterm::event::KeyModifiers::SHIFT) {
+                if key
+                    .modifiers
+                    .contains(crossterm::event::KeyModifiers::SHIFT)
+                {
                     self.focused = self.focused.prev();
                 } else {
                     self.focused = self.focused.next();
@@ -130,8 +133,12 @@ impl FormState {
     }
 
     fn handle_text_input(&self, state: &mut TextInputState, key: &Key) {
-        let shift = key.modifiers.contains(crossterm::event::KeyModifiers::SHIFT);
-        let ctrl = key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL);
+        let shift = key
+            .modifiers
+            .contains(crossterm::event::KeyModifiers::SHIFT);
+        let ctrl = key
+            .modifiers
+            .contains(crossterm::event::KeyModifiers::CONTROL);
 
         match key.code {
             crossterm::event::KeyCode::Char('a') if ctrl => state.select_all(),
@@ -200,14 +207,20 @@ fn render(state: &FormState) -> Element {
                 ),
                 Element::node::<Text>(
                     TextProps {
-                        content: format!("Remember me: {}", if state.remember_me { "Yes" } else { "No" }),
+                        content: format!(
+                            "Remember me: {}",
+                            if state.remember_me { "Yes" } else { "No" }
+                        ),
                         ..Default::default()
                     },
                     vec![],
                 ),
                 Element::node::<Text>(
                     TextProps {
-                        content: format!("Newsletter: {}", if state.newsletter { "Yes" } else { "No" }),
+                        content: format!(
+                            "Newsletter: {}",
+                            if state.newsletter { "Yes" } else { "No" }
+                        ),
                         ..Default::default()
                     },
                     vec![],
@@ -261,7 +274,12 @@ fn render(state: &FormState) -> Element {
                 vec![
                     Element::node::<Text>(
                         TextProps {
-                            content: if state.focused == Field::Username { "> " } else { "  " }.into(),
+                            content: if state.focused == Field::Username {
+                                "> "
+                            } else {
+                                "  "
+                            }
+                            .into(),
                             color: Some(Color::Cyan),
                             ..Default::default()
                         },
@@ -296,7 +314,12 @@ fn render(state: &FormState) -> Element {
                 vec![
                     Element::node::<Text>(
                         TextProps {
-                            content: if state.focused == Field::Password { "> " } else { "  " }.into(),
+                            content: if state.focused == Field::Password {
+                                "> "
+                            } else {
+                                "  "
+                            }
+                            .into(),
                             color: Some(Color::Cyan),
                             ..Default::default()
                         },
@@ -350,7 +373,12 @@ fn render(state: &FormState) -> Element {
                 vec![
                     Element::node::<Text>(
                         TextProps {
-                            content: if state.focused == Field::Submit { "> " } else { "  " }.into(),
+                            content: if state.focused == Field::Submit {
+                                "> "
+                            } else {
+                                "  "
+                            }
+                            .into(),
                             color: Some(Color::Cyan),
                             ..Default::default()
                         },

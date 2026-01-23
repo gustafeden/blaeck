@@ -473,7 +473,9 @@ mod tests {
 
     #[test]
     fn test_progress_render_string_ascii_style() {
-        let props = ProgressProps::new(0.5).width(10).style(ProgressStyle::Ascii);
+        let props = ProgressProps::new(0.5)
+            .width(10)
+            .style(ProgressStyle::Ascii);
         let bar = props.render_string();
         // ASCII style has a head character '>'
         assert!(bar.contains('='));
@@ -535,7 +537,12 @@ mod tests {
         for style in &styles {
             let props = ProgressProps::new(0.5).width(10).style(*style);
             let bar = props.render_string();
-            assert_eq!(bar.chars().count(), 10, "Style {:?} has wrong length", style);
+            assert_eq!(
+                bar.chars().count(),
+                10,
+                "Style {:?} has wrong length",
+                style
+            );
         }
     }
 }

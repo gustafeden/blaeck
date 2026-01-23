@@ -2,11 +2,11 @@
 //!
 //! Run with: cargo run --example select_demo
 
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use blaeck::input::{poll_key, Key};
 use blaeck::prelude::*;
-use blaeck::{Confirm, ConfirmProps, Select, SelectIndicator, SelectProps, SelectState};
 use blaeck::Blaeck;
+use blaeck::{Confirm, ConfirmProps, Select, SelectIndicator, SelectProps, SelectState};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use std::time::Duration;
 
@@ -50,19 +50,17 @@ impl AppState {
 
     fn handle_key(&mut self, key: &Key) -> bool {
         match key.code {
-            crossterm::event::KeyCode::Esc => {
-                match self.screen {
-                    Screen::Select => return true,
-                    Screen::Confirm => {
-                        self.screen = Screen::Select;
-                    }
-                    Screen::Result => {
-                        self.screen = Screen::Select;
-                        self.selected_item = None;
-                        self.confirmed = None;
-                    }
+            crossterm::event::KeyCode::Esc => match self.screen {
+                Screen::Select => return true,
+                Screen::Confirm => {
+                    self.screen = Screen::Select;
                 }
-            }
+                Screen::Result => {
+                    self.screen = Screen::Select;
+                    self.selected_item = None;
+                    self.confirmed = None;
+                }
+            },
             crossterm::event::KeyCode::Up | crossterm::event::KeyCode::Char('k') => {
                 match self.screen {
                     Screen::Select => self.select_state.up(),
@@ -117,7 +115,9 @@ impl AppState {
                     self.select_state.page_down();
                 }
             }
-            crossterm::event::KeyCode::Char(c) if self.screen == Screen::Select && c.is_alphabetic() => {
+            crossterm::event::KeyCode::Char(c)
+                if self.screen == Screen::Select && c.is_alphabetic() =>
+            {
                 // Type-to-jump: find next item starting with this letter
                 let props = SelectProps::new(self.items.clone());
                 if let Some(idx) = props.find_by_char(c, self.select_state.selected) {

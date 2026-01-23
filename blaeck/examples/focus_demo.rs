@@ -2,12 +2,12 @@
 //!
 //! Run with: cargo run --example focus_demo
 
-use blaeck::prelude::*;
-use blaeck::{FocusId, FocusManager, Blaeck, Text, TextProps};
 use blaeck::input::{poll_key, Key};
+use blaeck::prelude::*;
+use blaeck::{Blaeck, FocusId, FocusManager, Text, TextProps};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use std::time::Duration;
 use std::io;
+use std::time::Duration;
 
 struct AppState {
     focus: FocusManager,
@@ -35,7 +35,10 @@ impl AppState {
         match key.code {
             crossterm::event::KeyCode::Char('q') => return true,
             crossterm::event::KeyCode::Tab => {
-                if key.modifiers.contains(crossterm::event::KeyModifiers::SHIFT) {
+                if key
+                    .modifiers
+                    .contains(crossterm::event::KeyModifiers::SHIFT)
+                {
                     self.focus.focus_previous();
                 } else {
                     self.focus.focus_next();
@@ -69,30 +72,43 @@ fn render(state: &AppState) -> Element {
     let focused = state.focus.focused();
 
     // Create button elements
-    let buttons: Vec<Element> = state.buttons.iter().enumerate().map(|(i, label)| {
-        let is_focused = focused == Some(FocusId(i));
-        let border_style = if is_focused { BorderStyle::Double } else { BorderStyle::Single };
-        let color = if is_focused { Color::Cyan } else { Color::White };
+    let buttons: Vec<Element> = state
+        .buttons
+        .iter()
+        .enumerate()
+        .map(|(i, label)| {
+            let is_focused = focused == Some(FocusId(i));
+            let border_style = if is_focused {
+                BorderStyle::Double
+            } else {
+                BorderStyle::Single
+            };
+            let color = if is_focused {
+                Color::Cyan
+            } else {
+                Color::White
+            };
 
-        Element::node::<Box>(
-            BoxProps {
-                border_style,
-                padding_left: Some(2.0),
-                padding_right: Some(2.0),
-                border_color: Some(color),
-                ..Default::default()
-            },
-            vec![Element::node::<Text>(
-                TextProps {
-                    content: format!("{} {}", if is_focused { ">" } else { " " }, label),
-                    color: Some(color),
-                    bold: is_focused,
+            Element::node::<Box>(
+                BoxProps {
+                    border_style,
+                    padding_left: Some(2.0),
+                    padding_right: Some(2.0),
+                    border_color: Some(color),
                     ..Default::default()
                 },
-                vec![],
-            )],
-        )
-    }).collect();
+                vec![Element::node::<Text>(
+                    TextProps {
+                        content: format!("{} {}", if is_focused { ">" } else { " " }, label),
+                        color: Some(color),
+                        bold: is_focused,
+                        ..Default::default()
+                    },
+                    vec![],
+                )],
+            )
+        })
+        .collect();
 
     // Build the button row
     let button_row = Element::node::<Box>(
@@ -113,11 +129,19 @@ fn render(state: &AppState) -> Element {
         },
         vec![
             Element::node::<Text>(
-                TextProps { content: "Last Focus Event:".into(), dim: true, ..Default::default() },
+                TextProps {
+                    content: "Last Focus Event:".into(),
+                    dim: true,
+                    ..Default::default()
+                },
                 vec![],
             ),
             Element::node::<Text>(
-                TextProps { content: state.last_event.clone(), color: Some(Color::Yellow), ..Default::default() },
+                TextProps {
+                    content: state.last_event.clone(),
+                    color: Some(Color::Yellow),
+                    ..Default::default()
+                },
                 vec![],
             ),
         ],
@@ -131,11 +155,20 @@ fn render(state: &AppState) -> Element {
         },
         vec![
             Element::node::<Text>(
-                TextProps { content: "Focus Demo".into(), bold: true, color: Some(Color::Cyan), ..Default::default() },
+                TextProps {
+                    content: "Focus Demo".into(),
+                    bold: true,
+                    color: Some(Color::Cyan),
+                    ..Default::default()
+                },
                 vec![],
             ),
             Element::node::<Text>(
-                TextProps { content: "Tab/Arrows to navigate, 1-4 to jump, b to blur, q to quit".into(), dim: true, ..Default::default() },
+                TextProps {
+                    content: "Tab/Arrows to navigate, 1-4 to jump, b to blur, q to quit".into(),
+                    dim: true,
+                    ..Default::default()
+                },
                 vec![],
             ),
             Element::text(""),
@@ -144,7 +177,11 @@ fn render(state: &AppState) -> Element {
             event_box,
             Element::text(""),
             Element::node::<Text>(
-                TextProps { content: format!("Currently focused: {:?}", focused), color: Some(Color::Green), ..Default::default() },
+                TextProps {
+                    content: format!("Currently focused: {:?}", focused),
+                    color: Some(Color::Green),
+                    ..Default::default()
+                },
                 vec![],
             ),
         ],

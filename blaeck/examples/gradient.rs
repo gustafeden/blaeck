@@ -67,8 +67,7 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<Gradient>(
-                GradientProps::new("Deep blue ocean waves of color")
-                    .preset(GradientPreset::Ocean),
+                GradientProps::new("Deep blue ocean waves of color").preset(GradientPreset::Ocean),
                 vec![],
             ),
             Element::text(""),
@@ -97,8 +96,7 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<Gradient>(
-                GradientProps::new("Lush green forest shades")
-                    .preset(GradientPreset::Forest),
+                GradientProps::new("Lush green forest shades").preset(GradientPreset::Forest),
                 vec![],
             ),
             Element::text(""),
@@ -112,8 +110,7 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<Gradient>(
-                GradientProps::new("Cyberpunk neon glow")
-                    .preset(GradientPreset::Neon),
+                GradientProps::new("Cyberpunk neon glow").preset(GradientPreset::Neon),
                 vec![],
             ),
             Element::text(""),
@@ -157,8 +154,11 @@ fn main() -> io::Result<()> {
                 vec![],
             ),
             Element::node::<Gradient>(
-                GradientProps::new("Flowing through three colors smoothly")
-                    .three_colors(Color::Yellow, Color::Green, Color::Cyan),
+                GradientProps::new("Flowing through three colors smoothly").three_colors(
+                    Color::Yellow,
+                    Color::Green,
+                    Color::Cyan,
+                ),
                 vec![],
             ),
             Element::text(""),
@@ -171,11 +171,7 @@ fn main() -> io::Result<()> {
                 },
                 vec![],
             ),
-            Element::node::<Gradient>(
-                GradientProps::new("BOLD RAINBOW TEXT")
-                    .bold(),
-                vec![],
-            ),
+            Element::node::<Gradient>(GradientProps::new("BOLD RAINBOW TEXT").bold(), vec![]),
             Element::text(""),
             // All presets demo
             Element::node::<Divider>(
@@ -209,8 +205,7 @@ fn main() -> io::Result<()> {
                         vec![],
                     ),
                     Element::node::<Gradient>(
-                        GradientProps::new("Frozen ice crystals")
-                            .preset(GradientPreset::Ice),
+                        GradientProps::new("Frozen ice crystals").preset(GradientPreset::Ice),
                         vec![],
                     ),
                 ],
@@ -231,8 +226,7 @@ fn main() -> io::Result<()> {
                         vec![],
                     ),
                     Element::node::<Gradient>(
-                        GradientProps::new("Fresh mint leaves")
-                            .preset(GradientPreset::Mint),
+                        GradientProps::new("Fresh mint leaves").preset(GradientPreset::Mint),
                         vec![],
                     ),
                 ],
@@ -253,8 +247,7 @@ fn main() -> io::Result<()> {
                         vec![],
                     ),
                     Element::node::<Gradient>(
-                        GradientProps::new("Monochrome shades")
-                            .preset(GradientPreset::Grayscale),
+                        GradientProps::new("Monochrome shades").preset(GradientPreset::Grayscale),
                         vec![],
                     ),
                 ],

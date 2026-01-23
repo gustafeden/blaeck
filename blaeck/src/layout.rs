@@ -198,11 +198,7 @@ impl LayoutTree {
     }
 
     /// Set the style of a node.
-    pub fn set_style(
-        &mut self,
-        node: NodeId,
-        style: LayoutStyle,
-    ) -> Result<(), taffy::TaffyError> {
+    pub fn set_style(&mut self, node: NodeId, style: LayoutStyle) -> Result<(), taffy::TaffyError> {
         self.tree.set_style(node, style.into_taffy_style())
     }
 

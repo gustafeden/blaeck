@@ -549,8 +549,7 @@ mod tests {
 
     #[test]
     fn test_timer_is_danger() {
-        let props =
-            TimerProps::countdown(Duration::from_secs(3)).danger_at(Duration::from_secs(5));
+        let props = TimerProps::countdown(Duration::from_secs(3)).danger_at(Duration::from_secs(5));
         assert!(props.is_danger());
     }
 

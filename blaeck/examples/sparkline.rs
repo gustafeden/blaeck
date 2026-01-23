@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example sparkline
 
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use blaeck::input::poll_key;
 use blaeck::prelude::*;
 use blaeck::Blaeck;
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use std::time::Duration;
 
@@ -13,9 +13,15 @@ fn main() -> io::Result<()> {
     let mut blaeck = Blaeck::new(io::stdout())?;
 
     // Animated data - starts with some values
-    let mut cpu_data: Vec<f64> = vec![30.0, 35.0, 40.0, 38.0, 42.0, 45.0, 50.0, 48.0, 52.0, 55.0, 53.0, 50.0];
-    let mut mem_data: Vec<f64> = vec![45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0];
-    let mut net_data: Vec<f64> = vec![10.0, 15.0, 8.0, 20.0, 12.0, 25.0, 18.0, 30.0, 22.0, 35.0, 28.0, 40.0];
+    let mut cpu_data: Vec<f64> = vec![
+        30.0, 35.0, 40.0, 38.0, 42.0, 45.0, 50.0, 48.0, 52.0, 55.0, 53.0, 50.0,
+    ];
+    let mut mem_data: Vec<f64> = vec![
+        45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0,
+    ];
+    let mut net_data: Vec<f64> = vec![
+        10.0, 15.0, 8.0, 20.0, 12.0, 25.0, 18.0, 30.0, 22.0, 35.0, 28.0, 40.0,
+    ];
     let mut audio_data: Vec<f64> = vec![20.0; 24]; // Start with baseline
 
     // Simple pseudo-random using time
@@ -34,17 +40,23 @@ fn main() -> io::Result<()> {
         let cpu_last = *cpu_data.last().unwrap_or(&50.0);
         let cpu_new = (cpu_last + (random(&mut seed) - 0.5) * 20.0).clamp(10.0, 95.0);
         cpu_data.push(cpu_new);
-        if cpu_data.len() > max_points { cpu_data.remove(0); }
+        if cpu_data.len() > max_points {
+            cpu_data.remove(0);
+        }
 
         let mem_last = *mem_data.last().unwrap_or(&50.0);
         let mem_new = (mem_last + (random(&mut seed) - 0.4) * 5.0).clamp(30.0, 90.0);
         mem_data.push(mem_new);
-        if mem_data.len() > max_points { mem_data.remove(0); }
+        if mem_data.len() > max_points {
+            mem_data.remove(0);
+        }
 
         let net_last = *net_data.last().unwrap_or(&25.0);
         let net_new = (net_last + (random(&mut seed) - 0.5) * 30.0).clamp(0.0, 100.0);
         net_data.push(net_new);
-        if net_data.len() > max_points { net_data.remove(0); }
+        if net_data.len() > max_points {
+            net_data.remove(0);
+        }
 
         // Audio viz - each bar jumps independently for that equalizer look
         for i in 0..audio_data.len() {

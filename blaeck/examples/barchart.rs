@@ -124,47 +124,57 @@ fn main() -> io::Result<()> {
                         vec![
                             // Block style
                             Element::node::<BarChart>(
-                                BarChartProps::new(vec![BarData::new("Block", 70.0).color(Color::Cyan)])
-                                    .max_value(100.0)
-                                    .bar_width(15)
-                                    .style(BarStyle::Block)
-                                    .min_label_width(10),
+                                BarChartProps::new(vec![
+                                    BarData::new("Block", 70.0).color(Color::Cyan)
+                                ])
+                                .max_value(100.0)
+                                .bar_width(15)
+                                .style(BarStyle::Block)
+                                .min_label_width(10),
                                 vec![],
                             ),
                             // Hash style
                             Element::node::<BarChart>(
-                                BarChartProps::new(vec![BarData::new("Hash", 70.0).color(Color::Yellow)])
-                                    .max_value(100.0)
-                                    .bar_width(15)
-                                    .style(BarStyle::Hash)
-                                    .min_label_width(10),
+                                BarChartProps::new(vec![
+                                    BarData::new("Hash", 70.0).color(Color::Yellow)
+                                ])
+                                .max_value(100.0)
+                                .bar_width(15)
+                                .style(BarStyle::Hash)
+                                .min_label_width(10),
                                 vec![],
                             ),
                             // Equals style
                             Element::node::<BarChart>(
-                                BarChartProps::new(vec![BarData::new("Equals", 70.0).color(Color::Green)])
-                                    .max_value(100.0)
-                                    .bar_width(15)
-                                    .style(BarStyle::Equals)
-                                    .min_label_width(10),
+                                BarChartProps::new(vec![
+                                    BarData::new("Equals", 70.0).color(Color::Green)
+                                ])
+                                .max_value(100.0)
+                                .bar_width(15)
+                                .style(BarStyle::Equals)
+                                .min_label_width(10),
                                 vec![],
                             ),
                             // Dot style
                             Element::node::<BarChart>(
-                                BarChartProps::new(vec![BarData::new("Dot", 70.0).color(Color::Magenta)])
-                                    .max_value(100.0)
-                                    .bar_width(15)
-                                    .style(BarStyle::Dot)
-                                    .min_label_width(10),
+                                BarChartProps::new(vec![
+                                    BarData::new("Dot", 70.0).color(Color::Magenta)
+                                ])
+                                .max_value(100.0)
+                                .bar_width(15)
+                                .style(BarStyle::Dot)
+                                .min_label_width(10),
                                 vec![],
                             ),
                             // Gradient style
                             Element::node::<BarChart>(
-                                BarChartProps::new(vec![BarData::new("Gradient", 70.0).color(Color::Blue)])
-                                    .max_value(100.0)
-                                    .bar_width(15)
-                                    .style(BarStyle::Gradient)
-                                    .min_label_width(10),
+                                BarChartProps::new(vec![
+                                    BarData::new("Gradient", 70.0).color(Color::Blue)
+                                ])
+                                .max_value(100.0)
+                                .bar_width(15)
+                                .style(BarStyle::Gradient)
+                                .min_label_width(10),
                                 vec![],
                             ),
                         ],

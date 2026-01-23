@@ -207,7 +207,10 @@ fn syntect_to_blaeck_style(style: highlighting::Style) -> Style {
     if style.font_style.contains(highlighting::FontStyle::ITALIC) {
         s = s.add_modifier(Modifier::ITALIC);
     }
-    if style.font_style.contains(highlighting::FontStyle::UNDERLINE) {
+    if style
+        .font_style
+        .contains(highlighting::FontStyle::UNDERLINE)
+    {
         s = s.add_modifier(Modifier::UNDERLINED);
     }
 

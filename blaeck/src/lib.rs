@@ -54,56 +54,58 @@ pub mod buffer;
 pub mod components;
 pub mod element;
 pub mod focus;
-pub mod renderer;
 pub mod input;
 pub mod layout;
 pub mod log_update;
 pub mod output;
+pub mod renderer;
 pub mod style;
 
 #[cfg(feature = "async")]
 pub mod async_runtime;
 
-pub use animation::{AnimationTimer, BlinkPattern, Easing, IndicatorStyle, lerp_rgb, lerp_u8};
+pub use animation::{lerp_rgb, lerp_u8, AnimationTimer, BlinkPattern, Easing, IndicatorStyle};
 pub use app::{App, AppConfig, AppResult, ExitReason};
 pub use buffer::{Buffer, Cell};
 pub use components::{
-    animated_indicator, animated_indicator_colored, badge, badge_bracket, bar_chart,
+    alert, animated_indicator, animated_indicator_colored, badge, badge_bracket, bar_chart,
     bar_chart_with_values, blink, blink_or, blink_pattern, blinking_dot, breadcrumbs,
-    breadcrumbs_path, checkbox, confirm_prompt, divider, BarChart, BarChartProps, BarData, BarStyle, ValueFormat,
-    divider_with_label, gradient, gradient_preset, link, link_url, markdown_block, progress_bar,
-    progress_bar_bracketed, pulsing_dot, spinner_frame, spinner_frame_interval, transforms, Autocomplete,
-    AutocompleteItem, AutocompleteProps, AutocompleteState, Badge, BadgeProps, BadgeStyle,
-    BorderChars, BorderColors, BorderSides, BorderStyle, Box, BoxProps, Breadcrumbs,
-    BreadcrumbsProps, BreadcrumbSeparator, Checkbox, CheckboxProps, CheckboxStyle, ColorStop,
-    Confirm, ConfirmProps, ConfirmStyle, Crumb, Diff, DiffLine, DiffLineType, DiffProps, DiffStyle,
-    diff_lines, Divider, DividerProps, DividerStyle, FilterMode, Gradient, GradientPreset,
-    GradientProps, Indent, IndentProps, KeyHint, KeyHints, KeyHintsProps,
-    KeyHintSeparator, KeyHintStyle, key_hints, Link, LinkProps, log_box, LogBox, LogBoxProps,
-    LogLine, Markdown, MarkdownProps, Modal, ModalButton, ModalProps, ModalStyle, alert, confirm_modal,
-    error_modal, success_modal, MultiSelect, MultiSelectItem, MultiSelectProps, TreeStyle,
-    MultiSelectState, MultiSelectStyle, Newline,
-    NewlineProps, Progress, ProgressChars, ProgressProps, ProgressStyle, Select, SelectIndicator,
-    SelectItem, SelectProps, SelectState, spacer, flex_spacer, Spacer, SpacerProps, Sparkline, SparklineProps,
-    SparklineStyle, sparkline, sparkline_labeled, Spinner, SpinnerProps, SpinnerStyle, Static,
-    SyntaxHighlight, SyntaxHighlightProps, SyntaxTheme, LineNumberStyle, syntax_highlight, syntax_highlight_with_lines,
-    StaticItem, StaticProps, StatusBar, StatusBarProps, StatusSegment, StatusSeparator, git_branch,
-    icons, status_error, status_ok, status_warning, Table, TableCell, TableProps, TableState,
-    CellAlign, ColumnWidth, Row, RowStyle, Tab, TabDivider, Tabs, TabsProps, TabsState, TabStyle,
-    Text, TextInput, TextInputProps, TextInputState, TextProps, TextWrap, TimeFormat, Timer,
-    TimerMode, TimerProps, countdown, countdown_with_thresholds, stopwatch, timer_display,
-    Transform, TransformFn, TransformProps, TreeConnectors, TreeNode, TreeState, TreeView,
-    TreeViewProps, tree_view,
+    breadcrumbs_path, checkbox, confirm_modal, confirm_prompt, countdown,
+    countdown_with_thresholds, diff_lines, divider, divider_with_label, error_modal, flex_spacer,
+    git_branch, gradient, gradient_preset, icons, key_hints, link, link_url, log_box,
+    markdown_block, progress_bar, progress_bar_bracketed, pulsing_dot, spacer, sparkline,
+    sparkline_labeled, spinner_frame, spinner_frame_interval, status_error, status_ok,
+    status_warning, stopwatch, success_modal, syntax_highlight, syntax_highlight_with_lines,
+    timer_display, transforms, tree_view, Autocomplete, AutocompleteItem, AutocompleteProps,
+    AutocompleteState, Badge, BadgeProps, BadgeStyle, BarChart, BarChartProps, BarData, BarStyle,
+    BorderChars, BorderColors, BorderSides, BorderStyle, Box, BoxProps, BreadcrumbSeparator,
+    Breadcrumbs, BreadcrumbsProps, CellAlign, Checkbox, CheckboxProps, CheckboxStyle, ColorStop,
+    ColumnWidth, Confirm, ConfirmProps, ConfirmStyle, Crumb, Diff, DiffLine, DiffLineType,
+    DiffProps, DiffStyle, Divider, DividerProps, DividerStyle, FilterMode, Gradient,
+    GradientPreset, GradientProps, Indent, IndentProps, KeyHint, KeyHintSeparator, KeyHintStyle,
+    KeyHints, KeyHintsProps, LineNumberStyle, Link, LinkProps, LogBox, LogBoxProps, LogLine,
+    Markdown, MarkdownProps, Modal, ModalButton, ModalProps, ModalStyle, MultiSelect,
+    MultiSelectItem, MultiSelectProps, MultiSelectState, MultiSelectStyle, Newline, NewlineProps,
+    Progress, ProgressChars, ProgressProps, ProgressStyle, Row, RowStyle, Select, SelectIndicator,
+    SelectItem, SelectProps, SelectState, Spacer, SpacerProps, Sparkline, SparklineProps,
+    SparklineStyle, Spinner, SpinnerProps, SpinnerStyle, Static, StaticItem, StaticProps,
+    StatusBar, StatusBarProps, StatusSegment, StatusSeparator, SyntaxHighlight,
+    SyntaxHighlightProps, SyntaxTheme, Tab, TabDivider, TabStyle, Table, TableCell, TableProps,
+    TableState, Tabs, TabsProps, TabsState, Text, TextInput, TextInputProps, TextInputState,
+    TextProps, TextWrap, TimeFormat, Timer, TimerMode, TimerProps, Transform, TransformFn,
+    TransformProps, TreeConnectors, TreeNode, TreeState, TreeStyle, TreeView, TreeViewProps,
+    ValueFormat,
 };
 pub use element::{Component, Element};
 pub use focus::{FocusCallback, FocusEvent, FocusId, FocusManager, FocusState};
-pub use renderer::Blaeck;
 pub use input::{match_key, poll_key, read_key, Arrow, InputHandler, Key, KeyMatcher};
 pub use layout::{
-    AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutResult, LayoutStyle, LayoutTree,
+    AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutResult, LayoutStyle,
+    LayoutTree,
 };
 pub use log_update::LogUpdate;
 pub use output::{Output, OutputResult};
+pub use renderer::Blaeck;
 pub use style::{Color, Modifier, Style};
 
 #[cfg(feature = "async")]
@@ -118,45 +120,45 @@ pub use blaeck_macros::element;
 pub mod prelude {
     pub use crate::animation::{AnimationTimer, BlinkPattern, Easing, IndicatorStyle};
     pub use crate::components::{
-        animated_indicator, animated_indicator_colored, badge, badge_bracket, bar_chart,
+        alert, animated_indicator, animated_indicator_colored, badge, badge_bracket, bar_chart,
         bar_chart_with_values, blink, blink_or, blink_pattern, blinking_dot, breadcrumbs,
-        breadcrumbs_path, checkbox, confirm_prompt, divider, BarChart, BarChartProps, BarData, BarStyle, ValueFormat,
-        divider_with_label, gradient, gradient_preset, link, link_url, markdown_block, progress_bar,
-        progress_bar_bracketed, pulsing_dot, spinner_frame, spinner_frame_interval, transforms, Autocomplete,
+        breadcrumbs_path, checkbox, confirm_modal, confirm_prompt, countdown,
+        countdown_with_thresholds, diff_lines, divider, divider_with_label, error_modal,
+        flex_spacer, git_branch, gradient, gradient_preset, icons, key_hints, link, link_url,
+        log_box, markdown_block, progress_bar, progress_bar_bracketed, pulsing_dot, spacer,
+        sparkline, sparkline_labeled, spinner_frame, spinner_frame_interval, status_error,
+        status_ok, status_warning, stopwatch, success_modal, syntax_highlight,
+        syntax_highlight_with_lines, timer_display, transforms, tree_view, Autocomplete,
         AutocompleteItem, AutocompleteProps, AutocompleteState, Badge, BadgeProps, BadgeStyle,
-        BorderChars, BorderColors, BorderSides, BorderStyle, Box, BoxProps, Breadcrumbs,
-        BreadcrumbsProps, BreadcrumbSeparator, Checkbox, CheckboxProps, CheckboxStyle, ColorStop,
-        Confirm, ConfirmProps, ConfirmStyle, Crumb, Diff, DiffLine, DiffLineType, DiffProps,
-        DiffStyle, diff_lines, Divider, DividerProps, DividerStyle, FilterMode, Gradient,
-        GradientPreset, GradientProps, Indent, IndentProps, KeyHint, KeyHints, KeyHintsProps,
-        KeyHintSeparator, KeyHintStyle, key_hints, Link, LinkProps, log_box, LogBox, LogBoxProps,
-        LogLine, Markdown, MarkdownProps, Modal, ModalButton, ModalProps, ModalStyle, alert,
-        confirm_modal, error_modal, success_modal, MultiSelect, MultiSelectItem, MultiSelectProps, TreeStyle,
-        MultiSelectState, MultiSelectStyle, Newline,
-        NewlineProps, Progress, ProgressChars, ProgressProps, ProgressStyle, Select,
-        SelectIndicator, SelectItem, SelectProps, SelectState, spacer, flex_spacer, Spacer, SpacerProps, Sparkline,
-        SparklineProps, SparklineStyle, sparkline, sparkline_labeled, Spinner, SpinnerProps,
-        SpinnerStyle, Static, StaticItem, StaticProps, StatusBar, StatusBarProps, StatusSegment,
-        SyntaxHighlight, SyntaxHighlightProps, SyntaxTheme, LineNumberStyle, syntax_highlight, syntax_highlight_with_lines,
-        StatusSeparator, git_branch, icons, status_error, status_ok, status_warning, Table,
-        TableCell, TableProps, TableState, CellAlign, ColumnWidth, Row, RowStyle, Tab, TabDivider,
-        Tabs, TabsProps, TabsState, TabStyle, Text, TextInput, TextInputProps, TextInputState,
-        TextProps, TextWrap, TimeFormat, Timer, TimerMode, TimerProps, countdown,
-        countdown_with_thresholds, stopwatch, timer_display, Transform, TransformFn, TransformProps,
-        TreeConnectors, TreeNode, TreeState, TreeView, TreeViewProps, tree_view,
+        BarChart, BarChartProps, BarData, BarStyle, BorderChars, BorderColors, BorderSides,
+        BorderStyle, Box, BoxProps, BreadcrumbSeparator, Breadcrumbs, BreadcrumbsProps, CellAlign,
+        Checkbox, CheckboxProps, CheckboxStyle, ColorStop, ColumnWidth, Confirm, ConfirmProps,
+        ConfirmStyle, Crumb, Diff, DiffLine, DiffLineType, DiffProps, DiffStyle, Divider,
+        DividerProps, DividerStyle, FilterMode, Gradient, GradientPreset, GradientProps, Indent,
+        IndentProps, KeyHint, KeyHintSeparator, KeyHintStyle, KeyHints, KeyHintsProps,
+        LineNumberStyle, Link, LinkProps, LogBox, LogBoxProps, LogLine, Markdown, MarkdownProps,
+        Modal, ModalButton, ModalProps, ModalStyle, MultiSelect, MultiSelectItem, MultiSelectProps,
+        MultiSelectState, MultiSelectStyle, Newline, NewlineProps, Progress, ProgressChars,
+        ProgressProps, ProgressStyle, Row, RowStyle, Select, SelectIndicator, SelectItem,
+        SelectProps, SelectState, Spacer, SpacerProps, Sparkline, SparklineProps, SparklineStyle,
+        Spinner, SpinnerProps, SpinnerStyle, Static, StaticItem, StaticProps, StatusBar,
+        StatusBarProps, StatusSegment, StatusSeparator, SyntaxHighlight, SyntaxHighlightProps,
+        SyntaxTheme, Tab, TabDivider, TabStyle, Table, TableCell, TableProps, TableState, Tabs,
+        TabsProps, TabsState, Text, TextInput, TextInputProps, TextInputState, TextProps, TextWrap,
+        TimeFormat, Timer, TimerMode, TimerProps, Transform, TransformFn, TransformProps,
+        TreeConnectors, TreeNode, TreeState, TreeStyle, TreeView, TreeViewProps, ValueFormat,
     };
     pub use crate::element::{Component, Element};
-    pub use crate::renderer::Blaeck;
     pub use crate::layout::{
-        AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutResult, LayoutStyle,
+        AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutResult,
+        LayoutStyle,
     };
+    pub use crate::renderer::Blaeck;
     pub use crate::style::{Color, Modifier, Style};
     pub use blaeck_macros::element;
 
     #[cfg(feature = "async")]
-    pub use crate::async_runtime::{
-        channel, AppEvent, AsyncApp, AsyncAppConfig, Receiver, Sender,
-    };
+    pub use crate::async_runtime::{channel, AppEvent, AsyncApp, AsyncAppConfig, Receiver, Sender};
 }
 
 #[cfg(test)]

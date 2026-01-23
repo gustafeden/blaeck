@@ -221,7 +221,9 @@ mod tests {
 
     #[test]
     fn test_divider_double() {
-        let props = DividerProps::new().width(5).line_style(DividerStyle::Double);
+        let props = DividerProps::new()
+            .width(5)
+            .line_style(DividerStyle::Double);
         let s = props.render_string();
         assert_eq!(s, "═════");
     }

@@ -318,43 +318,40 @@ mod tests {
 
     #[test]
     fn test_keyhints_render_compact() {
-        let props = KeyHintsProps::new([("^C", "exit"), ("q", "quit")])
-            .style(KeyHintStyle::Compact);
+        let props =
+            KeyHintsProps::new([("^C", "exit"), ("q", "quit")]).style(KeyHintStyle::Compact);
         assert_eq!(props.render_string(), "^C exit • q quit");
     }
 
     #[test]
     fn test_keyhints_render_bracketed() {
-        let props = KeyHintsProps::new([("^C", "exit")])
-            .style(KeyHintStyle::Bracketed);
+        let props = KeyHintsProps::new([("^C", "exit")]).style(KeyHintStyle::Bracketed);
         assert_eq!(props.render_string(), "[^C] exit");
     }
 
     #[test]
     fn test_keyhints_render_colon() {
-        let props = KeyHintsProps::new([("^C", "exit")])
-            .style(KeyHintStyle::Colon);
+        let props = KeyHintsProps::new([("^C", "exit")]).style(KeyHintStyle::Colon);
         assert_eq!(props.render_string(), "^C: exit");
     }
 
     #[test]
     fn test_keyhints_render_action_first() {
-        let props = KeyHintsProps::new([("^C", "exit")])
-            .style(KeyHintStyle::ActionFirst);
+        let props = KeyHintsProps::new([("^C", "exit")]).style(KeyHintStyle::ActionFirst);
         assert_eq!(props.render_string(), "exit ^C");
     }
 
     #[test]
     fn test_keyhints_separator_pipe() {
-        let props = KeyHintsProps::new([("a", "one"), ("b", "two")])
-            .separator(KeyHintSeparator::Pipe);
+        let props =
+            KeyHintsProps::new([("a", "one"), ("b", "two")]).separator(KeyHintSeparator::Pipe);
         assert_eq!(props.render_string(), "a one | b two");
     }
 
     #[test]
     fn test_keyhints_separator_slash() {
-        let props = KeyHintsProps::new([("a", "one"), ("b", "two")])
-            .separator(KeyHintSeparator::Slash);
+        let props =
+            KeyHintsProps::new([("a", "one"), ("b", "two")]).separator(KeyHintSeparator::Slash);
         assert_eq!(props.render_string(), "a one / b two");
     }
 

@@ -2,9 +2,9 @@
 //!
 //! Run with: cargo run --example polish_demo
 
-use crossterm::terminal;
 use blaeck::prelude::*;
 use blaeck::{input, Blaeck};
+use crossterm::terminal;
 use std::io;
 
 fn main() -> io::Result<()> {
@@ -37,10 +37,11 @@ fn main() -> io::Result<()> {
                     vec![],
                 ),
                 Element::text(""),
-
                 // Dividers Section
                 Element::node::<Divider>(
-                    DividerProps::new().label("Divider Styles").color(Color::Yellow),
+                    DividerProps::new()
+                        .label("Divider Styles")
+                        .color(Color::Yellow),
                     vec![],
                 ),
                 Element::text(""),
@@ -60,7 +61,9 @@ fn main() -> io::Result<()> {
                             vec![],
                         ),
                         Element::node::<Divider>(
-                            DividerProps::new().width(30).line_style(DividerStyle::Single),
+                            DividerProps::new()
+                                .width(30)
+                                .line_style(DividerStyle::Single),
                             vec![],
                         ),
                         Element::node::<Text>(
@@ -72,7 +75,9 @@ fn main() -> io::Result<()> {
                             vec![],
                         ),
                         Element::node::<Divider>(
-                            DividerProps::new().width(30).line_style(DividerStyle::Double),
+                            DividerProps::new()
+                                .width(30)
+                                .line_style(DividerStyle::Double),
                             vec![],
                         ),
                         Element::node::<Text>(
@@ -84,7 +89,9 @@ fn main() -> io::Result<()> {
                             vec![],
                         ),
                         Element::node::<Divider>(
-                            DividerProps::new().width(30).line_style(DividerStyle::Dashed),
+                            DividerProps::new()
+                                .width(30)
+                                .line_style(DividerStyle::Dashed),
                             vec![],
                         ),
                         Element::node::<Text>(
@@ -106,10 +113,11 @@ fn main() -> io::Result<()> {
                     ],
                 ),
                 Element::text(""),
-
                 // Badges Section
                 Element::node::<Divider>(
-                    DividerProps::new().label("Badge Styles").color(Color::Yellow),
+                    DividerProps::new()
+                        .label("Badge Styles")
+                        .color(Color::Yellow),
                     vec![],
                 ),
                 Element::text(""),
@@ -154,7 +162,6 @@ fn main() -> io::Result<()> {
                     ],
                 ),
                 Element::text(""),
-
                 // Links Section
                 Element::node::<Divider>(
                     DividerProps::new().label("Links").color(Color::Yellow),
@@ -239,7 +246,6 @@ fn main() -> io::Result<()> {
                     ],
                 ),
                 Element::text(""),
-
                 // Confirm Button Style Section
                 Element::node::<Divider>(
                     DividerProps::new()
@@ -257,13 +263,16 @@ fn main() -> io::Result<()> {
                     vec![Element::node::<Confirm>(confirm.clone(), vec![])],
                 ),
                 Element::text(""),
-
                 // Instructions
-                Element::node::<Divider>(DividerProps::new().line_style(DividerStyle::Dotted), vec![]),
+                Element::node::<Divider>(
+                    DividerProps::new().line_style(DividerStyle::Dotted),
+                    vec![],
+                ),
                 Element::node::<Text>(
                     TextProps {
-                        content: "Left/Right or Y/N to toggle confirm | Enter to submit | Q to quit"
-                            .into(),
+                        content:
+                            "Left/Right or Y/N to toggle confirm | Enter to submit | Q to quit"
+                                .into(),
                         dim: true,
                         ..Default::default()
                     },
@@ -279,7 +288,9 @@ fn main() -> io::Result<()> {
             match key.code {
                 crossterm::event::KeyCode::Char('q') | crossterm::event::KeyCode::Esc => break,
                 crossterm::event::KeyCode::Char('c')
-                    if key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) =>
+                    if key
+                        .modifiers
+                        .contains(crossterm::event::KeyModifiers::CONTROL) =>
                 {
                     break
                 }

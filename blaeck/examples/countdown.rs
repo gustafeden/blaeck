@@ -47,11 +47,7 @@ fn render_big_number(seconds: u32) -> Vec<Element> {
     for row in 0..3 {
         let line = format!(
             "{}{}{}{}{}",
-            DIGITS[d1][row],
-            DIGITS[d2][row],
-            COLON[row],
-            DIGITS[d3][row],
-            DIGITS[d4][row]
+            DIGITS[d1][row], DIGITS[d2][row], COLON[row], DIGITS[d3][row], DIGITS[d4][row]
         );
         lines.push(element! {
             Text(content: line, color: Color::Cyan, bold: true)

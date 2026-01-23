@@ -19,8 +19,8 @@
 //! For async apps with background tasks, see `async_runtime.rs` instead.
 
 use crate::element::Element;
-use crate::renderer::Blaeck;
 use crate::input::{poll_key, Key};
+use crate::renderer::Blaeck;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io::{self, Write};
 use std::time::Duration;

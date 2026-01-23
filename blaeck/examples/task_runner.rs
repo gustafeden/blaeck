@@ -19,7 +19,12 @@ const SPINNER: [char; 4] = ['◐', '◓', '◑', '◒'];
 fn progress_bar(percent: u32, width: usize) -> String {
     let filled = (width * percent as usize) / 100;
     let empty = width - filled;
-    format!("[{}{}] {:>3}%", "█".repeat(filled), "░".repeat(empty), percent)
+    format!(
+        "[{}{}] {:>3}%",
+        "█".repeat(filled),
+        "░".repeat(empty),
+        percent
+    )
 }
 
 fn format_duration(secs: f32) -> String {
@@ -39,8 +44,12 @@ fn main() -> std::io::Result<()> {
     ];
 
     let files = [
-        "src/main.rs", "src/lib.rs", "src/utils.rs",
-        "src/config.rs", "src/parser.rs", "src/render.rs"
+        "src/main.rs",
+        "src/lib.rs",
+        "src/utils.rs",
+        "src/config.rs",
+        "src/parser.rs",
+        "src/render.rs",
     ];
     let total_modules = 54;
 
@@ -56,7 +65,9 @@ fn main() -> std::io::Result<()> {
             let percent = ((frame as u32 * 100) / frames as u32).min(99);
             let modules_done = if task_idx == 3 {
                 (frame * total_modules) / frames
-            } else { 0 };
+            } else {
+                0
+            };
             let current_file = files[frame % files.len()];
 
             // Build completed task rows

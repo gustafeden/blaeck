@@ -74,8 +74,8 @@ impl Transform {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::transforms::*;
+    use super::*;
 
     #[test]
     fn test_uppercase() {

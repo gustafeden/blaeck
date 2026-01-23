@@ -5,11 +5,11 @@
 //!
 //! Run with: cargo run --example async_demo --features async
 
-use blaeck::prelude::*;
 use blaeck::async_runtime::Sender;
+use blaeck::prelude::*;
 use blaeck::Blaeck;
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use crossterm::event::{Event, EventStream};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use futures::StreamExt;
 use std::io;
 use std::time::Duration;
@@ -36,13 +36,20 @@ fn render(state: &AppState) -> Element {
     } else {
         "✓ Ready"
     };
-    let loading_color = if state.loading { Color::Yellow } else { Color::Green };
+    let loading_color = if state.loading {
+        Color::Yellow
+    } else {
+        Color::Green
+    };
 
     let mut children: Vec<Element> = vec![
         element! { Text(content: "Async Blaeck Demo", bold: true, color: Color::Cyan) },
         Element::text(""),
         Element::node::<Box>(
-            BoxProps { flex_direction: FlexDirection::Row, ..Default::default() },
+            BoxProps {
+                flex_direction: FlexDirection::Row,
+                ..Default::default()
+            },
             vec![
                 element! { Text(content: "Status: ") },
                 element! { Text(content: loading_text, color: loading_color, italic: state.loading) },
@@ -50,7 +57,10 @@ fn render(state: &AppState) -> Element {
         ),
         Element::text(""),
         Element::node::<Box>(
-            BoxProps { flex_direction: FlexDirection::Row, ..Default::default() },
+            BoxProps {
+                flex_direction: FlexDirection::Row,
+                ..Default::default()
+            },
             vec![
                 element! { Text(content: "Counter: ") },
                 element! { Text(content: format!("{}", state.counter), bold: true, color: Color::Magenta) },

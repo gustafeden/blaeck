@@ -9,7 +9,6 @@ pub mod barchart;
 pub mod blink;
 pub mod box_component;
 pub mod breadcrumbs;
-pub mod multiselect;
 pub mod checkbox;
 pub mod confirm;
 pub mod diff;
@@ -21,6 +20,7 @@ pub mod link;
 pub mod logbox;
 pub mod markdown;
 pub mod modal;
+pub mod multiselect;
 pub mod newline;
 pub mod progress;
 pub mod select;
@@ -28,8 +28,8 @@ pub mod spacer;
 pub mod sparkline;
 pub mod spinner;
 pub mod r#static;
-pub mod syntax;
 pub mod statusbar;
+pub mod syntax;
 pub mod table;
 pub mod tabs;
 pub mod text;
@@ -38,38 +38,62 @@ pub mod timer;
 pub mod transform;
 pub mod tree;
 
-pub use autocomplete::{Autocomplete, AutocompleteItem, AutocompleteProps, AutocompleteState, FilterMode};
-pub use barchart::{bar_chart, bar_chart_with_values, BarChart, BarChartProps, BarData, BarStyle, ValueFormat};
-pub use blink::{animated_indicator, animated_indicator_colored, blink, blink_or, blink_pattern, blinking_dot, pulsing_dot};
+pub use autocomplete::{
+    Autocomplete, AutocompleteItem, AutocompleteProps, AutocompleteState, FilterMode,
+};
+pub use badge::{badge, badge_bracket, Badge, BadgeProps, BadgeStyle};
+pub use barchart::{
+    bar_chart, bar_chart_with_values, BarChart, BarChartProps, BarData, BarStyle, ValueFormat,
+};
+pub use blink::{
+    animated_indicator, animated_indicator_colored, blink, blink_or, blink_pattern, blinking_dot,
+    pulsing_dot,
+};
 pub use box_component::{BorderChars, BorderColors, BorderSides, BorderStyle, Box, BoxProps};
-pub use breadcrumbs::{breadcrumbs, breadcrumbs_path, Breadcrumbs, BreadcrumbsProps, BreadcrumbSeparator, Crumb};
+pub use breadcrumbs::{
+    breadcrumbs, breadcrumbs_path, BreadcrumbSeparator, Breadcrumbs, BreadcrumbsProps, Crumb,
+};
 pub use checkbox::{checkbox, Checkbox, CheckboxProps, CheckboxStyle};
 pub use confirm::{confirm_prompt, Confirm, ConfirmProps, ConfirmStyle};
-pub use badge::{badge, badge_bracket, Badge, BadgeProps, BadgeStyle};
 pub use diff::{diff_lines, Diff, DiffLine, DiffLineType, DiffProps, DiffStyle};
 pub use divider::{divider, divider_with_label, Divider, DividerProps, DividerStyle};
 pub use gradient::{gradient, gradient_preset, ColorStop, Gradient, GradientPreset, GradientProps};
 pub use indent::{Indent, IndentProps};
-pub use keyhints::{key_hints, KeyHint, KeyHints, KeyHintsProps, KeyHintSeparator, KeyHintStyle};
+pub use keyhints::{key_hints, KeyHint, KeyHintSeparator, KeyHintStyle, KeyHints, KeyHintsProps};
 pub use link::{link, link_url, Link, LinkProps};
 pub use logbox::{log_box, LogBox, LogBoxProps, LogLine, TreeStyle};
 pub use markdown::{markdown_block, Markdown, MarkdownProps};
-pub use modal::{alert, confirm_modal, error_modal, success_modal, Modal, ModalButton, ModalProps, ModalStyle};
-pub use multiselect::{MultiSelect, MultiSelectItem, MultiSelectProps, MultiSelectState, MultiSelectStyle};
+pub use modal::{
+    alert, confirm_modal, error_modal, success_modal, Modal, ModalButton, ModalProps, ModalStyle,
+};
+pub use multiselect::{
+    MultiSelect, MultiSelectItem, MultiSelectProps, MultiSelectState, MultiSelectStyle,
+};
 pub use newline::{Newline, NewlineProps};
-pub use progress::{progress_bar, progress_bar_bracketed, Progress, ProgressChars, ProgressProps, ProgressStyle};
-pub use select::{Select, SelectIndicator, SelectItem, SelectProps, SelectState};
+pub use progress::{
+    progress_bar, progress_bar_bracketed, Progress, ProgressChars, ProgressProps, ProgressStyle,
+};
 pub use r#static::{Static, StaticItem, StaticProps};
-pub use table::{CellAlign, ColumnWidth, Row, RowStyle, Table, TableCell, TableProps, TableState};
-pub use tabs::{Tab, TabDivider, Tabs, TabsProps, TabsState, TabStyle};
+pub use select::{Select, SelectIndicator, SelectItem, SelectProps, SelectState};
 pub use spacer::{flex_spacer, spacer, Spacer, SpacerProps};
 pub use sparkline::{sparkline, sparkline_labeled, Sparkline, SparklineProps, SparklineStyle};
 pub use spinner::{spinner_frame, spinner_frame_interval, Spinner, SpinnerProps, SpinnerStyle};
-pub use syntax::{syntax_highlight, syntax_highlight_with_lines, LineNumberStyle, SyntaxHighlight, SyntaxHighlightProps, SyntaxTheme};
-pub use statusbar::{git_branch, icons, status_error, status_ok, status_warning, StatusBar, StatusBarProps, StatusSegment, StatusSeparator};
+pub use statusbar::{
+    git_branch, icons, status_error, status_ok, status_warning, StatusBar, StatusBarProps,
+    StatusSegment, StatusSeparator,
+};
+pub use syntax::{
+    syntax_highlight, syntax_highlight_with_lines, LineNumberStyle, SyntaxHighlight,
+    SyntaxHighlightProps, SyntaxTheme,
+};
+pub use table::{CellAlign, ColumnWidth, Row, RowStyle, Table, TableCell, TableProps, TableState};
+pub use tabs::{Tab, TabDivider, TabStyle, Tabs, TabsProps, TabsState};
 pub use text::{Text, TextProps, TextWrap};
 pub use text_input::{TextInput, TextInputProps, TextInputState};
-pub use timer::{countdown, countdown_with_thresholds, stopwatch, timer_display, TimeFormat, Timer, TimerMode, TimerProps};
+pub use timer::{
+    countdown, countdown_with_thresholds, stopwatch, timer_display, TimeFormat, Timer, TimerMode,
+    TimerProps,
+};
 pub use transform::{transforms, Transform, TransformFn, TransformProps};
 pub use tree::{tree_view, TreeConnectors, TreeNode, TreeState, TreeView, TreeViewProps};
 

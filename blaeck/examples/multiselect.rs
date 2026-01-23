@@ -2,10 +2,10 @@
 //!
 //! Run with: cargo run --example multiselect
 
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use blaeck::input::poll_key;
 use blaeck::prelude::*;
 use blaeck::Blaeck;
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use std::time::Duration;
 
@@ -145,11 +145,7 @@ fn main() -> io::Result<()> {
 
     // Show results
     if state.has_selection() {
-        let selected: Vec<_> = state
-            .selected_indices()
-            .iter()
-            .map(|&i| items[i])
-            .collect();
+        let selected: Vec<_> = state.selected_indices().iter().map(|&i| items[i]).collect();
         println!("Selected: {}", selected.join(", "));
     } else {
         println!("No languages selected.");

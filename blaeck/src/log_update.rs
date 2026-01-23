@@ -341,7 +341,8 @@ mod tests {
         {
             let mut lu = LogUpdate::new(&mut buf);
             // Simulate styled output with ANSI codes
-            lu.render("\x1b[31mRed\x1b[0m\n\x1b[32mGreen\x1b[0m").unwrap();
+            lu.render("\x1b[31mRed\x1b[0m\n\x1b[32mGreen\x1b[0m")
+                .unwrap();
             assert_eq!(lu.previous_line_count(), 2);
         }
 
