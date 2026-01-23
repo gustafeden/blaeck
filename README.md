@@ -11,32 +11,7 @@ A component-based terminal UI framework for Rust — flexbox layout, async-first
 
 ## Preview
 
-<!-- TODO: Replace with actual GIF/video recording (e.g., using vhs or asciinema) -->
-
-```
-╭─────────────────────────────────────────────────────────────╮
-│                                                             │
-│  ┌─ System Status ──────────────────────────────────────┐   │
-│  │ ● API Server    running    cpu 2.3%    mem 128MB     │   │
-│  │ ● Database      running    cpu 5.1%    mem 512MB     │   │
-│  │ ○ Cache         stopped                               │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                             │
-│  Tasks                               Progress               │
-│  ├── Downloading assets              [████████░░] 80%      │
-│  ├── Compiling                       [██████████] done     │
-│  └── ⠋ Running tests...                                    │
-│                                                             │
-│  │ src/                                                    │
-│  │ ├── main.rs                                             │
-│  │ └── components/                                         │
-│  │     ├── mod.rs                                          │
-│  │     └── button.rs                                       │
-│                                                             │
-│  [Tab] Next  [Enter] Select  [q] Quit                      │
-│                                                             │
-╰─────────────────────────────────────────────────────────────╯
-```
+![Preview](preview.gif)
 
 ---
 
