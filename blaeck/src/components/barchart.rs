@@ -148,8 +148,8 @@ impl BarStyle {
             }
             _ => {
                 let filled_str: String =
-                    std::iter::repeat(self.filled_char()).take(filled).collect();
-                let empty_str: String = std::iter::repeat(self.empty_char()).take(empty).collect();
+                    std::iter::repeat_n(self.filled_char(), filled).collect();
+                let empty_str: String = std::iter::repeat_n(self.empty_char(), empty).collect();
                 format!("{}{}", filled_str, empty_str)
             }
         }
@@ -389,7 +389,7 @@ impl Component for BarChart {
             segments.push(Element::styled_text(&label_padded, label_style));
 
             // Gap
-            segments.push(Element::text(&" ".repeat(props.label_gap)));
+            segments.push(Element::text(" ".repeat(props.label_gap)));
 
             // Opening bracket
             if props.brackets {

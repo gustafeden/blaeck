@@ -187,7 +187,7 @@ impl TreeState {
 
     /// Check if a node is selected.
     pub fn is_selected(&self, id: &str) -> bool {
-        self.selected.as_ref().map_or(false, |s| s == id)
+        self.selected.as_ref().is_some_and(|s| s == id)
     }
 
     /// Expand all nodes in a tree.
@@ -360,9 +360,7 @@ impl TreeView {
         let (branch, last, vertical, space) = props.connectors.chars();
 
         // Determine the connector for this node
-        let connector = if is_root && !props.show_root {
-            "".to_string()
-        } else if is_root {
+        let connector = if is_root {
             "".to_string()
         } else if is_last {
             last.to_string()

@@ -235,10 +235,8 @@ fn render_cube(state: &CubeState) -> Vec<String> {
     }
 
     // Draw vertices as dots
-    for p in &projected {
-        if let Some((x, y)) = p {
-            fb.set(*x, *y, '●');
-        }
+    for (x, y) in projected.iter().flatten() {
+        fb.set(*x, *y, '●');
     }
 
     fb.to_lines()

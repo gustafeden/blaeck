@@ -16,12 +16,10 @@ fn main() -> io::Result<()> {
     let mut state = TabsState::new(tabs.len());
 
     // Content for each tab
-    let contents = vec![
-        "Welcome to the Home tab!\n\nThis is where you start.",
+    let contents = ["Welcome to the Home tab!\n\nThis is where you start.",
         "User Profile\n\nName: Alice\nEmail: alice@example.com",
         "Settings\n\n[x] Dark mode\n[ ] Notifications\n[x] Auto-save",
-        "Help & Support\n\nPress ←/→ to navigate tabs\nPress q to quit",
-    ];
+        "Help & Support\n\nPress ←/→ to navigate tabs\nPress q to quit"];
 
     enable_raw_mode()?;
 

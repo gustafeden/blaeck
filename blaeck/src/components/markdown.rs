@@ -313,12 +313,11 @@ impl Component for Markdown {
                     } else if style_state.in_blockquote {
                         // Blockquote prefix
                         for (i, line) in text_str.lines().enumerate() {
-                            if i > 0 {
-                                if !current_line.is_empty() {
+                            if i > 0
+                                && !current_line.is_empty() {
                                     lines.push(line_to_element(&current_line));
                                     current_line.clear();
                                 }
-                            }
                             current_line.push((format!("> {}", line), style));
                         }
                     } else {
@@ -530,7 +529,7 @@ mod tests {
                 Element::Text { style, content } => {
                     style.fg == Color::Yellow && content.contains("code")
                 }
-                Element::Fragment(children) => children.iter().any(|c| find_code_in_element(c)),
+                Element::Fragment(children) => children.iter().any(find_code_in_element),
                 _ => false,
             }
         }

@@ -44,6 +44,7 @@ fn render_big_number(seconds: u32) -> Vec<Element> {
 
     let mut lines: Vec<Element> = Vec::new();
 
+    #[allow(clippy::needless_range_loop)]
     for row in 0..3 {
         let line = format!(
             "{}{}{}{}{}",

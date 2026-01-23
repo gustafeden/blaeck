@@ -73,7 +73,7 @@ impl AnimationTimer {
     /// let visible = timer.blink(500); // Toggle every 500ms
     /// ```
     pub fn blink(&self, interval_ms: u64) -> bool {
-        (self.elapsed_ms() / interval_ms as u128) % 2 == 0
+        (self.elapsed_ms() / interval_ms as u128).is_multiple_of(2)
     }
 
     /// Returns true/false with separate on and off durations.
@@ -438,7 +438,7 @@ mod tests {
     fn test_progress() {
         let timer = AnimationTimer::new();
         let progress = timer.progress(1000, Easing::Linear);
-        assert!(progress >= 0.0 && progress <= 1.0);
+        assert!((0.0..=1.0).contains(&progress));
     }
 
     #[test]
@@ -498,7 +498,8 @@ mod tests {
     fn test_indicator_style_render() {
         let timer = AnimationTimer::new();
         // Verify all styles render something
-        assert!(!IndicatorStyle::BlinkingDot.render(&timer).is_empty() || true);
+        // BlinkingDot may be empty depending on timing, so we just verify it doesn't panic
+        let _ = IndicatorStyle::BlinkingDot.render(&timer);
         assert!(!IndicatorStyle::SpinnerDots.render(&timer).is_empty());
         assert!(!IndicatorStyle::SpinnerLine.render(&timer).is_empty());
     }
@@ -513,6 +514,6 @@ mod tests {
     fn test_progress_pingpong() {
         let timer = AnimationTimer::new();
         let value = timer.progress_pingpong(500, Easing::Linear);
-        assert!(value >= 0.0 && value <= 1.0);
+        assert!((0.0..=1.0).contains(&value));
     }
 }

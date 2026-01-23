@@ -23,20 +23,17 @@ use super::BorderStyle;
 
 /// Width specification for table columns.
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default)]
 pub enum ColumnWidth {
     /// Fixed character width.
     Fixed(u16),
     /// Percentage of total table width (0.0 to 1.0).
     Percent(f32),
     /// Auto-size based on content (uses flex-grow).
+    #[default]
     Auto,
 }
 
-impl Default for ColumnWidth {
-    fn default() -> Self {
-        ColumnWidth::Auto
-    }
-}
 
 /// Text alignment within a cell.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -49,6 +46,7 @@ pub enum CellAlign {
 
 /// A single cell in a table.
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct TableCell {
     /// Cell content.
     pub content: String,
@@ -66,19 +64,6 @@ pub struct TableCell {
     pub align: Option<CellAlign>,
 }
 
-impl Default for TableCell {
-    fn default() -> Self {
-        Self {
-            content: String::new(),
-            color: None,
-            bg_color: None,
-            bold: false,
-            dim: false,
-            italic: false,
-            align: None,
-        }
-    }
-}
 
 impl TableCell {
     /// Create a new cell with content.
@@ -145,6 +130,7 @@ impl<S: Into<String>> From<S> for TableCell {
 
 /// A row in a table.
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct Row {
     /// Cells in this row.
     pub cells: Vec<TableCell>,
@@ -154,15 +140,6 @@ pub struct Row {
     pub style: Option<Style>,
 }
 
-impl Default for Row {
-    fn default() -> Self {
-        Self {
-            cells: Vec::new(),
-            bg_color: None,
-            style: None,
-        }
-    }
-}
 
 impl Row {
     /// Create a new row with cells.

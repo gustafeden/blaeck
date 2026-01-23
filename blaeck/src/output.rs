@@ -115,12 +115,11 @@ impl Output {
                                 if c == '\x07' {
                                     break;
                                 }
-                                if c == '\x1b' {
-                                    if chars.peek() == Some(&'\\') {
+                                if c == '\x1b'
+                                    && chars.peek() == Some(&'\\') {
                                         chars.next();
                                         break;
                                     }
-                                }
                             }
                             continue;
                         }

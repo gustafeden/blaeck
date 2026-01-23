@@ -415,7 +415,7 @@ impl Component for Gradient {
                 };
                 let color = GradientProps::interpolate_color(&stops, position);
                 let style = Style::new().fg(color).add_modifier(base_modifiers);
-                Element::styled_text(&ch.to_string(), style)
+                Element::styled_text(ch.to_string(), style)
             })
             .collect();
 

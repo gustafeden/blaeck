@@ -280,7 +280,7 @@ impl ProgressProps {
         if let Some(head) = chars.head {
             // With head character
             if filled_count > 0 {
-                result.extend(std::iter::repeat(chars.filled).take(filled_count - 1));
+                result.extend(std::iter::repeat_n(chars.filled, filled_count - 1));
                 if filled_count < self.width {
                     result.push(head);
                 } else {
@@ -289,11 +289,11 @@ impl ProgressProps {
             }
         } else {
             // Without head character
-            result.extend(std::iter::repeat(chars.filled).take(filled_count));
+            result.extend(std::iter::repeat_n(chars.filled, filled_count));
         }
 
         // Empty portion
-        result.extend(std::iter::repeat(chars.empty).take(empty_count));
+        result.extend(std::iter::repeat_n(chars.empty, empty_count));
 
         // Closing bracket
         if self.brackets {

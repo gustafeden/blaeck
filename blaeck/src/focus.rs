@@ -79,6 +79,7 @@ impl FocusEvent {
 pub type FocusCallback = Box<dyn FnMut(FocusEvent)>;
 
 /// Manages focus state across multiple elements.
+#[derive(Default)]
 pub struct FocusManager {
     /// List of focusable element IDs in order.
     elements: Vec<FocusId>,
@@ -98,15 +99,6 @@ impl std::fmt::Debug for FocusManager {
     }
 }
 
-impl Default for FocusManager {
-    fn default() -> Self {
-        Self {
-            elements: Vec::new(),
-            current_index: None,
-            on_change: None,
-        }
-    }
-}
 
 impl FocusManager {
     pub fn new() -> Self {
@@ -279,7 +271,7 @@ mod tests {
     #[test]
     fn test_focus_id_clone() {
         let id = FocusId(5);
-        let cloned = id.clone();
+        let cloned = id;
         assert_eq!(id, cloned);
     }
 

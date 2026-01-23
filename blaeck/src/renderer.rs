@@ -62,12 +62,11 @@ fn strip_ansi_escapes(s: &str) -> String {
                         if ch == '\x07' {
                             break;
                         }
-                        if ch == '\x1b' {
-                            if chars.peek() == Some(&'\\') {
+                        if ch == '\x1b'
+                            && chars.peek() == Some(&'\\') {
                                 chars.next();
                                 break;
                             }
-                        }
                     }
                 }
                 _ => {
@@ -1078,7 +1077,7 @@ mod tests {
 
         // Should not panic
         let output = String::from_utf8(buf).unwrap();
-        assert!(output.len() > 0);
+        assert!(!output.is_empty());
     }
 
     #[test]

@@ -384,7 +384,7 @@ impl Component for StatusBar {
                 style = style.add_modifier(Modifier::DIM);
             }
 
-            children.push(Element::styled_text(&segment.render_string(), style));
+            children.push(Element::styled_text(segment.render_string(), style));
         }
 
         // Suffix

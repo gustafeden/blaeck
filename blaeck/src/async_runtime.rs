@@ -206,10 +206,7 @@ impl<W: Write, M: Send + 'static> AsyncApp<W, M> {
                 }
                 // Messages from background tasks
                 maybe_msg = self.rx.recv() => {
-                    match maybe_msg {
-                        Some(msg) => Some(AppEvent::Message(msg)),
-                        None => None, // All senders dropped
-                    }
+                    maybe_msg.map(AppEvent::Message)
                 }
                 // Tick events
                 _ = async {

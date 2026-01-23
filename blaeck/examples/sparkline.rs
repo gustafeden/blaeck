@@ -59,14 +59,14 @@ fn main() -> io::Result<()> {
         }
 
         // Audio viz - each bar jumps independently for that equalizer look
-        for i in 0..audio_data.len() {
+        for value in &mut audio_data {
             let target = random(&mut seed) * 100.0;
-            let current = audio_data[i];
+            let current = *value;
             // Quick jump up, slower fall down (like real audio)
             if target > current {
-                audio_data[i] = target;
+                *value = target;
             } else {
-                audio_data[i] = (current - 8.0).max(5.0); // Decay
+                *value = (current - 8.0).max(5.0); // Decay
             }
         }
 

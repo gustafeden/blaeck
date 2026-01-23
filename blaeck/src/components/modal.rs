@@ -312,7 +312,7 @@ impl Component for Modal {
         let title_width = unicode_width::UnicodeWidthStr::width(title.as_str());
         let body_width = props.body.as_ref().map_or(0, |b| {
             b.lines()
-                .map(|l| unicode_width::UnicodeWidthStr::width(l))
+                .map(unicode_width::UnicodeWidthStr::width)
                 .max()
                 .unwrap_or(0)
         });
@@ -355,7 +355,7 @@ impl Component for Modal {
 
         // Title line
         let mut title_segments = vec![Element::styled_text(
-            &chars.vertical.to_string(),
+            chars.vertical.to_string(),
             border_style,
         )];
 
@@ -367,9 +367,9 @@ impl Component for Modal {
             let padding_total = inner_width.saturating_sub(title_width);
             let left_pad = padding_total / 2;
             let right_pad = padding_total - left_pad;
-            title_segments.push(Element::text(&" ".repeat(left_pad)));
+            title_segments.push(Element::text(" ".repeat(left_pad)));
             title_segments.push(Element::styled_text(&title, title_style));
-            title_segments.push(Element::text(&" ".repeat(right_pad)));
+            title_segments.push(Element::text(" ".repeat(right_pad)));
         } else {
             let left_pad = " ".repeat(props.padding);
             let right_pad = " ".repeat(inner_width.saturating_sub(title_width + props.padding));
@@ -378,7 +378,7 @@ impl Component for Modal {
             title_segments.push(Element::text(&right_pad));
         }
         title_segments.push(Element::styled_text(
-            &chars.vertical.to_string(),
+            chars.vertical.to_string(),
             border_style,
         ));
         lines.push(Element::Fragment(title_segments));
@@ -414,9 +414,9 @@ impl Component for Modal {
                     " ".repeat(inner_width.saturating_sub(line_width + props.padding))
                 );
                 let line_segments = vec![
-                    Element::styled_text(&chars.vertical.to_string(), border_style),
+                    Element::styled_text(chars.vertical.to_string(), border_style),
                     Element::text(&content),
-                    Element::styled_text(&chars.vertical.to_string(), border_style),
+                    Element::styled_text(chars.vertical.to_string(), border_style),
                 ];
                 lines.push(Element::Fragment(line_segments));
             }
@@ -446,7 +446,7 @@ impl Component for Modal {
 
             // Button line
             let mut button_segments: Vec<Element> = vec![Element::styled_text(
-                &chars.vertical.to_string(),
+                chars.vertical.to_string(),
                 border_style,
             )];
 
@@ -478,11 +478,11 @@ impl Component for Modal {
             let left_pad = padding_total / 2;
             let right_pad = padding_total - left_pad;
 
-            button_segments.push(Element::text(&" ".repeat(left_pad)));
+            button_segments.push(Element::text(" ".repeat(left_pad)));
             button_segments.extend(button_parts);
-            button_segments.push(Element::text(&" ".repeat(right_pad)));
+            button_segments.push(Element::text(" ".repeat(right_pad)));
             button_segments.push(Element::styled_text(
-                &chars.vertical.to_string(),
+                chars.vertical.to_string(),
                 border_style,
             ));
             lines.push(Element::Fragment(button_segments));
