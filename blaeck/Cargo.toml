@@ -1,0 +1,39 @@
+[package]
+name = "blaeck"
+version.workspace = true
+edition.workspace = true
+description = "A component-based terminal UI framework for Rust"
+license.workspace = true
+repository.workspace = true
+readme = "../README.md"
+keywords = ["terminal", "tui", "cli", "ui", "flexbox"]
+categories = ["command-line-interface", "gui"]
+
+[features]
+default = []
+async = ["tokio", "futures"]
+
+[dependencies]
+bitflags = "2.6"
+crossterm = { version = "0.28", features = ["event-stream"] }
+taffy = "0.7"
+unicode-width = { workspace = true }
+blaeck-macros = { path = "../blaeck-macros", version = "0.1.0" }
+pulldown-cmark = "0.9"
+syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
+
+# Async dependencies (optional)
+tokio = { version = "1", features = ["sync", "time", "rt", "macros"], optional = true }
+futures = { version = "0.3", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+
+[[example]]
+name = "cube3d"
+required-features = ["async"]
+
+[[example]]
+name = "cube3d_braille"
+required-features = ["async"]

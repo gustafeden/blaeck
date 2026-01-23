@@ -1,0 +1,17 @@
+[package]
+name = "blaeck-macros"
+version.workspace = true
+edition.workspace = true
+description = "Procedural macros for the Blaeck terminal UI framework"
+license.workspace = true
+repository.workspace = true
+keywords = ["terminal", "tui", "cli", "macros"]
+categories = ["command-line-interface", "development-tools::procedural-macro-helpers"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }

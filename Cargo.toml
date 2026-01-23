@@ -1,0 +1,28 @@
+[workspace]
+resolver = "2"
+members = [
+    "blaeck",
+    "blaeck-macros",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gustafeden/blaeck"
+
+[workspace.dependencies]
+# Layout engine (Ink uses Yoga, we use Taffy)
+taffy = "0.7"
+
+# Terminal primitives
+crossterm = "0.28"
+
+# Unicode handling
+unicode-width = "0.2"
+unicode-segmentation = "1.12"
+
+# Macros
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+proc-macro2 = "1.0"
