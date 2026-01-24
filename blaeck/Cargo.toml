@@ -21,6 +21,7 @@ unicode-width = { workspace = true }
 blaeck-macros = { path = "../blaeck-macros", version = "0.1.2" }
 pulldown-cmark = "0.9"
 syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
+slotmap = "1.0"
 
 # Async dependencies (optional)
 tokio = { version = "1", features = ["sync", "time", "rt", "macros"], optional = true }

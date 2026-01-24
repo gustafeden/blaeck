@@ -5,6 +5,33 @@ All notable changes to Blaeck will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-01-24
+
+### Added
+
+**Reactive API** (new recommended way to build UIs)
+- `reactive` module with signals-based state management
+- `ReactiveApp` - Entry point for reactive applications
+- `use_state` hook - Create reactive state that triggers re-render on change
+- `use_input` hook - Register keyboard input handlers
+- `Signal<T>` - Reactive state container with `get()`, `set()`, and `update()`
+- `Scope` - Context passed to reactive component functions
+- Explicit `RuntimeHandle` (no thread-local state) for testability
+
+**Examples**
+- `reactive_counter.rs` - Basic counter demonstrating use_state and use_input
+- `reactive_list.rs` - List management with multiple signals
+
+### Changed
+
+- Documentation now positions ReactiveApp as the preferred/recommended approach
+- Updated "Quick Start" to show reactive API first
+- Added "Two Paradigms" section explaining reactive vs imperative approaches
+
+### Dependencies
+
+- Added `slotmap = "1.0"` for efficient arena-based storage
+
 ## [0.1.0] - 2025-01-22
 
 Initial release.

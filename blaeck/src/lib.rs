@@ -3,7 +3,88 @@
 //! Blaeck provides an Ink-like API for building terminal user interfaces
 //! with flexbox layout, inline rendering (not fullscreen), and 35+ components.
 //!
-//! # Quick Start
+//! # Quick Start (Reactive API)
+//!
+//! The recommended way to build interactive UIs is with the **reactive API**,
+//! which uses signals and hooks similar to React:
+//!
+//! ```ignore
+//! use blaeck::prelude::*;
+//! use blaeck::reactive::*;
+//!
+//! fn counter(cx: Scope) -> Element {
+//!     let count = use_state(cx.clone(), || 0);
+//!
+//!     let count_handler = count.clone();
+//!     use_input(cx, move |key| {
+//!         if key.is_char(' ') {
+//!             count_handler.set(count_handler.get() + 1);
+//!         }
+//!     });
+//!
+//!     element! {
+//!         Box(border_style: BorderStyle::Round, padding: 1.0) {
+//!             Text(content: format!("Count: {}", count.get()), color: Color::Green)
+//!         }
+//!     }
+//! }
+//!
+//! fn main() -> std::io::Result<()> {
+//!     ReactiveApp::run(counter)
+//! }
+//! ```
+//!
+//! See [`reactive`] module for the full API and more examples.
+//!
+//! # Two Paradigms
+//!
+//! Blaeck offers two ways to build UIs:
+//!
+//! ## 1. Reactive/Declarative (Recommended)
+//!
+//! Use [`reactive::ReactiveApp`] with hooks like `use_state` and `use_input`.
+//! State changes automatically trigger re-renders. This is the **preferred approach**
+//! for most applications.
+//!
+//! **Pros:**
+//! - Cleaner mental model - state and UI are declaratively connected
+//! - Automatic re-rendering when state changes
+//! - No manual state management boilerplate
+//! - Familiar to React/Solid.js developers
+//!
+//! **Examples:** `reactive_counter.rs`, `reactive_list.rs`
+//!
+//! ## 2. Imperative (Advanced)
+//!
+//! Use [`App`] with explicit state management (typically `RefCell` or similar).
+//! You manually control when and how state changes and re-renders occur.
+//!
+//! **When to use:**
+//! - Integration with existing imperative codebases
+//! - Fine-grained control over render timing
+//! - Cases where the reactive model doesn't fit
+//!
+//! **Examples:** `interactive.rs`, `form_demo.rs`
+//!
+//! ```ignore
+//! use blaeck::prelude::*;
+//! use blaeck::App;
+//! use std::cell::RefCell;
+//!
+//! let state = RefCell::new(0);
+//! App::new()?.run(
+//!     |_app| element! { Text(content: format!("Count: {}", state.borrow())) },
+//!     |_app, key| {
+//!         if key.is_char(' ') {
+//!             *state.borrow_mut() += 1;
+//!         }
+//!     },
+//! )?;
+//! ```
+//!
+//! # Static Rendering
+//!
+//! For one-shot rendering without interactivity, use [`Blaeck`] directly:
 //!
 //! ```ignore
 //! use blaeck::prelude::*;
@@ -25,6 +106,7 @@
 //! **Data flow**: `element! macro` → Element tree → Layout (Taffy) → Output grid → Terminal
 //!
 //! **Key modules** (read in this order):
+//! - [`reactive`] — Signals-based reactive system (start here for new apps)
 //! - [`renderer`] — Main render engine, orchestrates everything
 //! - [`element`] — Element tree and Component trait
 //! - [`log_update`] — Ink-style inline rendering (the clever bit)
@@ -33,9 +115,10 @@
 //!
 //! # Where to Start
 //!
-//! - **Using Blaeck**: Start with `examples/hello.rs`, then `examples/interactive.rs`
+//! - **New to Blaeck**: Start with `examples/reactive_counter.rs`
+//! - **Interactive apps**: See `examples/reactive_list.rs` for multiple signals
 //! - **Understanding internals**: Read `ARCHITECTURE.md`, then `renderer.rs`
-//! - **Adding components**: Study `components/box_component.rs` (marked as example)
+//! - **Adding components**: Study `components/box_component.rs`
 //!
 //! # Async Support
 //!
@@ -58,6 +141,7 @@ pub mod input;
 pub mod layout;
 pub mod log_update;
 pub mod output;
+pub mod reactive;
 pub mod renderer;
 pub mod style;
 
