@@ -1,13 +1,57 @@
-//! Application runtime with event loop.
+//! Imperative application runtime with manual state management.
 //!
-//! Provides an `App` struct that manages the render-input loop for interactive UIs.
+//! # Prefer ReactiveApp for New Code
 //!
-//! The event loop pattern:
+//! For most applications, the **reactive API** ([`crate::reactive::ReactiveApp`]) is
+//! recommended. It provides automatic re-rendering when state changes and a cleaner
+//! mental model.
+//!
 //! ```ignore
+//! // Recommended: Use ReactiveApp with hooks
+//! use blaeck::reactive::*;
+//!
+//! fn my_app(cx: Scope) -> Element {
+//!     let count = use_state(cx.clone(), || 0);
+//!     // State changes automatically trigger re-render
+//!     // ...
+//! }
+//!
+//! ReactiveApp::run(my_app)?;
+//! ```
+//!
+//! # When to Use App (Advanced)
+//!
+//! Use `App` instead of `ReactiveApp` when you need:
+//!
+//! - **Integration with existing imperative code** that uses `RefCell` or similar patterns
+//! - **Fine-grained control** over exactly when renders occur
+//! - **Custom state management** patterns that don't fit the reactive model
+//! - **Migration path** from older code before adopting reactive patterns
+//!
+//! # Usage
+//!
+//! ```ignore
+//! use blaeck::{App, match_key};
+//! use std::cell::RefCell;
+//!
+//! // Manual state management with RefCell
+//! let state = RefCell::new(MyState::default());
+//!
 //! App::new()?.run(
-//!     |app| { /* build UI */ element! { ... } },
-//!     |app, key| { /* handle input */ },
-//! )
+//!     |_app| {
+//!         let s = state.borrow();
+//!         element! { Text(content: format!("Count: {}", s.count)) }
+//!     },
+//!     |app, key| {
+//!         let mut s = state.borrow_mut();
+//!         if key.is_char(' ') {
+//!             s.count += 1;
+//!         }
+//!         if key.is_char('q') {
+//!             app.exit();
+//!         }
+//!     },
+//! )?;
 //! ```
 //!
 //! The App handles:

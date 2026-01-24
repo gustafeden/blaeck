@@ -19,8 +19,45 @@ A component-based terminal UI framework for Rust — flexbox layout, async-first
 
 ```toml
 [dependencies]
-blaeck = "0.1"
+blaeck = "0.2"
 ```
+
+### Interactive App (Recommended)
+
+Use the **reactive API** with signals and hooks for interactive UIs:
+
+```rust
+use blaeck::prelude::*;
+use blaeck::reactive::*;
+
+fn counter(cx: Scope) -> Element {
+    let count = use_state(cx.clone(), || 0);
+
+    let count_handler = count.clone();
+    use_input(cx, move |key| {
+        if key.is_char(' ') {
+            count_handler.set(count_handler.get() + 1);
+        }
+    });
+
+    element! {
+        Box(border_style: BorderStyle::Round, padding: 1.0) {
+            Text(content: format!("Count: {}", count.get()), color: Color::Green)
+            Text(content: "Press SPACE to increment, Ctrl+C to exit", dim: true)
+        }
+    }
+}
+
+fn main() -> std::io::Result<()> {
+    ReactiveApp::run(counter)
+}
+```
+
+State changes automatically trigger re-renders — no manual state management needed.
+
+### Static Rendering
+
+For one-shot output without interactivity:
 
 ```rust
 use blaeck::prelude::*;
@@ -30,60 +67,32 @@ use std::io;
 fn main() -> io::Result<()> {
     let mut blaeck = Blaeck::new(io::stdout())?;
 
-    let ui = element! {
+    blaeck.render(element! {
         Box(border_style: BorderStyle::Round, padding: 1.0) {
             Box(flex_direction: FlexDirection::Row, gap: 2.0) {
                 Text(content: "Status:", bold: true)
                 Text(content: "Ready", color: Color::Green)
             }
-            Box(flex_direction: FlexDirection::Row, gap: 1.0) {
-                Text(content: "Progress:", dim: true)
-                Text(content: "[████████░░] 80%", color: Color::Cyan)
-            }
         }
-    };
+    })?;
 
-    blaeck.render(ui)?;
     blaeck.unmount()?;
     Ok(())
 }
 ```
 
-Output:
-```
-╭────────────────────────────╮
-│ Status:  Ready             │
-│ Progress: [████████░░] 80% │
-╰────────────────────────────╯
-```
+---
 
-### Interactive Example
+## Two APIs
 
-```rust
-use blaeck::prelude::*;
-use blaeck::{App, Key, match_key};
+Blaeck offers two ways to build interactive UIs:
 
-fn main() -> std::io::Result<()> {
-    let items = vec!["Build", "Test", "Deploy", "Rollback"];
-    let mut selected = 0;
+| API | Best For | State Management |
+|-----|----------|------------------|
+| **`ReactiveApp`** (recommended) | Most interactive apps | Automatic via signals |
+| **`App`** (advanced) | Custom state patterns | Manual via RefCell |
 
-    App::new()?.run(
-        |_| element! {
-            Box(border_style: BorderStyle::Round, padding: 1.0) {
-                Text(content: "Select action:", bold: true)
-                // ... render items with selection indicator
-            }
-        },
-        |app, key| {
-            match_key(&key, &mut selected)
-                .on_arrow(Arrow::Up, |s| *s = s.saturating_sub(1))
-                .on_arrow(Arrow::Down, |s| *s = (*s + 1).min(items.len() - 1))
-                .on_enter(|_| { /* handle selection */ })
-                .on_char('q', |_| app.exit());
-        },
-    )
-}
-```
+New projects should use `ReactiveApp` — it's simpler and less error-prone.
 
 ---
 
@@ -269,24 +278,27 @@ async fn main() -> io::Result<()> {
 ## Examples
 
 ```bash
-# Basic
-cargo run --example hello           # Hello world
-cargo run --example interactive     # Keyboard input
+# Reactive API (recommended for interactive apps)
+cargo run --example reactive_counter  # Counter with use_state
+cargo run --example reactive_list     # List with multiple signals
+
+# Static rendering
+cargo run --example hello             # Hello world
 
 # Components
-cargo run --example spinner_demo    # 15 spinner styles
-cargo run --example progress        # Progress bars
-cargo run --example table           # Data tables
-cargo run --example tree            # File tree view
-cargo run --example syntax          # Syntax highlighting
-cargo run --example modal           # Dialog boxes
-cargo run --example barchart        # Charts
-cargo run --example markdown        # Markdown rendering
+cargo run --example spinner_demo      # 15 spinner styles
+cargo run --example progress          # Progress bars
+cargo run --example table             # Data tables
+cargo run --example tree              # File tree view
+cargo run --example syntax            # Syntax highlighting
+cargo run --example modal             # Dialog boxes
+cargo run --example barchart          # Charts
+cargo run --example markdown          # Markdown rendering
 
 # Advanced
-cargo run --example dashboard       # Multi-panel layout
-cargo run --example timer           # Stopwatch/countdown
-cargo run --example logbox_command  # Command output viewer
+cargo run --example dashboard         # Multi-panel layout
+cargo run --example timer             # Stopwatch/countdown
+cargo run --example interactive       # Imperative API (advanced)
 cargo run --example async_demo --features async  # Async app
 ```
 

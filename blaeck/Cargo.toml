@@ -18,7 +18,7 @@ bitflags = "2.6"
 crossterm = { version = "0.28", features = ["event-stream"] }
 taffy = "0.7"
 unicode-width = { workspace = true }
-blaeck-macros = { path = "../blaeck-macros", version = "0.1.2" }
+blaeck-macros = { path = "../blaeck-macros", version = "0.2.0" }
 pulldown-cmark = "0.9"
 syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
 slotmap = "1.0"
