@@ -200,6 +200,30 @@ pub use async_runtime::{
 /// Re-export the element! macro from blaeck-macros.
 pub use blaeck_macros::element;
 
+/// Print an element to stdout and return.
+///
+/// This is the simplest way to render something with Blaeck — great for
+/// one-shot output like status messages or formatted results.
+///
+/// # Example
+///
+/// ```ignore
+/// use blaeck::prelude::*;
+///
+/// fn main() -> std::io::Result<()> {
+///     blaeck::print(element! {
+///         Text(content: "Hello!", color: Color::Green, bold: true)
+///     })
+/// }
+/// ```
+///
+/// For interactive apps that respond to keyboard input, use [`reactive::ReactiveApp`].
+pub fn print(element: Element) -> std::io::Result<()> {
+    let mut blaeck = Blaeck::new(std::io::stdout())?;
+    blaeck.render(element)?;
+    blaeck.unmount()
+}
+
 /// Prelude module with commonly used types.
 pub mod prelude {
     pub use crate::animation::{AnimationTimer, BlinkPattern, Easing, IndicatorStyle};

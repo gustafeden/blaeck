@@ -22,17 +22,63 @@ A component-based terminal UI framework for Rust — flexbox layout, async-first
 blaeck = "0.2"
 ```
 
-### Interactive App (Recommended)
+### 1. Print Something
 
-Use the **reactive API** with signals and hooks for interactive UIs:
+The simplest thing you can do — print styled text:
+
+```rust
+use blaeck::prelude::*;
+
+fn main() -> std::io::Result<()> {
+    blaeck::print(element! {
+        Text(content: "Hello from Blaeck!", color: Color::Green, bold: true)
+    })
+}
+```
+
+Output:
+```
+Hello from Blaeck!   (in bold green)
+```
+
+### 2. Add Layout
+
+Use `Box` to arrange multiple elements:
+
+```rust
+use blaeck::prelude::*;
+
+fn main() -> std::io::Result<()> {
+    blaeck::print(element! {
+        Box(border_style: BorderStyle::Round, padding: 1.0) {
+            Text(content: "Status:", bold: true)
+            Text(content: "Ready", color: Color::Green)
+        }
+    })
+}
+```
+
+Output:
+```
+╭──────────────╮
+│ Status:      │
+│ Ready        │
+╰──────────────╯
+```
+
+### 3. Make It Interactive
+
+For apps that respond to keyboard input, use `ReactiveApp`:
 
 ```rust
 use blaeck::prelude::*;
 use blaeck::reactive::*;
 
 fn counter(cx: Scope) -> Element {
+    // Create a piece of state (starts at 0)
     let count = use_state(cx.clone(), || 0);
 
+    // Handle keyboard input
     let count_handler = count.clone();
     use_input(cx, move |key| {
         if key.is_char(' ') {
@@ -40,10 +86,11 @@ fn counter(cx: Scope) -> Element {
         }
     });
 
+    // Return the UI (re-renders automatically when count changes)
     element! {
         Box(border_style: BorderStyle::Round, padding: 1.0) {
             Text(content: format!("Count: {}", count.get()), color: Color::Green)
-            Text(content: "Press SPACE to increment, Ctrl+C to exit", dim: true)
+            Text(content: "SPACE to increment, Ctrl+C to exit", dim: true)
         }
     }
 }
@@ -53,46 +100,13 @@ fn main() -> std::io::Result<()> {
 }
 ```
 
-State changes automatically trigger re-renders — no manual state management needed.
+**Key concepts:**
+- `Scope` — context passed to your component (like React's component instance)
+- `use_state` — creates reactive state; UI re-renders when it changes
+- `use_input` — registers a keyboard handler (only runs once, not every render)
+- `Signal` — a container for state; use `.get()` to read, `.set()` to write
 
-### Static Rendering
-
-For one-shot output without interactivity:
-
-```rust
-use blaeck::prelude::*;
-use blaeck::Blaeck;
-use std::io;
-
-fn main() -> io::Result<()> {
-    let mut blaeck = Blaeck::new(io::stdout())?;
-
-    blaeck.render(element! {
-        Box(border_style: BorderStyle::Round, padding: 1.0) {
-            Box(flex_direction: FlexDirection::Row, gap: 2.0) {
-                Text(content: "Status:", bold: true)
-                Text(content: "Ready", color: Color::Green)
-            }
-        }
-    })?;
-
-    blaeck.unmount()?;
-    Ok(())
-}
-```
-
----
-
-## Two APIs
-
-Blaeck offers two ways to build interactive UIs:
-
-| API | Best For | State Management |
-|-----|----------|------------------|
-| **`ReactiveApp`** (recommended) | Most interactive apps | Automatic via signals |
-| **`App`** (advanced) | Custom state patterns | Manual via RefCell |
-
-New projects should use `ReactiveApp` — it's simpler and less error-prone.
+The `.clone()` calls are Rust's way of sharing data between the render function and the input handler — both need access to `count`.
 
 ---
 
@@ -202,76 +216,13 @@ element! {
 
 ---
 
-## Architecture
+## How It Works
 
-### Rendering Model
+Blaeck uses **inline rendering** — it renders within the normal terminal flow (not fullscreen). Your output stays in scrollback, and `println!()` works after you're done.
 
-Blaeck uses **inline rendering**: it tracks how many lines were written and overwrites them on re-render. This means:
+For interactive apps, `ReactiveApp` handles the event loop: poll for input → dispatch to handlers → re-render if state changed.
 
-- Output stays in terminal scrollback
-- `println!()` works after `unmount()`
-- Multiple Blaeck instances can coexist
-- No alternate screen buffer
-
-Render throttling prevents excessive CPU usage:
-
-```rust
-blaeck.set_max_fps(30); // Limit to 30 renders/second
-```
-
-### Layout System
-
-Uses [Taffy](https://github.com/DioxusLabs/taffy) for flexbox layout:
-
-- `flex_direction`: Row or Column
-- `justify_content`, `align_items`: Standard flexbox alignment
-- `gap`, `padding`, `margin`: Spacing
-- `flex_grow`, `flex_shrink`: Flexible sizing
-
-### Focus Management
-
-```rust
-let mut focus = FocusManager::new();
-focus.register(FocusId(0));
-focus.register(FocusId(1));
-
-focus.on_focus_change(|event| {
-    // Handle focus/blur events
-});
-
-// In input handler
-match_key(&key, &mut focus)
-    .on_tab(|f| f.focus_next())
-    .on_backtab(|f| f.focus_previous());
-```
-
-### Async Model
-
-Enable with `features = ["async"]`:
-
-```rust
-use blaeck::{AsyncApp, AppEvent, channel};
-
-#[tokio::main]
-async fn main() -> io::Result<()> {
-    let (tx, mut rx) = channel::<Message>(10);
-
-    // Background task
-    tokio::spawn(async move {
-        tx.send(Message::Update).await.ok();
-    });
-
-    let mut app = AsyncApp::new(io::stdout())?;
-
-    loop {
-        tokio::select! {
-            event = app.next_event() => { /* handle input */ }
-            msg = rx.recv() => { /* handle background message */ }
-        }
-        app.render(build_ui())?;
-    }
-}
-```
+For details on layout, focus management, and async, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
