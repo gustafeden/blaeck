@@ -51,6 +51,9 @@ impl<W: Write> LogUpdate<W> {
     ///
     /// If the content is the same as the previous render, this is a no-op.
     /// The content should NOT include a trailing newline - one will be added.
+    ///
+    /// Uses synchronized output (DEC private mode 2026) to prevent flicker
+    /// by buffering all updates until complete.
     pub fn render(&mut self, content: &str) -> Result<()> {
         // Use \r\n to work correctly in raw terminal mode
         let output = format!("{}\r\n", content);
@@ -60,18 +63,51 @@ impl<W: Write> LogUpdate<W> {
             return Ok(());
         }
 
-        // Erase previous lines
-        self.erase_lines(self.previous_line_count)?;
+        // Buffer everything to minimize flicker
+        let mut buffer = String::new();
 
-        // Write new content
-        write!(self.writer, "{}", output)?;
+        // Begin synchronized output (terminal buffers until we end)
+        buffer.push_str("\x1b[?2026h");
+
+        // Hide cursor during render
+        buffer.push_str("\x1b[?25l");
+
+        // Build erase sequence
+        if self.previous_line_count > 0 {
+            // Move cursor up
+            buffer.push_str(&format!("\x1b[{}A", self.previous_line_count));
+
+            // Clear each line
+            for i in 0..self.previous_line_count {
+                buffer.push_str("\x1b[2K");
+                if i < self.previous_line_count - 1 {
+                    buffer.push_str("\x1b[1B");
+                }
+            }
+
+            // Move back to start
+            if self.previous_line_count > 1 {
+                buffer.push_str(&format!("\x1b[{}A", self.previous_line_count - 1));
+            }
+            buffer.push_str("\x1b[0G");
+        }
+
+        // Add new content
+        buffer.push_str(&output);
+
+        // Show cursor
+        buffer.push_str("\x1b[?25h");
+
+        // End synchronized output (terminal flushes buffer)
+        buffer.push_str("\x1b[?2026l");
+
+        // Single write for entire frame
+        write!(self.writer, "{}", buffer)?;
         self.writer.flush()?;
 
         // Update tracking
-        self.previous_output = output.clone();
-        // Count lines - each line is terminated by \r\n or \n
-        // We count by the number of newlines (\n characters)
-        self.previous_line_count = output.matches('\n').count().max(1);
+        self.previous_output = output;
+        self.previous_line_count = self.previous_output.matches('\n').count().max(1);
 
         Ok(())
     }
