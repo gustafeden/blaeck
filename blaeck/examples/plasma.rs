@@ -8,8 +8,8 @@ use blaeck::prelude::*;
 use crossterm::event::{poll, read, Event, KeyCode};
 use std::time::{Duration, Instant};
 
-const WIDTH: usize = 120;
-const HEIGHT: usize = 30;
+const DEFAULT_WIDTH: usize = 120;
+const DEFAULT_HEIGHT: usize = 30;
 
 const LOGO: &[&str] = &[
     "██████╗ ██╗      █████╗ ███████╗ ██████╗██╗  ██╗",
@@ -291,6 +291,7 @@ struct Params {
     seed: u64,
     // Lava lamp params
     num_blobs: usize,
+    zoom: f64,  // 1.0 = default, higher = zoomed in (bigger blobs), lower = zoomed out
 }
 
 impl Params {
@@ -304,6 +305,7 @@ impl Params {
             preset_idx: 0,
             seed,
             num_blobs: 8,
+            zoom: 1.0,
         }
     }
 
@@ -350,22 +352,22 @@ fn plasma_value(nx: f64, ny: f64, time: f64, p: &Params) -> f64 {
 }
 
 /// Lava lamp mode - slow, blobby plasma with gentle movement
-fn lava_plasma_value(nx: f64, ny: f64, time: f64, _p: &Params) -> f64 {
-    // Use fixed low frequencies for big blob-like shapes
-    // Ignore preset frequencies - lava lamp has its own look
-    let slow_time = time * 0.08;  // Very slow animation
+fn lava_plasma_value(nx: f64, ny: f64, time: f64, p: &Params) -> f64 {
+    // Zoom: higher = bigger blobs (lower frequency), lower = smaller blobs
+    let scale = 3.0 / p.zoom;  // Base frequency divided by zoom
+    let slow_time = time * 0.06;  // Very slow animation
 
     // Big, slow-moving blobs
-    let v1 = (nx * 4.0 + slow_time).sin();
-    let v2 = (ny * 3.0 - slow_time * 0.7).cos();
-    let v3 = ((nx + ny) * 2.5 + slow_time * 0.5).sin();
-    let v4 = ((nx * 0.5).sin() * 3.0 + (ny * 0.5).cos() * 3.0 + slow_time * 0.3).cos();
+    let v1 = (nx * scale + slow_time).sin();
+    let v2 = (ny * scale * 0.8 - slow_time * 0.7).cos();
+    let v3 = ((nx + ny) * scale * 0.7 + slow_time * 0.5).sin();
+    let v4 = ((nx * scale * 0.15).sin() * 2.0 + (ny * scale * 0.15).cos() * 2.0 + slow_time * 0.3).cos();
 
     // Radial blob component - creates round shapes
     let cx = nx - 0.5;
     let cy = ny - 0.5;
     let r = (cx * cx + cy * cy).sqrt();
-    let radial = (r * 6.0 - slow_time * 0.4).sin();
+    let radial = (r * scale * 1.5 - slow_time * 0.4).sin();
 
     (v1 + v2 + v3 + v4 * 0.5 + radial * 0.8) / 4.3
 }
@@ -468,7 +470,7 @@ fn build_info(p: &Params) -> Element {
     let theme = p.theme();
     let mode_str = match p.mode {
         Mode::Plasma => format!("Plasma ({})", p.preset().name),
-        Mode::LavaLamp => format!("Lava Lamp ({} blobs)", p.num_blobs),
+        Mode::LavaLamp => format!("Lava (zoom: {:.1}x)", p.zoom),
     };
 
     element! {
@@ -499,11 +501,27 @@ fn main() -> std::io::Result<()> {
     let mut show_info = true;
     let mut last_time = start.elapsed().as_secs_f64();
 
+    // Get initial terminal size, capped at default max
+    let (mut width, mut height) = crossterm::terminal::size()
+        .map(|(w, h)| (w as usize, h as usize))
+        .unwrap_or((DEFAULT_WIDTH + 4, DEFAULT_HEIGHT + 4));
+    // Leave room for border (2) and help text (1), cap at defaults
+    width = width.saturating_sub(4).min(DEFAULT_WIDTH).max(40);
+    height = height.saturating_sub(4).min(DEFAULT_HEIGHT).max(10);
+
     crossterm::terminal::enable_raw_mode()?;
 
     loop {
         if poll(Duration::from_millis(30))? {
-            if let Event::Key(key) = read()? {
+            match read()? {
+                Event::Resize(w, h) => {
+                    // Update dimensions on resize, capped at defaults
+                    width = (w as usize).saturating_sub(4).min(DEFAULT_WIDTH).max(40);
+                    height = (h as usize).saturating_sub(4).min(DEFAULT_HEIGHT).max(10);
+                    // Use Blaeck's resize handler to clear and update dimensions
+                    let _ = blaeck.handle_resize(w, h);
+                }
+                Event::Key(key) => {
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => break,
                     KeyCode::Char('c') if key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) => break,
@@ -558,8 +576,14 @@ fn main() -> std::io::Result<()> {
                     KeyCode::Char('+') | KeyCode::Char('=') => params.speed = (params.speed + 0.1).min(5.0),
                     KeyCode::Char('-') | KeyCode::Char('_') => params.speed = (params.speed - 0.1).max(0.1),
 
+                    // Zoom (for lava mode) - z/Z or [/]
+                    KeyCode::Char('z') | KeyCode::Char('[') => params.zoom = (params.zoom * 0.85).max(0.1),  // zoom out
+                    KeyCode::Char('Z') | KeyCode::Char(']') => params.zoom = (params.zoom * 1.15).min(5.0),  // zoom in
+
                     _ => {}
                 }
+                }
+                _ => {}
             }
         }
 
@@ -575,7 +599,7 @@ fn main() -> std::io::Result<()> {
         let _dt = raw_dt * params.speed;
 
         let time = now * params.speed;
-        let display = build_display(WIDTH, HEIGHT, time, &params, &lava);
+        let display = build_display(width, height, time, &params, &lava);
 
         let content = if show_info {
             let info = build_info(&params);
@@ -597,7 +621,7 @@ fn main() -> std::io::Result<()> {
 
         let help = match params.mode {
             Mode::Plasma => "m:lava  t/T:theme  p/P:preset  1-8:presets  r:random  +/-:speed  i:info  q:quit",
-            Mode::LavaLamp => "m:plasma  t/T:theme  b/B:blobs  r:reset  +/-:speed  i:info  q:quit",
+            Mode::LavaLamp => "m:plasma  t/T:theme  z/Z:zoom  +/-:speed  i:info  q:quit",
         };
 
         blaeck.render(element! {

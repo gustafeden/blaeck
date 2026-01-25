@@ -860,6 +860,27 @@ impl<W: Write> Blaeck<W> {
     pub fn clear(&mut self) -> Result<()> {
         self.log_update.clear()
     }
+
+    /// Handle terminal resize event.
+    ///
+    /// Call this when you receive a resize event from crossterm/termion.
+    /// It clears the display and updates the internal dimensions so the
+    /// next render uses the new size.
+    ///
+    /// ```no_run
+    /// use crossterm::event::{Event, read};
+    ///
+    /// // In your event loop:
+    /// // if let Event::Resize(w, h) = read()? {
+    /// //     blaeck.handle_resize(w, h)?;
+    /// // }
+    /// ```
+    pub fn handle_resize(&mut self, width: u16, height: u16) -> Result<()> {
+        self.width = width;
+        self.height = height;
+        // Clear our content area only, preserving scrollback above
+        self.log_update.handle_resize()
+    }
 }
 
 /// Convert a Taffy error to an io::Error.

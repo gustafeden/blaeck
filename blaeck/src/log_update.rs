@@ -123,6 +123,25 @@ impl<W: Write> LogUpdate<W> {
         Ok(())
     }
 
+    /// Handle terminal resize by clearing our content area only.
+    ///
+    /// Moves cursor to start of our content (based on tracked line count),
+    /// clears from there to end of screen, preserving scrollback above.
+    pub fn handle_resize(&mut self) -> Result<()> {
+        if self.previous_line_count > 0 {
+            // Move cursor up to start of our content
+            write!(self.writer, "\x1b[{}A", self.previous_line_count)?;
+            // Move to column 0
+            write!(self.writer, "\x1b[0G")?;
+            // Clear from cursor to end of screen (preserves everything above)
+            write!(self.writer, "\x1b[J")?;
+            self.writer.flush()?;
+        }
+        self.previous_output.clear();
+        self.previous_line_count = 0;
+        Ok(())
+    }
+
     /// Finalizes the output, leaving it visible.
     ///
     /// After calling done(), subsequent render() calls will write below
