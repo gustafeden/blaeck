@@ -158,8 +158,61 @@ impl Element {
     }
 
     /// Create a fragment from multiple elements.
+    ///
+    /// **Note:** Fragments render children **horizontally** (inline).
+    /// For vertical stacking, use [`Element::column`] instead.
     pub fn fragment(elements: Vec<Element>) -> Self {
         Element::Fragment(elements)
+    }
+
+    /// Create a vertical column of elements.
+    ///
+    /// This is the recommended way to render a dynamic list of items vertically.
+    /// It creates a `Box` with `flex_direction: Column`.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let items = vec!["Apple", "Banana", "Cherry"];
+    /// Element::column(
+    ///     items.iter().map(|item| {
+    ///         element! { Text(content: item) }
+    ///     }).collect()
+    /// )
+    /// ```
+    pub fn column(children: Vec<Element>) -> Self {
+        use crate::components::{Box, BoxProps};
+        Element::node::<Box>(
+            BoxProps {
+                flex_direction: crate::layout::FlexDirection::Column,
+                ..Default::default()
+            },
+            children,
+        )
+    }
+
+    /// Create a horizontal row of elements.
+    ///
+    /// This creates a `Box` with `flex_direction: Row`.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Element::row(vec![
+    ///     element! { Text(content: "Left") },
+    ///     element! { Spacer },
+    ///     element! { Text(content: "Right") },
+    /// ])
+    /// ```
+    pub fn row(children: Vec<Element>) -> Self {
+        use crate::components::{Box, BoxProps};
+        Element::node::<Box>(
+            BoxProps {
+                flex_direction: crate::layout::FlexDirection::Row,
+                ..Default::default()
+            },
+            children,
+        )
     }
 
     /// Get the children of this element (empty for non-nodes).

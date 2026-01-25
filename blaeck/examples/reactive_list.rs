@@ -81,24 +81,20 @@ fn list_app(cx: Scope) -> Element {
                     Text(content: "No items. Press 'a' to add one.", dim: true)
                 }
             } else {
-                element! {
-                    Box(flex_direction: FlexDirection::Column) {
-                        #(Element::Fragment(
-                            current_items.iter().enumerate().map(|(i, item)| {
-                                let is_selected = i == current_selected;
-                                let prefix = if is_selected { "> " } else { "  " };
-                                let color = if is_selected { Color::Green } else { Color::White };
-                                element! {
-                                    Text(
-                                        content: format!("{}{}", prefix, item),
-                                        color: color,
-                                        bold: is_selected
-                                    )
-                                }
-                            }).collect()
-                        ))
-                    }
-                }
+                Element::column(
+                    current_items.iter().enumerate().map(|(i, item)| {
+                        let is_selected = i == current_selected;
+                        let prefix = if is_selected { "> " } else { "  " };
+                        let color = if is_selected { Color::Green } else { Color::White };
+                        element! {
+                            Text(
+                                content: format!("{}{}", prefix, item),
+                                color: color,
+                                bold: is_selected
+                            )
+                        }
+                    }).collect()
+                )
             })
             Newline
             Text(content: format!("Items: {} | Selected: {}", current_items.len(), current_selected + 1), dim: true)
