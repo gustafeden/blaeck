@@ -5,14 +5,19 @@
 
 use taffy::prelude::*;
 
+// Re-export Display for use by other modules
+pub use taffy::Display;
+
 /// A thin wrapper around Taffy's layout tree.
 pub struct LayoutTree {
     tree: TaffyTree<()>,
 }
 
 /// Layout style configuration for a node.
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct LayoutStyle {
+    /// Display mode (Flex, Block, None, etc.)
+    pub display: Display,
     /// Fixed width (if set)
     pub width: Option<f32>,
     /// Fixed height (if set)
@@ -61,6 +66,38 @@ pub struct LayoutStyle {
     pub align_content: Option<AlignContent>,
     /// How to justify content along main axis
     pub justify_content: Option<JustifyContent>,
+}
+
+impl Default for LayoutStyle {
+    fn default() -> Self {
+        Self {
+            display: Display::Flex,
+            width: None,
+            height: None,
+            min_width: None,
+            min_height: None,
+            max_width: None,
+            max_height: None,
+            flex_direction: FlexDirection::default(),
+            flex_grow: 0.0,
+            flex_shrink: 1.0,
+            padding: 0.0,
+            padding_left: None,
+            padding_right: None,
+            padding_top: None,
+            padding_bottom: None,
+            margin: 0.0,
+            margin_left: None,
+            margin_right: None,
+            margin_top: None,
+            margin_bottom: None,
+            gap: 0.0,
+            align_items: None,
+            align_self: None,
+            align_content: None,
+            justify_content: None,
+        }
+    }
 }
 
 /// Flex direction (row or column)
@@ -220,6 +257,13 @@ impl LayoutTree {
     pub fn children(&self, node: NodeId) -> Vec<NodeId> {
         self.tree.children(node).unwrap_or_default()
     }
+
+    /// Clear all nodes from the tree, allowing it to be reused.
+    /// This is important for avoiding memory leaks when rendering many frames,
+    /// as Taffy uses arena-style allocation that grows if new trees are created each frame.
+    pub fn clear(&mut self) {
+        self.tree.clear();
+    }
 }
 
 impl Default for LayoutTree {
@@ -242,17 +286,18 @@ impl LayoutStyle {
         let margin_bottom = self.margin_bottom.unwrap_or(self.margin);
 
         Style {
+            display: self.display,
             size: Size {
-                width: self.width.map_or(Dimension::Auto, Dimension::Length),
-                height: self.height.map_or(Dimension::Auto, Dimension::Length),
+                width: self.width.map_or(Dimension::auto(), Dimension::length),
+                height: self.height.map_or(Dimension::auto(), Dimension::length),
             },
             min_size: Size {
-                width: self.min_width.map_or(Dimension::Auto, Dimension::Length),
-                height: self.min_height.map_or(Dimension::Auto, Dimension::Length),
+                width: self.min_width.map_or(Dimension::auto(), Dimension::length),
+                height: self.min_height.map_or(Dimension::auto(), Dimension::length),
             },
             max_size: Size {
-                width: self.max_width.map_or(Dimension::Auto, Dimension::Length),
-                height: self.max_height.map_or(Dimension::Auto, Dimension::Length),
+                width: self.max_width.map_or(Dimension::auto(), Dimension::length),
+                height: self.max_height.map_or(Dimension::auto(), Dimension::length),
             },
             flex_direction: match self.flex_direction {
                 FlexDirection::Row => taffy::FlexDirection::Row,
@@ -261,20 +306,20 @@ impl LayoutStyle {
             flex_grow: self.flex_grow,
             flex_shrink: self.flex_shrink,
             padding: Rect {
-                left: LengthPercentage::Length(padding_left),
-                right: LengthPercentage::Length(padding_right),
-                top: LengthPercentage::Length(padding_top),
-                bottom: LengthPercentage::Length(padding_bottom),
+                left: LengthPercentage::length(padding_left),
+                right: LengthPercentage::length(padding_right),
+                top: LengthPercentage::length(padding_top),
+                bottom: LengthPercentage::length(padding_bottom),
             },
             margin: Rect {
-                left: LengthPercentageAuto::Length(margin_left),
-                right: LengthPercentageAuto::Length(margin_right),
-                top: LengthPercentageAuto::Length(margin_top),
-                bottom: LengthPercentageAuto::Length(margin_bottom),
+                left: LengthPercentageAuto::length(margin_left),
+                right: LengthPercentageAuto::length(margin_right),
+                top: LengthPercentageAuto::length(margin_top),
+                bottom: LengthPercentageAuto::length(margin_bottom),
             },
             gap: Size {
-                width: LengthPercentage::Length(self.gap),
-                height: LengthPercentage::Length(self.gap),
+                width: LengthPercentage::length(self.gap),
+                height: LengthPercentage::length(self.gap),
             },
             align_items: self.align_items.map(|a| match a {
                 AlignItems::Start => taffy::AlignItems::Start,

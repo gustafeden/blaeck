@@ -16,7 +16,7 @@ async = ["tokio", "futures"]
 [dependencies]
 bitflags = "2.6"
 crossterm = { version = "0.28", features = ["event-stream"] }
-taffy = "0.7"
+taffy = "0.9"
 unicode-width = { workspace = true }
 blaeck-macros = { path = "../blaeck-macros", version = "0.2.0" }
 pulldown-cmark = "0.9"

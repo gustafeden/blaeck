@@ -107,6 +107,8 @@ pub struct Blaeck<W: Write> {
     min_render_interval: Option<Duration>,
     /// Last time a render was performed
     last_render: Option<Instant>,
+    /// Reusable layout tree to avoid memory growth from Taffy allocations
+    layout_tree: LayoutTree,
 }
 
 impl<W: Write> Blaeck<W> {
@@ -128,6 +130,7 @@ impl<W: Write> Blaeck<W> {
             static_output: String::new(),
             min_render_interval: None,
             last_render: None,
+            layout_tree: LayoutTree::new(),
         })
     }
 
@@ -230,9 +233,12 @@ impl<W: Write> Blaeck<W> {
     }
 
     /// Renders an element tree and returns the string output.
-    fn render_element(&self, element: &Element) -> Result<String> {
-        // Build layout tree from element
-        let mut layout_tree = LayoutTree::new();
+    fn render_element(&mut self, element: &Element) -> Result<String> {
+        // Reuse layout tree's memory. If tree has grown very large, recreate it
+        // to release memory (prevents unbounded growth from varying tree sizes)
+        let mut layout_tree = std::mem::take(&mut self.layout_tree);
+        layout_tree.clear();
+
         let mut node_elements: HashMap<NodeId, &Element> = HashMap::new();
 
         // Create layout tree recursively
@@ -257,6 +263,9 @@ impl<W: Write> Blaeck<W> {
             0.0,
             &node_elements,
         )?;
+
+        // Put the layout tree back for reuse
+        self.layout_tree = layout_tree;
 
         let result = output.get();
         Ok(result.output)
@@ -814,7 +823,7 @@ impl<W: Write> Blaeck<W> {
 
     /// Checks if the element is a Static component and returns its rendered content.
     /// Returns (static_content, has_static).
-    fn check_for_static(&self, element: &Element) -> (String, bool) {
+    fn check_for_static(&mut self, element: &Element) -> (String, bool) {
         match element {
             Element::Node {
                 type_id, children, ..
