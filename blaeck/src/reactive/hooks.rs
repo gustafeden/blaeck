@@ -20,7 +20,7 @@ use super::runtime::{InputHandlerId, RuntimeHandle, TimelineId};
 use super::scope::Scope;
 use super::signal::Signal;
 use crate::input::Key;
-use crate::timeline::{Animatable, Timeline};
+use crate::timeline::{Animatable, Timeline, TimelineDebugInfo};
 use std::marker::PhantomData;
 
 /// Create a reactive state signal.
@@ -443,6 +443,21 @@ impl TimelineHandle {
         self.rt
             .with_timeline(self.id, |tl| tl.stagger_count(property))
             .unwrap_or(0)
+    }
+
+    /// Get debug information about the timeline state.
+    ///
+    /// Useful for building debug panels or logging timeline state.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let debug = timeline.debug_info();
+    /// println!("{}", debug.to_compact_string());
+    /// // Output: [1.50s/5.00s] fade_in (75%) PLAYING 1.0x
+    /// ```
+    pub fn debug_info(&self) -> Option<TimelineDebugInfo> {
+        self.rt.with_timeline(self.id, |tl| tl.debug_info())
     }
 }
 

@@ -195,7 +195,7 @@ pub use renderer::Blaeck;
 pub use style::{Color, Modifier, Style};
 pub use timeline::{
     Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, StaggerConfig,
-    StaggerOrder, StaggerTrack, Timeline, TimelineState, Track,
+    StaggerOrder, StaggerTrack, Timeline, TimelineDebugInfo, TimelineState, Track,
 };
 
 #[cfg(feature = "async")]
@@ -271,7 +271,7 @@ pub mod prelude {
     pub use crate::style::{Color, Modifier, Style};
     pub use crate::timeline::{
         Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, StaggerConfig,
-        StaggerOrder, StaggerTrack, Timeline, Track,
+        StaggerOrder, StaggerTrack, Timeline, TimelineDebugInfo, Track,
     };
     pub use blaeck_macros::element;
 

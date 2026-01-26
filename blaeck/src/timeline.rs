@@ -1451,6 +1451,191 @@ impl PlayingTimeline {
 }
 
 // ============================================================================
+// Timeline Visualization (Phase 4: Developer Experience)
+// ============================================================================
+
+/// A debug visualization of a timeline's current state.
+///
+/// Use this to display timeline info in a debug panel or logging output.
+#[derive(Debug, Clone)]
+pub struct TimelineDebugInfo {
+    /// Total duration of the timeline
+    pub duration: f64,
+    /// Current elapsed time
+    pub elapsed: f64,
+    /// Overall progress (0.0 to 1.0)
+    pub progress: f64,
+    /// Name of the current act
+    pub current_act: String,
+    /// Index of the current act
+    pub act_index: usize,
+    /// Total number of acts
+    pub act_count: usize,
+    /// Progress within the current act (0.0 to 1.0)
+    pub act_progress: f64,
+    /// Duration of the current act
+    pub act_duration: f64,
+    /// Whether the timeline is paused
+    pub is_paused: bool,
+    /// Current playback speed
+    pub speed: f64,
+    /// Number of loop iterations completed
+    pub loop_count: u32,
+    /// Loop behavior description
+    pub loop_behavior: String,
+    /// List of all act names with their durations
+    pub acts: Vec<(String, f64)>,
+}
+
+impl TimelineDebugInfo {
+    /// Format as a compact single-line string.
+    pub fn to_compact_string(&self) -> String {
+        format!(
+            "[{:.2}s/{:.2}s] {} ({:.0}%) {} {:.1}x",
+            self.elapsed,
+            self.duration,
+            self.current_act,
+            self.act_progress * 100.0,
+            if self.is_paused { "PAUSED" } else { "PLAYING" },
+            self.speed,
+        )
+    }
+
+    /// Format as a multi-line debug display.
+    pub fn to_debug_string(&self) -> String {
+        let mut lines = vec![
+            format!("Timeline Debug Info"),
+            format!("=================="),
+            format!(
+                "Time: {:.2}s / {:.2}s ({:.1}%)",
+                self.elapsed,
+                self.duration,
+                self.progress * 100.0
+            ),
+            format!(
+                "Act: {} [{}/{}]",
+                self.current_act,
+                self.act_index + 1,
+                self.act_count
+            ),
+            format!("Act Progress: {:.1}%", self.act_progress * 100.0),
+            format!(
+                "Status: {} at {:.1}x speed",
+                if self.is_paused { "Paused" } else { "Playing" },
+                self.speed
+            ),
+            format!("Loop: {} (count: {})", self.loop_behavior, self.loop_count),
+            format!(""),
+            format!("Acts:"),
+        ];
+
+        let mut time_offset = 0.0;
+        for (i, (name, duration)) in self.acts.iter().enumerate() {
+            let marker = if i == self.act_index { ">>>" } else { "   " };
+            lines.push(format!(
+                "{} {:2}. {:20} ({:.1}s) @ {:.1}s",
+                marker,
+                i + 1,
+                name,
+                duration,
+                time_offset
+            ));
+            time_offset += duration;
+        }
+
+        lines.join("\n")
+    }
+
+    /// Create an ASCII progress bar showing overall timeline progress.
+    pub fn progress_bar(&self, width: usize) -> String {
+        let filled = (self.progress * width as f64) as usize;
+        let empty = width.saturating_sub(filled);
+        format!("[{}{}]", "=".repeat(filled), "-".repeat(empty))
+    }
+
+    /// Create an ASCII visualization of the act layout.
+    pub fn act_visualization(&self, width: usize) -> String {
+        if self.duration == 0.0 || self.acts.is_empty() {
+            return format!("[{}]", "-".repeat(width));
+        }
+
+        let mut result = String::new();
+
+        for (i, (_name, duration)) in self.acts.iter().enumerate() {
+            let act_width =
+                ((duration / self.duration) * width as f64).round() as usize;
+            let act_width = act_width.max(1);
+
+            let char_to_use = if i == self.act_index { '=' } else { '-' };
+            let segment = char_to_use.to_string().repeat(act_width);
+
+            // Add separator between acts
+            if !result.is_empty() {
+                result.push('|');
+            }
+            result.push_str(&segment);
+        }
+
+        // Mark current position
+        let pos = ((self.elapsed / self.duration) * width as f64) as usize;
+        let pos = pos.min(width.saturating_sub(1));
+
+        // Replace character at position with marker
+        let mut chars: Vec<char> = result.chars().collect();
+        if pos < chars.len() {
+            chars[pos] = '*';
+        }
+
+        format!("[{}]", chars.into_iter().collect::<String>())
+    }
+}
+
+impl PlayingTimeline {
+    /// Get debug information about the current timeline state.
+    ///
+    /// Useful for debugging and visualization tools.
+    pub fn debug_info(&self) -> TimelineDebugInfo {
+        let state = self.state();
+
+        let acts: Vec<(String, f64)> = self
+            .timeline
+            .acts
+            .iter()
+            .map(|a| (a.name.clone(), a.duration))
+            .collect();
+
+        let loop_behavior = match &self.timeline.loop_behavior {
+            LoopBehavior::None => "None".to_string(),
+            LoopBehavior::Loop => "Loop forever".to_string(),
+            LoopBehavior::LoopFrom(name) => format!("Loop from '{}'", name),
+        };
+
+        let act_duration = self
+            .timeline
+            .acts
+            .get(state.act_index)
+            .map(|a| a.duration)
+            .unwrap_or(0.0);
+
+        TimelineDebugInfo {
+            duration: self.timeline.duration(),
+            elapsed: self.elapsed(),
+            progress: self.progress(),
+            current_act: state.act_name,
+            act_index: state.act_index,
+            act_count: self.timeline.acts.len(),
+            act_progress: state.act_progress,
+            act_duration,
+            is_paused: self.paused,
+            speed: self.speed,
+            loop_count: self.loop_count,
+            loop_behavior,
+            acts,
+        }
+    }
+}
+
+// ============================================================================
 // Tests
 // ============================================================================
 
@@ -1872,5 +2057,72 @@ mod tests {
 
         let all: Vec<f64> = playing.get_stagger_all("value", 0.0);
         assert_eq!(all.len(), 3);
+    }
+
+    #[test]
+    fn test_debug_info_basic() {
+        let timeline = Timeline::new()
+            .act(Act::new("intro").duration(2.0))
+            .act(Act::new("main").duration(3.0))
+            .act(Act::new("outro").duration(1.0));
+
+        let mut playing = timeline.start();
+        playing.seek(2.5); // Halfway through "main"
+
+        let debug = playing.debug_info();
+        assert_eq!(debug.duration, 6.0);
+        assert!((debug.elapsed - 2.5).abs() < 0.1);
+        assert_eq!(debug.current_act, "main");
+        assert_eq!(debug.act_index, 1);
+        assert_eq!(debug.act_count, 3);
+        assert_eq!(debug.acts.len(), 3);
+        assert_eq!(debug.loop_behavior, "None");
+    }
+
+    #[test]
+    fn test_debug_info_compact_string() {
+        let timeline = Timeline::new()
+            .act(Act::new("test").duration(1.0));
+
+        let mut playing = timeline.start();
+        playing.seek(0.5);
+
+        let debug = playing.debug_info();
+        let compact = debug.to_compact_string();
+
+        assert!(compact.contains("0.50s"));
+        assert!(compact.contains("1.00s"));
+        assert!(compact.contains("test"));
+        assert!(compact.contains("PLAYING"));
+    }
+
+    #[test]
+    fn test_debug_info_progress_bar() {
+        let timeline = Timeline::new()
+            .act(Act::new("test").duration(1.0));
+
+        let mut playing = timeline.start();
+        playing.seek(0.5);
+
+        let debug = playing.debug_info();
+        let bar = debug.progress_bar(10);
+
+        assert!(bar.starts_with('['));
+        assert!(bar.ends_with(']'));
+        assert_eq!(bar.len(), 12); // [ + 10 chars + ]
+    }
+
+    #[test]
+    fn test_debug_info_loop() {
+        let timeline = Timeline::new()
+            .act(Act::new("a").duration(1.0))
+            .act(Act::new("b").duration(1.0))
+            .loop_from("a");
+
+        let playing = timeline.start();
+        let debug = playing.debug_info();
+
+        assert!(debug.loop_behavior.contains("Loop from"));
+        assert!(debug.loop_behavior.contains("'a'"));
     }
 }
