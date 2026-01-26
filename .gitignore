@@ -1,4 +1,5 @@
 /target
+/playground
 Cargo.lock
 .ralph.log
 .ralph-result.json

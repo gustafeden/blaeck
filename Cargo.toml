@@ -13,10 +13,10 @@ repository = "https://github.com/gustafeden/blaeck"
 
 [workspace.dependencies]
 # Layout engine (Ink uses Yoga, we use Taffy)
-taffy = "0.7"
+taffy = "0.9"
 
 # Terminal primitives
-crossterm = "0.28"
+crossterm = "0.29"
 
 # Unicode handling
 unicode-width = "0.2"

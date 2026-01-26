@@ -17,7 +17,7 @@
 
 use crate::element::{Component, Element};
 use crate::style::{Color, Modifier, Style};
-use pulldown_cmark::{Event, Options, Parser, Tag};
+use pulldown_cmark::{Event, Options, Parser, Tag, TagEnd};
 
 /// Properties for the Markdown component.
 #[derive(Debug, Clone)]
@@ -186,7 +186,7 @@ impl Component for Markdown {
             match event {
                 Event::Start(tag) => {
                     match tag {
-                        Tag::Heading(level, _, _) => {
+                        Tag::Heading { level, .. } => {
                             style_state.heading_level = Some(level as u8);
                         }
                         Tag::Strong => {
@@ -202,7 +202,7 @@ impl Component for Markdown {
                             in_code_block = true;
                             style_state.code = true;
                         }
-                        Tag::BlockQuote => {
+                        Tag::BlockQuote(_) => {
                             style_state.in_blockquote = true;
                         }
                         Tag::List(start) => {
@@ -228,15 +228,15 @@ impl Component for Markdown {
                                 current_line.push((marker, Style::new()));
                             }
                         }
-                        Tag::Link(_, dest_url, _) => {
+                        Tag::Link { dest_url, .. } => {
                             style_state.link_url = Some(dest_url.to_string());
                         }
                         _ => {}
                     }
                 }
-                Event::End(tag) => {
-                    match tag {
-                        Tag::Heading(_, _, _) => {
+                Event::End(tag_end) => {
+                    match tag_end {
+                        TagEnd::Heading(_) => {
                             // Flush current line
                             if !current_line.is_empty() {
                                 lines.push(line_to_element(&current_line));
@@ -244,40 +244,40 @@ impl Component for Markdown {
                             }
                             style_state.heading_level = None;
                         }
-                        Tag::Strong => {
+                        TagEnd::Strong => {
                             style_state.bold = false;
                         }
-                        Tag::Emphasis => {
+                        TagEnd::Emphasis => {
                             style_state.italic = false;
                         }
-                        Tag::Strikethrough => {
+                        TagEnd::Strikethrough => {
                             style_state.strikethrough = false;
                         }
-                        Tag::CodeBlock(_) => {
+                        TagEnd::CodeBlock => {
                             in_code_block = false;
                             style_state.code = false;
                         }
-                        Tag::BlockQuote => {
+                        TagEnd::BlockQuote(_) => {
                             style_state.in_blockquote = false;
                         }
-                        Tag::List(_) => {
+                        TagEnd::List(_) => {
                             list_stack.pop();
                         }
-                        Tag::Item => {
+                        TagEnd::Item => {
                             // Flush current line
                             if !current_line.is_empty() {
                                 lines.push(line_to_element(&current_line));
                                 current_line.clear();
                             }
                         }
-                        Tag::Paragraph => {
+                        TagEnd::Paragraph => {
                             // Flush current line
                             if !current_line.is_empty() {
                                 lines.push(line_to_element(&current_line));
                                 current_line.clear();
                             }
                         }
-                        Tag::Link(_, _, _) => {
+                        TagEnd::Link => {
                             style_state.link_url = None;
                         }
                         _ => {}

@@ -14,14 +14,14 @@ default = []
 async = ["tokio", "futures"]
 
 [dependencies]
-bitflags = "2.6"
-crossterm = { version = "0.28", features = ["event-stream"] }
+bitflags = "2.10"
+crossterm = { version = "0.29", features = ["event-stream"] }
 taffy = "0.9"
 unicode-width = { workspace = true }
 blaeck-macros = { path = "../blaeck-macros", version = "0.2.0" }
-pulldown-cmark = "0.9"
-syntect = { version = "5.2", default-features = false, features = ["default-fancy"] }
-slotmap = "1.0"
+pulldown-cmark = "0.13"
+syntect = { version = "5.3", default-features = false, features = ["default-fancy"] }
+slotmap = "1.1"
 
 # Async dependencies (optional)
 tokio = { version = "1", features = ["sync", "time", "rt", "macros"], optional = true }
