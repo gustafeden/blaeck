@@ -5,6 +5,7 @@
 
 use super::instance::ComponentInstance;
 use crate::input::Key;
+use crate::timeline::PlayingTimeline;
 use slotmap::{new_key_type, SlotMap};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -20,6 +21,9 @@ new_key_type! {
 
     /// Unique identifier for an input handler.
     pub struct InputHandlerId;
+
+    /// Unique identifier for a timeline in the runtime.
+    pub struct TimelineId;
 }
 
 /// Handle to the runtime, cheaply clonable.
@@ -155,6 +159,34 @@ impl RuntimeHandle {
         }
     }
 
+    /// Create a new timeline from a PlayingTimeline.
+    pub fn create_timeline(&self, timeline: PlayingTimeline) -> TimelineId {
+        self.0.borrow_mut().timelines.insert(timeline)
+    }
+
+    /// Check if a timeline with the given ID exists.
+    pub fn has_timeline(&self, id: TimelineId) -> bool {
+        self.0.borrow().timelines.contains_key(id)
+    }
+
+    /// Access a timeline immutably.
+    pub fn with_timeline<R, F: FnOnce(&PlayingTimeline) -> R>(
+        &self,
+        id: TimelineId,
+        f: F,
+    ) -> Option<R> {
+        self.0.borrow().timelines.get(id).map(f)
+    }
+
+    /// Access a timeline mutably.
+    pub fn with_timeline_mut<R, F: FnOnce(&mut PlayingTimeline) -> R>(
+        &self,
+        id: TimelineId,
+        f: F,
+    ) -> Option<R> {
+        self.0.borrow_mut().timelines.get_mut(id).map(f)
+    }
+
     /// Access a component instance.
     pub fn with_instance<R, F: FnOnce(&ComponentInstance) -> R>(
         &self,
@@ -196,6 +228,9 @@ pub struct RuntimeInner {
     /// Input handlers - maps InputHandlerId to handler functions.
     pub(crate) input_handlers: SlotMap<InputHandlerId, Box<dyn Fn(&Key)>>,
 
+    /// Timeline storage - maps TimelineId to playing timelines.
+    pub(crate) timelines: SlotMap<TimelineId, PlayingTimeline>,
+
     /// Whether the UI needs to be re-rendered.
     ///
     /// Uses `Cell` for interior mutability without full borrow.
@@ -210,6 +245,7 @@ impl RuntimeInner {
             instances: SlotMap::with_key(),
             current_instance: None,
             input_handlers: SlotMap::with_key(),
+            timelines: SlotMap::with_key(),
             needs_render: Cell::new(false),
         }
     }

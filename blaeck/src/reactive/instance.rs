@@ -5,7 +5,7 @@
 //! - Hook cursor (for consistent hook ordering)
 //! - Cleanup callbacks (for future use_effect support)
 
-use super::runtime::{InputHandlerId, SignalId};
+use super::runtime::{InputHandlerId, SignalId, TimelineId};
 
 /// Represents a slot in the hooks array.
 ///
@@ -18,6 +18,9 @@ pub enum HookSlot {
 
     /// An input handler created by `use_input`.
     Input(InputHandlerId),
+
+    /// A timeline created by `use_timeline`.
+    Timeline(TimelineId),
     // Future hooks (v0.3.0+):
     // Effect { cleanup: Option<Box<dyn FnOnce()>>, deps: Vec<...> },
     // Memo { value: Box<dyn Any>, deps: Vec<...> },

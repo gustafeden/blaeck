@@ -49,6 +49,7 @@
 //! |------|---------|
 //! | [`use_state`] | Create reactive state that triggers re-render on change |
 //! | [`use_input`] | Register keyboard input handler (runs once, persists across renders) |
+//! | [`use_timeline`] | Create a declarative animation timeline with playback controls |
 //!
 //! Future hooks (v0.3.0+): `use_effect`, `use_memo`, `use_const`
 //!
@@ -133,7 +134,7 @@ mod scope;
 mod signal;
 
 pub use app::{ReactiveApp, ReactiveAppConfig, ReactiveAppResult};
-pub use hooks::{use_input, use_state};
+pub use hooks::{use_input, use_state, use_timeline, TimelineHandle};
 pub use instance::{ComponentInstance, HookSlot};
 pub use runtime::{RuntimeHandle, RuntimeInner};
 pub use scope::Scope;

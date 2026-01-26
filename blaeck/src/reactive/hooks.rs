@@ -16,10 +16,11 @@
 //! - [`use_input`] - Register an input handler
 
 use super::instance::HookSlot;
-use super::runtime::InputHandlerId;
+use super::runtime::{InputHandlerId, RuntimeHandle, TimelineId};
 use super::scope::Scope;
 use super::signal::Signal;
 use crate::input::Key;
+use crate::timeline::{Animatable, Timeline};
 use std::marker::PhantomData;
 
 /// Create a reactive state signal.
@@ -187,6 +188,196 @@ where
                 instance.push_hook(HookSlot::Input(handler_id));
             });
         }
+    }
+}
+
+/// Create a reactive timeline from a Timeline definition.
+///
+/// On the first render, the timeline is started. On subsequent renders,
+/// the existing timeline is reused, preserving playback state.
+///
+/// Returns a `TimelineHandle` that provides access to animated values
+/// and playback controls.
+///
+/// # Example
+///
+/// ```ignore
+/// use blaeck::prelude::*;
+/// use blaeck::reactive::*;
+/// use blaeck::animation::Easing;
+///
+/// fn animated_component(cx: Scope) -> Element {
+///     let timeline = use_timeline(cx, Timeline::new()
+///         .act(Act::new("fade_in")
+///             .duration(1.0)
+///             .animate("opacity", 0.0f64, 1.0, Easing::EaseOutCubic)));
+///
+///     let opacity = timeline.get_or("opacity", 1.0f64);
+///
+///     element! {
+///         Text(content: format!("Opacity: {:.2}", opacity))
+///     }
+/// }
+/// ```
+///
+/// # Panics
+///
+/// Panics if:
+/// - Called outside of a reactive component render
+/// - Hook order changes between renders
+pub fn use_timeline(cx: Scope, timeline: Timeline) -> TimelineHandle {
+    let rt = cx.rt.clone();
+    let component_id = cx.component_id;
+
+    // Get current cursor position and advance
+    let cursor = rt
+        .with_instance_mut(component_id, |instance| instance.advance_cursor())
+        .expect("Component instance not found");
+
+    // Check if we already have a hook at this position
+    let existing = rt.with_instance(component_id, |instance| instance.get_hook(cursor).cloned());
+
+    match existing {
+        Some(Some(HookSlot::Timeline(id))) => {
+            // Reuse existing timeline
+            if !rt.has_timeline(id) {
+                panic!("Timeline was unexpectedly removed");
+            }
+            TimelineHandle { id, rt }
+        }
+        Some(Some(other)) => {
+            // Wrong hook type - user changed hook order
+            panic!(
+                "Hook order changed: expected Timeline hook at position {}, found {:?}. \
+                 Hooks must be called unconditionally and in the same order every render.",
+                cursor, other
+            );
+        }
+        Some(None) | None => {
+            // First render - create and start the timeline
+            let playing = timeline.start();
+            let timeline_id = rt.create_timeline(playing);
+
+            // Store the hook slot
+            rt.with_instance_mut(component_id, |instance| {
+                instance.push_hook(HookSlot::Timeline(timeline_id));
+            });
+
+            TimelineHandle { id: timeline_id, rt }
+        }
+    }
+}
+
+/// Handle to a timeline in the reactive system.
+///
+/// Provides access to animated values and playback controls.
+/// This handle is cheaply clonable.
+#[derive(Clone)]
+pub struct TimelineHandle {
+    id: TimelineId,
+    rt: RuntimeHandle,
+}
+
+impl TimelineHandle {
+    /// Get the ID of this timeline.
+    pub fn id(&self) -> TimelineId {
+        self.id
+    }
+
+    /// Get an animated value by name at the current time.
+    ///
+    /// Returns `None` if the property doesn't exist in the current act.
+    pub fn get<T: Animatable + Clone>(&self, property: &str) -> Option<T> {
+        self.rt.with_timeline(self.id, |tl| tl.get::<T>(property))?
+    }
+
+    /// Get an animated value with a default.
+    pub fn get_or<T: Animatable + Clone>(&self, property: &str, default: T) -> T {
+        self.get(property).unwrap_or(default)
+    }
+
+    /// Get the current elapsed time in seconds.
+    pub fn elapsed(&self) -> f64 {
+        self.rt
+            .with_timeline(self.id, |tl| tl.elapsed())
+            .unwrap_or(0.0)
+    }
+
+    /// Get the name of the current act.
+    pub fn current_act(&self) -> String {
+        self.rt
+            .with_timeline(self.id, |tl| tl.current_act())
+            .unwrap_or_default()
+    }
+
+    /// Get progress through the current act (0.0 to 1.0).
+    pub fn act_progress(&self) -> f64 {
+        self.rt
+            .with_timeline(self.id, |tl| tl.act_progress())
+            .unwrap_or(0.0)
+    }
+
+    /// Get overall progress (0.0 to 1.0) for non-looping timelines.
+    pub fn progress(&self) -> f64 {
+        self.rt
+            .with_timeline(self.id, |tl| tl.progress())
+            .unwrap_or(0.0)
+    }
+
+    /// Get the total duration of the timeline.
+    pub fn duration(&self) -> f64 {
+        self.rt
+            .with_timeline(self.id, |tl| tl.duration())
+            .unwrap_or(0.0)
+    }
+
+    /// Check if the timeline is paused.
+    pub fn is_paused(&self) -> bool {
+        self.rt
+            .with_timeline(self.id, |tl| tl.is_paused())
+            .unwrap_or(false)
+    }
+
+    /// Check if the timeline is playing.
+    pub fn is_playing(&self) -> bool {
+        !self.is_paused()
+    }
+
+    /// Pause the timeline.
+    pub fn pause(&self) {
+        self.rt.with_timeline_mut(self.id, |tl| tl.pause());
+    }
+
+    /// Resume the timeline.
+    pub fn play(&self) {
+        self.rt.with_timeline_mut(self.id, |tl| tl.play());
+    }
+
+    /// Toggle pause/play.
+    pub fn toggle_pause(&self) {
+        self.rt.with_timeline_mut(self.id, |tl| tl.toggle_pause());
+    }
+
+    /// Seek to a specific time in seconds.
+    pub fn seek(&self, time: f64) {
+        self.rt.with_timeline_mut(self.id, |tl| tl.seek(time));
+    }
+
+    /// Restart the timeline from the beginning.
+    pub fn restart(&self) {
+        self.rt.with_timeline_mut(self.id, |tl| tl.restart());
+    }
+
+    /// Set playback speed (1.0 = normal, 2.0 = 2x, 0.5 = half speed).
+    pub fn set_speed(&self, speed: f64) {
+        self.rt.with_timeline_mut(self.id, |tl| tl.set_speed(speed));
+    }
+
+    /// Get the current playback speed.
+    pub fn speed(&self) -> f64 {
+        self.rt
+            .with_timeline(self.id, |tl| tl.speed())
+            .unwrap_or(1.0)
     }
 }
 
