@@ -1,7 +1,7 @@
-//! Layout engine - thin wrapper around Taffy for flexbox layout.
+//! Layout engine - wrapper around Taffy for flexbox/grid/block layout.
 //!
-//! This module provides a simplified API for Taffy's flexbox layout engine,
-//! similar to how Iocraft wraps Taffy in their render.rs.
+//! This module provides a simplified API for Taffy's layout engine,
+//! exposing flexbox, CSS Grid, block layout, positioning, and more.
 
 use taffy::prelude::*;
 
@@ -16,8 +16,17 @@ pub struct LayoutTree {
 /// Layout style configuration for a node.
 #[derive(Clone, Debug)]
 pub struct LayoutStyle {
-    /// Display mode (Flex, Block, None, etc.)
+    // === Display & Box Model ===
+    /// Display mode (Flex, Grid, Block, None)
     pub display: Display,
+    /// Position type (Relative, Absolute)
+    pub position: Position,
+    /// Overflow behavior on X axis
+    pub overflow_x: Overflow,
+    /// Overflow behavior on Y axis
+    pub overflow_y: Overflow,
+
+    // === Sizing ===
     /// Fixed width (if set)
     pub width: Option<f32>,
     /// Fixed height (if set)
@@ -30,12 +39,22 @@ pub struct LayoutStyle {
     pub max_width: Option<f32>,
     /// Maximum height constraint
     pub max_height: Option<f32>,
+    /// Aspect ratio (width / height)
+    pub aspect_ratio: Option<f32>,
+
+    // === Flexbox Properties ===
     /// Flex direction (row or column)
     pub flex_direction: FlexDirection,
+    /// Flex wrap behavior
+    pub flex_wrap: FlexWrap,
     /// Flex grow factor
     pub flex_grow: f32,
     /// Flex shrink factor
     pub flex_shrink: f32,
+    /// Flex basis (initial size before grow/shrink, None = auto)
+    pub flex_basis: Option<f32>,
+
+    // === Spacing: Padding ===
     /// Padding on all sides
     pub padding: f32,
     /// Padding on the left
@@ -46,6 +65,8 @@ pub struct LayoutStyle {
     pub padding_top: Option<f32>,
     /// Padding on the bottom
     pub padding_bottom: Option<f32>,
+
+    // === Spacing: Margin ===
     /// Margin on all sides
     pub margin: f32,
     /// Margin on the left
@@ -56,8 +77,26 @@ pub struct LayoutStyle {
     pub margin_top: Option<f32>,
     /// Margin on the bottom
     pub margin_bottom: Option<f32>,
-    /// Gap between children
+
+    // === Spacing: Border (for layout calculation) ===
+    /// Border width on the left
+    pub border_left: f32,
+    /// Border width on the right
+    pub border_right: f32,
+    /// Border width on the top
+    pub border_top: f32,
+    /// Border width on the bottom
+    pub border_bottom: f32,
+
+    // === Spacing: Gap ===
+    /// Gap between children (both axes)
     pub gap: f32,
+    /// Column gap (horizontal gap)
+    pub column_gap: Option<f32>,
+    /// Row gap (vertical gap)
+    pub row_gap: Option<f32>,
+
+    // === Alignment ===
     /// How to align items along cross axis
     pub align_items: Option<AlignItems>,
     /// How to align this item (overrides parent's align_items)
@@ -66,36 +105,108 @@ pub struct LayoutStyle {
     pub align_content: Option<AlignContent>,
     /// How to justify content along main axis
     pub justify_content: Option<JustifyContent>,
+
+    // === Position: Inset ===
+    /// Inset from top (for absolute positioning)
+    pub inset_top: Option<f32>,
+    /// Inset from bottom (for absolute positioning)
+    pub inset_bottom: Option<f32>,
+    /// Inset from left (for absolute positioning)
+    pub inset_left: Option<f32>,
+    /// Inset from right (for absolute positioning)
+    pub inset_right: Option<f32>,
+
+    // === Grid Container Properties ===
+    /// Grid template columns
+    pub grid_template_columns: Vec<TrackSize>,
+    /// Grid template rows
+    pub grid_template_rows: Vec<TrackSize>,
+    /// Grid auto columns (size of implicitly created columns)
+    pub grid_auto_columns: Vec<TrackSize>,
+    /// Grid auto rows (size of implicitly created rows)
+    pub grid_auto_rows: Vec<TrackSize>,
+    /// Grid auto-placement flow direction
+    pub grid_auto_flow: GridAutoFlow,
+
+    // === Grid Item Properties ===
+    /// Grid column placement
+    pub grid_column: GridPlacement,
+    /// Grid row placement
+    pub grid_row: GridPlacement,
 }
 
 impl Default for LayoutStyle {
     fn default() -> Self {
         Self {
+            // Display & Box Model
             display: Display::Flex,
+            position: Position::default(),
+            overflow_x: Overflow::default(),
+            overflow_y: Overflow::default(),
+
+            // Sizing
             width: None,
             height: None,
             min_width: None,
             min_height: None,
             max_width: None,
             max_height: None,
+            aspect_ratio: None,
+
+            // Flexbox
             flex_direction: FlexDirection::default(),
+            flex_wrap: FlexWrap::default(),
             flex_grow: 0.0,
             flex_shrink: 1.0,
+            flex_basis: None,
+
+            // Padding
             padding: 0.0,
             padding_left: None,
             padding_right: None,
             padding_top: None,
             padding_bottom: None,
+
+            // Margin
             margin: 0.0,
             margin_left: None,
             margin_right: None,
             margin_top: None,
             margin_bottom: None,
+
+            // Border (layout)
+            border_left: 0.0,
+            border_right: 0.0,
+            border_top: 0.0,
+            border_bottom: 0.0,
+
+            // Gap
             gap: 0.0,
+            column_gap: None,
+            row_gap: None,
+
+            // Alignment
             align_items: None,
             align_self: None,
             align_content: None,
             justify_content: None,
+
+            // Inset
+            inset_top: None,
+            inset_bottom: None,
+            inset_left: None,
+            inset_right: None,
+
+            // Grid Container
+            grid_template_columns: Vec::new(),
+            grid_template_rows: Vec::new(),
+            grid_auto_columns: Vec::new(),
+            grid_auto_rows: Vec::new(),
+            grid_auto_flow: GridAutoFlow::default(),
+
+            // Grid Item
+            grid_column: GridPlacement::default(),
+            grid_row: GridPlacement::default(),
         }
     }
 }
@@ -171,6 +282,159 @@ pub enum JustifyContent {
     SpaceAround,
     /// Distribute with even space
     SpaceEvenly,
+}
+
+/// Flex wrap behavior.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum FlexWrap {
+    /// Items are laid out in a single line (default)
+    #[default]
+    NoWrap,
+    /// Items wrap to additional lines
+    Wrap,
+    /// Items wrap to additional lines in reverse
+    WrapReverse,
+}
+
+/// Position type for an element.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Position {
+    /// Element is positioned relative to its normal position (default)
+    #[default]
+    Relative,
+    /// Element is removed from flow and positioned relative to its containing block
+    Absolute,
+}
+
+/// Overflow behavior.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Overflow {
+    /// Content is not clipped and may extend outside the element
+    #[default]
+    Visible,
+    /// Content is clipped and hidden
+    Hidden,
+    /// Content is clipped but scrollable (affects layout calculation)
+    Scroll,
+    /// Content is clipped if needed
+    Clip,
+}
+
+/// Grid auto-placement flow direction.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum GridAutoFlow {
+    /// Items are placed by filling each row (default)
+    #[default]
+    Row,
+    /// Items are placed by filling each column
+    Column,
+    /// Items are placed by filling each row, using dense packing
+    RowDense,
+    /// Items are placed by filling each column, using dense packing
+    ColumnDense,
+}
+
+/// Track sizing function for grid templates.
+#[derive(Debug, Clone, PartialEq)]
+pub enum TrackSize {
+    /// Track size is determined by content (auto)
+    Auto,
+    /// Fixed size in pixels/units
+    Fixed(f32),
+    /// Minimum content size
+    MinContent,
+    /// Maximum content size
+    MaxContent,
+    /// Fit content with maximum size
+    FitContent(f32),
+    /// Flexible fraction (fr units)
+    Flex(f32),
+    /// Minmax constraint
+    Minmax(Box<TrackSize>, Box<TrackSize>),
+}
+
+impl Default for TrackSize {
+    fn default() -> Self {
+        TrackSize::Auto
+    }
+}
+
+/// Grid placement for a single axis (column or row).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct GridPlacement {
+    /// Start line (1-indexed, negative counts from end)
+    pub start: Option<i16>,
+    /// End line (1-indexed, negative counts from end)
+    pub end: Option<i16>,
+    /// Number of tracks to span
+    pub span: Option<u16>,
+}
+
+impl GridPlacement {
+    /// Create placement at a specific line
+    pub fn line(n: i16) -> Self {
+        Self {
+            start: Some(n),
+            end: None,
+            span: None,
+        }
+    }
+
+    /// Create placement spanning from start to end lines
+    pub fn from_to(start: i16, end: i16) -> Self {
+        Self {
+            start: Some(start),
+            end: Some(end),
+            span: None,
+        }
+    }
+
+    /// Create placement spanning a number of tracks
+    pub fn span(n: u16) -> Self {
+        Self {
+            start: None,
+            end: None,
+            span: Some(n),
+        }
+    }
+
+    /// Create auto placement (default)
+    pub fn auto() -> Self {
+        Self::default()
+    }
+
+    /// Convert to Taffy's GridPlacement for start
+    fn to_taffy_start(&self) -> taffy::GridPlacement<String> {
+        use taffy::style_helpers::{line, span as taffy_span};
+
+        if let Some(span_val) = self.span {
+            if self.start.is_some() || self.end.is_some() {
+                // span with start/end - use line
+                self.start.map_or(taffy::GridPlacement::Auto, |n| line(n))
+            } else {
+                taffy_span(span_val)
+            }
+        } else {
+            self.start.map_or(taffy::GridPlacement::Auto, |n| line(n))
+        }
+    }
+
+    /// Convert to Taffy's GridPlacement for end
+    fn to_taffy_end(&self) -> taffy::GridPlacement<String> {
+        use taffy::style_helpers::{line, span as taffy_span};
+
+        if let Some(span_val) = self.span {
+            if self.end.is_some() {
+                self.end.map_or(taffy::GridPlacement::Auto, |n| line(n))
+            } else if self.start.is_some() {
+                taffy_span(span_val)
+            } else {
+                taffy::GridPlacement::Auto
+            }
+        } else {
+            self.end.map_or(taffy::GridPlacement::Auto, |n| line(n))
+        }
+    }
 }
 
 /// Computed layout result for a node.
@@ -272,21 +536,88 @@ impl Default for LayoutTree {
     }
 }
 
+/// Convert a TrackSize to Taffy's TrackSizingFunction
+fn track_size_to_taffy(ts: &TrackSize) -> taffy::TrackSizingFunction {
+    use taffy::style_helpers::{TaffyAuto, TaffyMinContent, TaffyMaxContent, TaffyFitContent, FromLength, FromFr};
+
+    match ts {
+        TrackSize::Auto => taffy::TrackSizingFunction::AUTO,
+        TrackSize::Fixed(v) => taffy::TrackSizingFunction::from_length(*v),
+        TrackSize::MinContent => taffy::TrackSizingFunction::MIN_CONTENT,
+        TrackSize::MaxContent => taffy::TrackSizingFunction::MAX_CONTENT,
+        TrackSize::FitContent(v) => {
+            taffy::TrackSizingFunction::fit_content(taffy::LengthPercentage::length(*v))
+        }
+        TrackSize::Flex(fr) => taffy::TrackSizingFunction::from_fr(*fr),
+        TrackSize::Minmax(min, max) => {
+            let min_sizing = match min.as_ref() {
+                TrackSize::Auto => taffy::MinTrackSizingFunction::AUTO,
+                TrackSize::Fixed(v) => taffy::MinTrackSizingFunction::from_length(*v),
+                TrackSize::MinContent => taffy::MinTrackSizingFunction::MIN_CONTENT,
+                TrackSize::MaxContent => taffy::MinTrackSizingFunction::MAX_CONTENT,
+                _ => taffy::MinTrackSizingFunction::AUTO,
+            };
+            let max_sizing = match max.as_ref() {
+                TrackSize::Auto => taffy::MaxTrackSizingFunction::AUTO,
+                TrackSize::Fixed(v) => taffy::MaxTrackSizingFunction::from_length(*v),
+                TrackSize::MinContent => taffy::MaxTrackSizingFunction::MIN_CONTENT,
+                TrackSize::MaxContent => taffy::MaxTrackSizingFunction::MAX_CONTENT,
+                TrackSize::FitContent(v) => taffy::MaxTrackSizingFunction::fit_content(taffy::LengthPercentage::length(*v)),
+                TrackSize::Flex(fr) => taffy::MaxTrackSizingFunction::from_fr(*fr),
+                TrackSize::Minmax(_, _) => taffy::MaxTrackSizingFunction::AUTO,
+            };
+            taffy::TrackSizingFunction { min: min_sizing, max: max_sizing }
+        }
+    }
+}
+
+/// Convert a TrackSize to a GridTemplateComponent
+fn track_size_to_grid_component(ts: &TrackSize) -> taffy::GridTemplateComponent<String> {
+    taffy::GridTemplateComponent::Single(track_size_to_taffy(ts))
+}
+
 impl LayoutStyle {
     /// Convert to Taffy's style format.
     fn into_taffy_style(self) -> Style {
+        // Padding
         let padding_left = self.padding_left.unwrap_or(self.padding);
         let padding_right = self.padding_right.unwrap_or(self.padding);
         let padding_top = self.padding_top.unwrap_or(self.padding);
         let padding_bottom = self.padding_bottom.unwrap_or(self.padding);
 
+        // Margin
         let margin_left = self.margin_left.unwrap_or(self.margin);
         let margin_right = self.margin_right.unwrap_or(self.margin);
         let margin_top = self.margin_top.unwrap_or(self.margin);
         let margin_bottom = self.margin_bottom.unwrap_or(self.margin);
 
+        // Gap
+        let column_gap = self.column_gap.unwrap_or(self.gap);
+        let row_gap = self.row_gap.unwrap_or(self.gap);
+
         Style {
+            // Display & Box Model
             display: self.display,
+            position: match self.position {
+                Position::Relative => taffy::Position::Relative,
+                Position::Absolute => taffy::Position::Absolute,
+            },
+            overflow: taffy::Point {
+                x: match self.overflow_x {
+                    Overflow::Visible => taffy::Overflow::Visible,
+                    Overflow::Hidden => taffy::Overflow::Hidden,
+                    Overflow::Scroll => taffy::Overflow::Scroll,
+                    Overflow::Clip => taffy::Overflow::Clip,
+                },
+                y: match self.overflow_y {
+                    Overflow::Visible => taffy::Overflow::Visible,
+                    Overflow::Hidden => taffy::Overflow::Hidden,
+                    Overflow::Scroll => taffy::Overflow::Scroll,
+                    Overflow::Clip => taffy::Overflow::Clip,
+                },
+            },
+
+            // Sizing
             size: Size {
                 width: self.width.map_or(Dimension::auto(), Dimension::length),
                 height: self.height.map_or(Dimension::auto(), Dimension::length),
@@ -299,28 +630,53 @@ impl LayoutStyle {
                 width: self.max_width.map_or(Dimension::auto(), Dimension::length),
                 height: self.max_height.map_or(Dimension::auto(), Dimension::length),
             },
+            aspect_ratio: self.aspect_ratio,
+
+            // Flexbox
             flex_direction: match self.flex_direction {
                 FlexDirection::Row => taffy::FlexDirection::Row,
                 FlexDirection::Column => taffy::FlexDirection::Column,
             },
+            flex_wrap: match self.flex_wrap {
+                FlexWrap::NoWrap => taffy::FlexWrap::NoWrap,
+                FlexWrap::Wrap => taffy::FlexWrap::Wrap,
+                FlexWrap::WrapReverse => taffy::FlexWrap::WrapReverse,
+            },
             flex_grow: self.flex_grow,
             flex_shrink: self.flex_shrink,
+            flex_basis: self.flex_basis.map_or(Dimension::auto(), Dimension::length),
+
+            // Padding
             padding: Rect {
                 left: LengthPercentage::length(padding_left),
                 right: LengthPercentage::length(padding_right),
                 top: LengthPercentage::length(padding_top),
                 bottom: LengthPercentage::length(padding_bottom),
             },
+
+            // Margin
             margin: Rect {
                 left: LengthPercentageAuto::length(margin_left),
                 right: LengthPercentageAuto::length(margin_right),
                 top: LengthPercentageAuto::length(margin_top),
                 bottom: LengthPercentageAuto::length(margin_bottom),
             },
-            gap: Size {
-                width: LengthPercentage::length(self.gap),
-                height: LengthPercentage::length(self.gap),
+
+            // Border (for layout calculation)
+            border: Rect {
+                left: LengthPercentage::length(self.border_left),
+                right: LengthPercentage::length(self.border_right),
+                top: LengthPercentage::length(self.border_top),
+                bottom: LengthPercentage::length(self.border_bottom),
             },
+
+            // Gap
+            gap: Size {
+                width: LengthPercentage::length(column_gap),
+                height: LengthPercentage::length(row_gap),
+            },
+
+            // Alignment
             align_items: self.align_items.map(|a| match a {
                 AlignItems::Start => taffy::AlignItems::Start,
                 AlignItems::End => taffy::AlignItems::End,
@@ -350,6 +706,37 @@ impl LayoutStyle {
                 JustifyContent::SpaceAround => taffy::JustifyContent::SpaceAround,
                 JustifyContent::SpaceEvenly => taffy::JustifyContent::SpaceEvenly,
             }),
+
+            // Inset (for absolute positioning)
+            inset: Rect {
+                top: self.inset_top.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                bottom: self.inset_bottom.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                left: self.inset_left.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                right: self.inset_right.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+            },
+
+            // Grid Container
+            grid_template_columns: self.grid_template_columns.iter().map(track_size_to_grid_component).collect(),
+            grid_template_rows: self.grid_template_rows.iter().map(track_size_to_grid_component).collect(),
+            grid_auto_columns: self.grid_auto_columns.iter().map(track_size_to_taffy).collect(),
+            grid_auto_rows: self.grid_auto_rows.iter().map(track_size_to_taffy).collect(),
+            grid_auto_flow: match self.grid_auto_flow {
+                GridAutoFlow::Row => taffy::GridAutoFlow::Row,
+                GridAutoFlow::Column => taffy::GridAutoFlow::Column,
+                GridAutoFlow::RowDense => taffy::GridAutoFlow::RowDense,
+                GridAutoFlow::ColumnDense => taffy::GridAutoFlow::ColumnDense,
+            },
+
+            // Grid Item
+            grid_column: taffy::Line {
+                start: self.grid_column.to_taffy_start(),
+                end: self.grid_column.to_taffy_end(),
+            },
+            grid_row: taffy::Line {
+                start: self.grid_row.to_taffy_start(),
+                end: self.grid_row.to_taffy_end(),
+            },
+
             ..Default::default()
         }
     }

@@ -225,32 +225,8 @@ impl Element {
 
     /// Get the layout style of this element.
     pub fn layout_style(&self) -> &LayoutStyle {
-        static DEFAULT_LAYOUT: LayoutStyle = LayoutStyle {
-            width: None,
-            height: None,
-            min_width: None,
-            min_height: None,
-            max_width: None,
-            max_height: None,
-            flex_direction: crate::layout::FlexDirection::Column,
-            flex_grow: 0.0,
-            flex_shrink: 0.0,
-            padding: 0.0,
-            padding_left: None,
-            padding_right: None,
-            padding_top: None,
-            padding_bottom: None,
-            margin: 0.0,
-            margin_left: None,
-            margin_right: None,
-            margin_top: None,
-            margin_bottom: None,
-            gap: 0.0,
-            align_items: None,
-            align_self: None,
-            align_content: None,
-            justify_content: None,
-        };
+        use std::sync::LazyLock;
+        static DEFAULT_LAYOUT: LazyLock<LayoutStyle> = LazyLock::new(LayoutStyle::default);
         match self {
             Element::Node { layout_style, .. } => layout_style,
             _ => &DEFAULT_LAYOUT,

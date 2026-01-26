@@ -571,31 +571,45 @@ impl BoxProps {
             .max(border_right);
 
         LayoutStyle {
+            // Sizing
             width: self.width,
             height: self.height,
             min_width: self.min_width,
             min_height: self.min_height,
             max_width: self.max_width,
             max_height: self.max_height,
+
+            // Flexbox
             flex_direction: self.flex_direction,
             flex_grow: self.flex_grow,
             flex_shrink: self.flex_shrink,
-            // Add border to padding based on which sides have borders
+
+            // Padding (add border to padding based on which sides have borders)
             padding: self.padding + max_border,
             padding_left: Some(self.padding_left.unwrap_or(self.padding) + border_left),
             padding_right: Some(self.padding_right.unwrap_or(self.padding) + border_right),
             padding_top: Some(self.padding_top.unwrap_or(self.padding) + border_top),
             padding_bottom: Some(self.padding_bottom.unwrap_or(self.padding) + border_bottom),
+
+            // Margin
             margin: self.margin,
             margin_left: self.margin_left,
             margin_right: self.margin_right,
             margin_top: self.margin_top,
             margin_bottom: self.margin_bottom,
+
+            // Gap
             gap: self.gap,
+
+            // Alignment
             align_items: self.align_items,
             align_self: self.align_self,
             align_content: self.align_content,
             justify_content: self.justify_content,
+
+            // Use defaults for all the new Taffy features
+            // (display, position, grid, etc. will be added to BoxProps as needed)
+            ..Default::default()
         }
     }
 }
