@@ -51,6 +51,140 @@ pub type LoopCallback = Rc<dyn Fn(u32)>;
 pub type ActCallback = Rc<dyn Fn(&str)>;
 
 // ============================================================================
+// Spring Physics
+// ============================================================================
+
+/// Spring configuration for physics-based animation.
+///
+/// Springs provide natural, organic motion that responds to physical parameters
+/// rather than predefined easing curves.
+///
+/// # Example
+///
+/// ```ignore
+/// let bouncy = Spring::new(170.0, 26.0); // Stiff and bouncy
+/// let smooth = Spring::new(100.0, 20.0); // Smoother motion
+/// let gentle = Spring::preset_gentle();   // Use a preset
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Spring {
+    /// Stiffness (spring constant k). Higher = faster oscillation.
+    /// Typical range: 100-500
+    pub stiffness: f64,
+    /// Damping coefficient. Higher = less bouncing.
+    /// Typical range: 10-40
+    pub damping: f64,
+    /// Mass of the object. Higher = more inertia.
+    /// Usually kept at 1.0
+    pub mass: f64,
+}
+
+impl Spring {
+    /// Create a new spring with the given parameters.
+    pub fn new(stiffness: f64, damping: f64) -> Self {
+        Self {
+            stiffness,
+            damping,
+            mass: 1.0,
+        }
+    }
+
+    /// Create a spring with custom mass.
+    pub fn with_mass(stiffness: f64, damping: f64, mass: f64) -> Self {
+        Self {
+            stiffness,
+            damping,
+            mass,
+        }
+    }
+
+    /// Gentle spring - smooth with minimal overshoot.
+    pub fn preset_gentle() -> Self {
+        Self::new(120.0, 20.0)
+    }
+
+    /// Bouncy spring - playful with visible overshoot.
+    pub fn preset_bouncy() -> Self {
+        Self::new(180.0, 12.0)
+    }
+
+    /// Stiff spring - quick and snappy.
+    pub fn preset_stiff() -> Self {
+        Self::new(300.0, 30.0)
+    }
+
+    /// Slow spring - gradual, heavy feeling.
+    pub fn preset_slow() -> Self {
+        Self::new(80.0, 20.0)
+    }
+
+    /// Calculate the damping ratio (ζ).
+    /// - ζ < 1: underdamped (bouncy)
+    /// - ζ = 1: critically damped (fastest without overshoot)
+    /// - ζ > 1: overdamped (slow approach)
+    fn damping_ratio(&self) -> f64 {
+        self.damping / (2.0 * (self.stiffness * self.mass).sqrt())
+    }
+
+    /// Calculate the natural frequency (ω₀).
+    fn natural_frequency(&self) -> f64 {
+        (self.stiffness / self.mass).sqrt()
+    }
+
+    /// Compute the spring position at time t, starting from 0 and moving to 1.
+    ///
+    /// Returns a value that starts at 0, oscillates toward 1, and settles at 1.
+    pub fn evaluate(&self, t: f64) -> f64 {
+        if t <= 0.0 {
+            return 0.0;
+        }
+
+        let zeta = self.damping_ratio();
+        let omega0 = self.natural_frequency();
+
+        if zeta < 1.0 {
+            // Underdamped - oscillates
+            let omega_d = omega0 * (1.0 - zeta * zeta).sqrt();
+            let decay = (-zeta * omega0 * t).exp();
+            let oscillation = (omega_d * t).cos() + (zeta * omega0 / omega_d) * (omega_d * t).sin();
+            1.0 - decay * oscillation
+        } else if (zeta - 1.0).abs() < 0.0001 {
+            // Critically damped - fastest without overshoot
+            let decay = (-omega0 * t).exp();
+            1.0 - decay * (1.0 + omega0 * t)
+        } else {
+            // Overdamped - slow approach
+            let sqrt_term = (zeta * zeta - 1.0).sqrt();
+            let r1 = -omega0 * (zeta - sqrt_term);
+            let r2 = -omega0 * (zeta + sqrt_term);
+            let c2 = -r1 / (r2 - r1);
+            let c1 = 1.0 - c2;
+            1.0 - c1 * (r1 * t).exp() - c2 * (r2 * t).exp()
+        }
+    }
+
+    /// Estimate the settling time (time to reach ~99% of target).
+    pub fn settling_time(&self) -> f64 {
+        let zeta = self.damping_ratio();
+        let omega0 = self.natural_frequency();
+
+        if zeta < 1.0 {
+            // Underdamped: ~4/(ζω₀) for 2% settling
+            4.6 / (zeta * omega0)
+        } else {
+            // Critically/overdamped: ~4/ω₀
+            4.6 / omega0
+        }
+    }
+}
+
+impl Default for Spring {
+    fn default() -> Self {
+        Self::preset_gentle()
+    }
+}
+
+// ============================================================================
 // Animatable Trait
 // ============================================================================
 
@@ -250,6 +384,50 @@ impl<T: Animatable> AnyTrack for Track<T> {
 }
 
 // ============================================================================
+// SpringTrack
+// ============================================================================
+
+/// A track that uses spring physics for animation.
+///
+/// Unlike keyframe-based tracks, spring tracks simulate physical spring motion
+/// from a start value to a target value.
+#[derive(Clone)]
+pub struct SpringTrack<T: Animatable> {
+    from: T,
+    to: T,
+    spring: Spring,
+}
+
+impl<T: Animatable> SpringTrack<T> {
+    /// Create a new spring track.
+    pub fn new(from: T, to: T, spring: Spring) -> Self {
+        Self { from, to, spring }
+    }
+
+    /// Get the interpolated value at normalized time t (0.0 to 1.0).
+    ///
+    /// The spring animation is scaled to fit within the act duration,
+    /// with t=1.0 corresponding to the spring's settling time.
+    pub fn value_at(&self, t: f64) -> T {
+        let t = t.clamp(0.0, 1.0);
+        // Scale t to spring settling time
+        let spring_t = t * self.spring.settling_time();
+        let spring_progress = self.spring.evaluate(spring_t);
+        T::lerp(&self.from, &self.to, spring_progress)
+    }
+}
+
+impl<T: Animatable> AnyTrack for SpringTrack<T> {
+    fn value_at(&self, t: f64) -> Box<dyn Any + Send + Sync> {
+        Box::new(self.value_at(t))
+    }
+
+    fn clone_box(&self) -> Box<dyn AnyTrack> {
+        Box::new(self.clone())
+    }
+}
+
+// ============================================================================
 // Act
 // ============================================================================
 
@@ -323,6 +501,40 @@ impl Act {
 
     /// Add a track with full keyframe control.
     pub fn track<T: Animatable>(mut self, property: impl Into<String>, track: Track<T>) -> Self {
+        self.tracks.insert(property.into(), Box::new(track));
+        self
+    }
+
+    /// Add a spring-based animation for a property.
+    ///
+    /// Spring animations provide natural, physics-based motion with overshoots
+    /// and settling behavior.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Act::new("bounce_in")
+    ///     .duration(1.0)
+    ///     .spring("position", 0.0, 100.0, Spring::preset_bouncy())
+    /// ```
+    pub fn spring<T: Animatable>(
+        mut self,
+        property: impl Into<String>,
+        from: T,
+        to: T,
+        spring: Spring,
+    ) -> Self {
+        let track = SpringTrack::new(from, to, spring);
+        self.tracks.insert(property.into(), Box::new(track));
+        self
+    }
+
+    /// Add a spring track with full control.
+    pub fn spring_track<T: Animatable>(
+        mut self,
+        property: impl Into<String>,
+        track: SpringTrack<T>,
+    ) -> Self {
         self.tracks.insert(property.into(), Box::new(track));
         self
     }
@@ -1095,5 +1307,65 @@ mod tests {
         // Note: loop detection is based on elapsed time jumping backward
         // which doesn't happen with seek(), so we test act changes instead
         assert_eq!(*act_entered.borrow(), "a");
+    }
+
+    #[test]
+    fn test_spring_evaluate() {
+        let spring = Spring::preset_bouncy();
+
+        // At t=0, should be at start (0)
+        assert!((spring.evaluate(0.0) - 0.0).abs() < 0.001);
+
+        // At settling time, should be very close to target (1)
+        let settling = spring.settling_time();
+        assert!((spring.evaluate(settling) - 1.0).abs() < 0.05);
+    }
+
+    #[test]
+    fn test_spring_presets() {
+        let gentle = Spring::preset_gentle();
+        let bouncy = Spring::preset_bouncy();
+        let stiff = Spring::preset_stiff();
+        let slow = Spring::preset_slow();
+
+        // All should reach target eventually
+        for spring in [gentle, bouncy, stiff, slow] {
+            let settling = spring.settling_time();
+            let final_val = spring.evaluate(settling);
+            assert!(
+                (final_val - 1.0).abs() < 0.1,
+                "Spring should settle near target"
+            );
+        }
+    }
+
+    #[test]
+    fn test_spring_track() {
+        let track = SpringTrack::new(0.0f64, 100.0, Spring::preset_gentle());
+
+        // At t=0, should be at start
+        assert!((track.value_at(0.0) - 0.0).abs() < 0.1);
+
+        // At t=1, should be at or very near target
+        assert!((track.value_at(1.0) - 100.0).abs() < 5.0);
+    }
+
+    #[test]
+    fn test_act_with_spring() {
+        let timeline = Timeline::new().act(
+            Act::new("bounce")
+                .duration(1.0)
+                .spring("position", 0.0f64, 100.0, Spring::preset_bouncy()),
+        );
+
+        // At start
+        let state = timeline.at(0.0);
+        let pos: f64 = state.get("position").unwrap();
+        assert!((pos - 0.0).abs() < 0.1);
+
+        // At end
+        let state = timeline.at(1.0);
+        let pos: f64 = state.get("position").unwrap();
+        assert!((pos - 100.0).abs() < 5.0);
     }
 }

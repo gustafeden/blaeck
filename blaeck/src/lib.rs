@@ -193,7 +193,10 @@ pub use log_update::LogUpdate;
 pub use output::{Output, OutputResult};
 pub use renderer::Blaeck;
 pub use style::{Color, Modifier, Style};
-pub use timeline::{Act, Animatable, LoopBehavior, PlayingTimeline, Timeline, TimelineState, Track};
+pub use timeline::{
+    Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, Timeline, TimelineState,
+    Track,
+};
 
 #[cfg(feature = "async")]
 pub use async_runtime::{
@@ -266,7 +269,9 @@ pub mod prelude {
     };
     pub use crate::renderer::Blaeck;
     pub use crate::style::{Color, Modifier, Style};
-    pub use crate::timeline::{Act, Animatable, LoopBehavior, PlayingTimeline, Timeline, Track};
+    pub use crate::timeline::{
+        Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, Timeline, Track,
+    };
     pub use blaeck_macros::element;
 
     #[cfg(feature = "async")]
