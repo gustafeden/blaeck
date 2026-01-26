@@ -379,6 +379,23 @@ impl TimelineHandle {
             .with_timeline(self.id, |tl| tl.speed())
             .unwrap_or(1.0)
     }
+
+    /// Get the number of times the timeline has looped.
+    pub fn loop_count(&self) -> u32 {
+        self.rt
+            .with_timeline(self.id, |tl| tl.loop_count())
+            .unwrap_or(0)
+    }
+
+    /// Update the timeline and fire any pending callbacks.
+    ///
+    /// Call this each frame to ensure callbacks are triggered at the right time.
+    /// Returns true if any callbacks were fired.
+    pub fn update(&self) -> bool {
+        self.rt
+            .with_timeline_mut(self.id, |tl| tl.update())
+            .unwrap_or(false)
+    }
 }
 
 #[cfg(test)]

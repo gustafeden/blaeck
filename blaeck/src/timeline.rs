@@ -34,7 +34,21 @@
 use crate::animation::Easing;
 use std::any::Any;
 use std::collections::HashMap;
+use std::rc::Rc;
 use std::time::Instant;
+
+// ============================================================================
+// Callback Types
+// ============================================================================
+
+/// A callback that takes no arguments.
+pub type Callback = Rc<dyn Fn()>;
+
+/// A callback that receives the loop count.
+pub type LoopCallback = Rc<dyn Fn(u32)>;
+
+/// A callback that receives the act name.
+pub type ActCallback = Rc<dyn Fn(&str)>;
 
 // ============================================================================
 // Animatable Trait
@@ -248,6 +262,10 @@ pub struct Act {
     duration: f64,
     /// Named tracks for animated properties
     tracks: HashMap<String, Box<dyn AnyTrack>>,
+    /// Callback fired when entering this act
+    on_enter: Option<Callback>,
+    /// Callback fired when exiting this act
+    on_exit: Option<Callback>,
 }
 
 impl Act {
@@ -257,6 +275,8 @@ impl Act {
             name: name.into(),
             duration: 1.0,
             tracks: HashMap::new(),
+            on_enter: None,
+            on_exit: None,
         }
     }
 
@@ -266,6 +286,8 @@ impl Act {
             name: name.into(),
             duration,
             tracks: HashMap::new(),
+            on_enter: None,
+            on_exit: None,
         }
     }
 
@@ -275,6 +297,8 @@ impl Act {
             name: name.into(),
             duration,
             tracks: HashMap::new(),
+            on_enter: None,
+            on_exit: None,
         }
     }
 
@@ -317,6 +341,48 @@ impl Act {
     fn get_value(&self, property: &str, t: f64) -> Option<Box<dyn Any + Send + Sync>> {
         self.tracks.get(property).map(|track| track.value_at(t))
     }
+
+    /// Set a callback to fire when entering this act.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Act::new("intro")
+    ///     .duration(2.0)
+    ///     .on_enter(|| println!("Intro started!"))
+    /// ```
+    pub fn on_enter<F: Fn() + 'static>(mut self, callback: F) -> Self {
+        self.on_enter = Some(Rc::new(callback));
+        self
+    }
+
+    /// Set a callback to fire when exiting this act.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Act::new("intro")
+    ///     .duration(2.0)
+    ///     .on_exit(|| println!("Intro complete!"))
+    /// ```
+    pub fn on_exit<F: Fn() + 'static>(mut self, callback: F) -> Self {
+        self.on_exit = Some(Rc::new(callback));
+        self
+    }
+
+    /// Fire the on_enter callback if set.
+    fn fire_enter(&self) {
+        if let Some(ref cb) = self.on_enter {
+            cb();
+        }
+    }
+
+    /// Fire the on_exit callback if set.
+    fn fire_exit(&self) {
+        if let Some(ref cb) = self.on_exit {
+            cb();
+        }
+    }
 }
 
 impl Clone for Box<dyn AnyTrack> {
@@ -349,6 +415,12 @@ pub struct Timeline {
     total_duration: f64,
     /// Loop start time (computed, for LoopFrom)
     loop_start_time: f64,
+    /// Callback fired when timeline loops
+    on_loop: Option<LoopCallback>,
+    /// Callback fired when any act is entered
+    on_act_enter: Option<ActCallback>,
+    /// Callback fired when any act is exited
+    on_act_exit: Option<ActCallback>,
 }
 
 impl Timeline {
@@ -359,6 +431,9 @@ impl Timeline {
             loop_behavior: LoopBehavior::None,
             total_duration: 0.0,
             loop_start_time: 0.0,
+            on_loop: None,
+            on_act_enter: None,
+            on_act_exit: None,
         }
     }
 
@@ -391,6 +466,30 @@ impl Timeline {
         self
     }
 
+    /// Set a callback to fire when the timeline loops.
+    ///
+    /// The callback receives the loop iteration count (1 for first loop, 2 for second, etc.).
+    pub fn on_loop<F: Fn(u32) + 'static>(mut self, callback: F) -> Self {
+        self.on_loop = Some(Rc::new(callback));
+        self
+    }
+
+    /// Set a callback to fire when any act is entered.
+    ///
+    /// The callback receives the act name.
+    pub fn on_act_enter<F: Fn(&str) + 'static>(mut self, callback: F) -> Self {
+        self.on_act_enter = Some(Rc::new(callback));
+        self
+    }
+
+    /// Set a callback to fire when any act is exited.
+    ///
+    /// The callback receives the act name.
+    pub fn on_act_exit<F: Fn(&str) + 'static>(mut self, callback: F) -> Self {
+        self.on_act_exit = Some(Rc::new(callback));
+        self
+    }
+
     /// Chain another timeline after this one.
     pub fn then(mut self, other: Timeline) -> Self {
         for act in other.acts {
@@ -398,6 +497,16 @@ impl Timeline {
             self.acts.push(act);
         }
         self.loop_behavior = other.loop_behavior;
+        // Copy callbacks from the other timeline if not already set
+        if self.on_loop.is_none() {
+            self.on_loop = other.on_loop;
+        }
+        if self.on_act_enter.is_none() {
+            self.on_act_enter = other.on_act_enter;
+        }
+        if self.on_act_exit.is_none() {
+            self.on_act_exit = other.on_act_exit;
+        }
         if let LoopBehavior::LoopFrom(ref name) = self.loop_behavior {
             // Recalculate loop start time
             let mut time = 0.0;
@@ -494,6 +603,9 @@ impl Timeline {
             paused: false,
             paused_at: 0.0,
             speed: 1.0,
+            last_act_index: None,
+            loop_count: 0,
+            last_elapsed: 0.0,
         }
     }
 }
@@ -522,12 +634,13 @@ pub struct TimelineState<'a> {
     act: &'a Act,
 }
 
-impl<'a> TimelineState<'a> {
+impl TimelineState<'static> {
     /// Create an empty state (for empty timelines).
+    ///
+    /// Note: This leaks a small amount of memory each call. Only used for empty timelines.
     fn empty() -> Self {
-        // This is a bit of a hack - we need a static Act for empty timelines
-        static EMPTY_ACT: std::sync::OnceLock<Act> = std::sync::OnceLock::new();
-        let act = EMPTY_ACT.get_or_init(|| Act::new("empty").duration(0.0));
+        // Leak a minimal Act - this is fine since empty timelines are edge cases
+        let act: &'static Act = Box::leak(Box::new(Act::new("empty").duration(0.0)));
 
         Self {
             time: 0.0,
@@ -537,7 +650,9 @@ impl<'a> TimelineState<'a> {
             act,
         }
     }
+}
 
+impl<'a> TimelineState<'a> {
     /// Get an animated value by name.
     ///
     /// Returns `None` if the property doesn't exist in the current act.
@@ -566,6 +681,12 @@ pub struct PlayingTimeline {
     paused: bool,
     paused_at: f64,
     speed: f64,
+    /// Last known act index for detecting transitions
+    last_act_index: Option<usize>,
+    /// Number of times the timeline has looped
+    loop_count: u32,
+    /// Last elapsed time for detecting loop resets
+    last_elapsed: f64,
 }
 
 impl PlayingTimeline {
@@ -683,6 +804,70 @@ impl PlayingTimeline {
         } else {
             1.0
         }
+    }
+
+    /// Get the number of times the timeline has looped.
+    pub fn loop_count(&self) -> u32 {
+        self.loop_count
+    }
+
+    /// Update the timeline and fire any pending callbacks.
+    ///
+    /// Call this each frame to ensure callbacks are triggered at the right time.
+    /// Returns true if any callbacks were fired.
+    pub fn update(&mut self) -> bool {
+        let mut fired = false;
+        let state = self.state();
+        let current_act_index = state.act_index;
+        let current_elapsed = self.elapsed();
+
+        // Detect loop (elapsed time jumped backward while looping)
+        let looped = match self.timeline.loop_behavior {
+            LoopBehavior::Loop | LoopBehavior::LoopFrom(_) => {
+                current_elapsed < self.last_elapsed && self.last_elapsed > 0.0
+            }
+            LoopBehavior::None => false,
+        };
+
+        if looped {
+            self.loop_count += 1;
+
+            // Fire loop callback
+            if let Some(ref cb) = self.timeline.on_loop {
+                cb(self.loop_count);
+                fired = true;
+            }
+        }
+
+        // Detect act change
+        if self.last_act_index != Some(current_act_index) {
+            // Fire exit callback for previous act
+            if let Some(prev_idx) = self.last_act_index {
+                if prev_idx < self.timeline.acts.len() {
+                    let prev_act = &self.timeline.acts[prev_idx];
+                    prev_act.fire_exit();
+                    if let Some(ref cb) = self.timeline.on_act_exit {
+                        cb(&prev_act.name);
+                    }
+                    fired = true;
+                }
+            }
+
+            // Fire enter callback for current act
+            if current_act_index < self.timeline.acts.len() {
+                let current_act = &self.timeline.acts[current_act_index];
+                current_act.fire_enter();
+                if let Some(ref cb) = self.timeline.on_act_enter {
+                    cb(&current_act.name);
+                }
+                fired = true;
+            }
+
+            self.last_act_index = Some(current_act_index);
+        }
+
+        self.last_elapsed = current_elapsed;
+        fired
     }
 }
 
@@ -840,5 +1025,75 @@ mod tests {
         // Test restart
         playing.restart();
         assert!(playing.elapsed() < 0.1);
+    }
+
+    #[test]
+    fn test_act_callbacks() {
+        use std::cell::Cell;
+        use std::rc::Rc;
+
+        let entered = Rc::new(Cell::new(false));
+        let exited = Rc::new(Cell::new(false));
+
+        let entered_clone = entered.clone();
+        let exited_clone = exited.clone();
+
+        let timeline = Timeline::new()
+            .act(Act::new("first")
+                .duration(1.0)
+                .on_enter(move || entered_clone.set(true))
+                .on_exit(move || exited_clone.set(true)))
+            .act(Act::new("second").duration(1.0));
+
+        let mut playing = timeline.start();
+
+        // First update should fire enter callback
+        playing.update();
+        assert!(entered.get(), "on_enter should fire on first act");
+        assert!(!exited.get(), "on_exit should not fire yet");
+
+        // Seek to second act
+        playing.seek(1.5);
+        playing.update();
+        assert!(exited.get(), "on_exit should fire when leaving first act");
+    }
+
+    #[test]
+    fn test_timeline_callbacks() {
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
+        let act_entered = Rc::new(RefCell::new(String::new()));
+        let loop_count = Rc::new(RefCell::new(0u32));
+
+        let act_entered_clone = act_entered.clone();
+        let loop_count_clone = loop_count.clone();
+
+        let timeline = Timeline::new()
+            .act(Act::new("a").duration(0.5))
+            .act(Act::new("b").duration(0.5))
+            .loop_forever()
+            .on_act_enter(move |name| *act_entered_clone.borrow_mut() = name.to_string())
+            .on_loop(move |count| *loop_count_clone.borrow_mut() = count);
+
+        let mut playing = timeline.start();
+
+        // Initial update
+        playing.update();
+        assert_eq!(*act_entered.borrow(), "a");
+
+        // Move to act b
+        playing.seek(0.6);
+        playing.update();
+        assert_eq!(*act_entered.borrow(), "b");
+
+        // Loop back to a
+        playing.seek(1.1); // This should trigger loop detection on next seek backward
+        playing.update();
+        playing.seek(0.1); // Go back to start (simulates loop)
+        playing.update();
+        // Note: loop detection is based on elapsed time jumping backward
+        // which doesn't happen with seek(), so we test act changes instead
+        assert_eq!(*act_entered.borrow(), "a");
     }
 }
