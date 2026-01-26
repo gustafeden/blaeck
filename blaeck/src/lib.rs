@@ -111,7 +111,7 @@
 //! - [`element`] — Element tree and Component trait
 //! - [`log_update`] — Ink-style inline rendering (the clever bit)
 //! - [`output`] — Virtual 2D grid for styled characters
-//! - [`layout`] — Flexbox via Taffy
+//! - [`layout`] — Flexbox, CSS Grid, and positioning via Taffy
 //!
 //! # Where to Start
 //!
@@ -184,8 +184,9 @@ pub use element::{Component, Element};
 pub use focus::{FocusCallback, FocusEvent, FocusId, FocusManager, FocusState};
 pub use input::{match_key, poll_key, read_key, Arrow, InputHandler, Key, KeyMatcher};
 pub use layout::{
-    AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutResult, LayoutStyle,
-    LayoutTree,
+    AlignContent, AlignItems, AlignSelf, Display, FlexDirection, FlexWrap, GridAutoFlow,
+    GridPlacement, JustifyContent, LayoutResult, LayoutStyle, LayoutTree, Overflow, Position,
+    TrackSize,
 };
 pub use log_update::LogUpdate;
 pub use output::{Output, OutputResult};
@@ -258,8 +259,8 @@ pub mod prelude {
     };
     pub use crate::element::{Component, Element};
     pub use crate::layout::{
-        AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutResult,
-        LayoutStyle,
+        AlignContent, AlignItems, AlignSelf, Display, FlexDirection, FlexWrap, GridAutoFlow,
+        GridPlacement, JustifyContent, LayoutResult, LayoutStyle, Overflow, Position, TrackSize,
     };
     pub use crate::renderer::Blaeck;
     pub use crate::style::{Color, Modifier, Style};

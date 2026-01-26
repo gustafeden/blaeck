@@ -1,6 +1,6 @@
 # Blaeck
 
-A terminal UI framework for Rust. Inline rendering, flexbox layout, 35+ components.
+A terminal UI framework for Rust. Inline rendering, flexbox/grid layout, 35+ components.
 
 [![Crates.io](https://img.shields.io/crates/v/blaeck.svg)](https://crates.io/crates/blaeck)
 [![Documentation](https://docs.rs/blaeck/badge.svg)](https://docs.rs/blaeck)
