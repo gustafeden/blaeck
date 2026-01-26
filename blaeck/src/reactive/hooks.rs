@@ -396,6 +396,54 @@ impl TimelineHandle {
             .with_timeline_mut(self.id, |tl| tl.update())
             .unwrap_or(false)
     }
+
+    /// Get a staggered animation value for a specific item.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// for i in 0..5 {
+    ///     let opacity: f64 = timeline.get_stagger_or("panel_opacity", i, 0.0);
+    ///     // Use opacity for panel i
+    /// }
+    /// ```
+    pub fn get_stagger<T: Animatable + Clone>(&self, property: &str, index: usize) -> Option<T> {
+        self.rt
+            .with_timeline(self.id, |tl| tl.get_stagger::<T>(property, index))?
+    }
+
+    /// Get a staggered animation value with a default.
+    pub fn get_stagger_or<T: Animatable + Clone>(
+        &self,
+        property: &str,
+        index: usize,
+        default: T,
+    ) -> T {
+        self.get_stagger(property, index).unwrap_or(default)
+    }
+
+    /// Get all stagger values as a Vec.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let opacities: Vec<f64> = timeline.get_stagger_all("panel_opacity", 0.0);
+    /// for (i, opacity) in opacities.iter().enumerate() {
+    ///     // Use opacity for panel i
+    /// }
+    /// ```
+    pub fn get_stagger_all<T: Animatable + Clone>(&self, property: &str, default: T) -> Vec<T> {
+        self.rt
+            .with_timeline(self.id, |tl| tl.get_stagger_all::<T>(property, default))
+            .unwrap_or_default()
+    }
+
+    /// Get the number of items in a stagger track.
+    pub fn stagger_count(&self, property: &str) -> usize {
+        self.rt
+            .with_timeline(self.id, |tl| tl.stagger_count(property))
+            .unwrap_or(0)
+    }
 }
 
 #[cfg(test)]

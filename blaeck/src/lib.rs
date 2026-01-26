@@ -194,8 +194,8 @@ pub use output::{Output, OutputResult};
 pub use renderer::Blaeck;
 pub use style::{Color, Modifier, Style};
 pub use timeline::{
-    Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, Timeline, TimelineState,
-    Track,
+    Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, StaggerConfig,
+    StaggerOrder, StaggerTrack, Timeline, TimelineState, Track,
 };
 
 #[cfg(feature = "async")]
@@ -270,7 +270,8 @@ pub mod prelude {
     pub use crate::renderer::Blaeck;
     pub use crate::style::{Color, Modifier, Style};
     pub use crate::timeline::{
-        Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, Timeline, Track,
+        Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, StaggerConfig,
+        StaggerOrder, StaggerTrack, Timeline, Track,
     };
     pub use blaeck_macros::element;
 

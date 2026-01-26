@@ -51,6 +51,149 @@ pub type LoopCallback = Rc<dyn Fn(u32)>;
 pub type ActCallback = Rc<dyn Fn(&str)>;
 
 // ============================================================================
+// Stagger Configuration
+// ============================================================================
+
+/// Order in which staggered items animate.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum StaggerOrder {
+    /// Animate from first to last (index 0, 1, 2, ...)
+    #[default]
+    Forward,
+    /// Animate from last to first (index n-1, n-2, ..., 0)
+    Reverse,
+    /// Animate from center outward
+    CenterOut,
+    /// Animate from edges toward center
+    EdgesIn,
+    /// Random order (deterministic based on index)
+    Random,
+}
+
+impl StaggerOrder {
+    /// Calculate the delay multiplier for an item at the given index.
+    /// Returns a value between 0.0 and 1.0 representing the relative start position.
+    pub fn delay_factor(&self, index: usize, count: usize) -> f64 {
+        if count <= 1 {
+            return 0.0;
+        }
+        let max_idx = count - 1;
+        match self {
+            StaggerOrder::Forward => index as f64 / max_idx as f64,
+            StaggerOrder::Reverse => (max_idx - index) as f64 / max_idx as f64,
+            StaggerOrder::CenterOut => {
+                let center = (count - 1) as f64 / 2.0;
+                let distance = (index as f64 - center).abs();
+                let max_distance = center;
+                if max_distance > 0.0 {
+                    distance / max_distance
+                } else {
+                    0.0
+                }
+            }
+            StaggerOrder::EdgesIn => {
+                let center = (count - 1) as f64 / 2.0;
+                let distance = (index as f64 - center).abs();
+                let max_distance = center;
+                if max_distance > 0.0 {
+                    1.0 - (distance / max_distance)
+                } else {
+                    0.0
+                }
+            }
+            StaggerOrder::Random => {
+                // Simple hash-based pseudo-random but deterministic
+                let hash = (index.wrapping_mul(2654435761) ^ index.wrapping_mul(0x5bd1e995)) % 1000;
+                hash as f64 / 999.0
+            }
+        }
+    }
+}
+
+/// Configuration for a staggered animation.
+#[derive(Clone)]
+pub struct StaggerConfig<T: Animatable> {
+    /// Number of items to stagger
+    pub count: usize,
+    /// Delay between each item (as a fraction of act duration, 0.0-1.0)
+    pub delay: f64,
+    /// Order of animation
+    pub order: StaggerOrder,
+    /// Start value
+    pub from: T,
+    /// End value
+    pub to: T,
+    /// Easing function
+    pub easing: Easing,
+}
+
+impl<T: Animatable> StaggerConfig<T> {
+    /// Create a new stagger config with defaults.
+    pub fn new(count: usize, from: T, to: T) -> Self {
+        Self {
+            count,
+            delay: 0.1, // 10% of act duration between each
+            order: StaggerOrder::Forward,
+            from,
+            to,
+            easing: Easing::EaseOutCubic,
+        }
+    }
+
+    /// Set the delay between items (as fraction of act duration).
+    pub fn delay(mut self, delay: f64) -> Self {
+        self.delay = delay.clamp(0.0, 1.0);
+        self
+    }
+
+    /// Set the stagger order.
+    pub fn order(mut self, order: StaggerOrder) -> Self {
+        self.order = order;
+        self
+    }
+
+    /// Set the easing function.
+    pub fn easing(mut self, easing: Easing) -> Self {
+        self.easing = easing;
+        self
+    }
+
+    /// Get the animated value for a specific item at normalized time t.
+    pub fn value_at(&self, index: usize, t: f64) -> T {
+        if self.count == 0 {
+            return self.from.clone();
+        }
+
+        // Calculate when this item starts and ends
+        let delay_factor = self.order.delay_factor(index, self.count);
+        let total_stagger_time = self.delay * (self.count - 1) as f64;
+        let item_start = delay_factor * total_stagger_time;
+        let item_duration = 1.0 - total_stagger_time;
+
+        if item_duration <= 0.0 {
+            // If stagger takes up all the time, just return based on whether we've started
+            return if t >= item_start {
+                self.to.clone()
+            } else {
+                self.from.clone()
+            };
+        }
+
+        // Calculate local progress for this item
+        let local_t = if t < item_start {
+            0.0
+        } else if t >= item_start + item_duration {
+            1.0
+        } else {
+            (t - item_start) / item_duration
+        };
+
+        let eased_t = self.easing.apply(local_t);
+        T::lerp(&self.from, &self.to, eased_t)
+    }
+}
+
+// ============================================================================
 // Spring Physics
 // ============================================================================
 
@@ -428,6 +571,70 @@ impl<T: Animatable> AnyTrack for SpringTrack<T> {
 }
 
 // ============================================================================
+// StaggerTrack
+// ============================================================================
+
+/// Type-erased stagger track that can be stored in collections.
+trait AnyStaggerTrack: Send + Sync {
+    /// Get the value at normalized time t for a specific item index, boxed as Any.
+    fn value_at_index(&self, index: usize, t: f64) -> Box<dyn Any + Send + Sync>;
+    /// Get the number of items.
+    fn count(&self) -> usize;
+    /// Clone the track.
+    fn clone_box(&self) -> Box<dyn AnyStaggerTrack>;
+}
+
+/// A track that staggers animation across multiple items.
+#[derive(Clone)]
+pub struct StaggerTrack<T: Animatable> {
+    config: StaggerConfig<T>,
+}
+
+impl<T: Animatable> StaggerTrack<T> {
+    /// Create a new stagger track from configuration.
+    pub fn new(config: StaggerConfig<T>) -> Self {
+        Self { config }
+    }
+
+    /// Create a simple stagger track with default settings.
+    pub fn simple(count: usize, from: T, to: T, easing: Easing) -> Self {
+        Self {
+            config: StaggerConfig::new(count, from, to).easing(easing),
+        }
+    }
+
+    /// Get the value for a specific item at normalized time t.
+    pub fn value_at(&self, index: usize, t: f64) -> T {
+        self.config.value_at(index, t)
+    }
+
+    /// Get the number of items.
+    pub fn count(&self) -> usize {
+        self.config.count
+    }
+}
+
+impl<T: Animatable> AnyStaggerTrack for StaggerTrack<T> {
+    fn value_at_index(&self, index: usize, t: f64) -> Box<dyn Any + Send + Sync> {
+        Box::new(self.value_at(index, t))
+    }
+
+    fn count(&self) -> usize {
+        self.config.count
+    }
+
+    fn clone_box(&self) -> Box<dyn AnyStaggerTrack> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn AnyStaggerTrack> {
+    fn clone(&self) -> Self {
+        self.clone_box()
+    }
+}
+
+// ============================================================================
 // Act
 // ============================================================================
 
@@ -440,6 +647,8 @@ pub struct Act {
     duration: f64,
     /// Named tracks for animated properties
     tracks: HashMap<String, Box<dyn AnyTrack>>,
+    /// Named stagger tracks for multi-item animations
+    stagger_tracks: HashMap<String, Box<dyn AnyStaggerTrack>>,
     /// Callback fired when entering this act
     on_enter: Option<Callback>,
     /// Callback fired when exiting this act
@@ -453,6 +662,7 @@ impl Act {
             name: name.into(),
             duration: 1.0,
             tracks: HashMap::new(),
+            stagger_tracks: HashMap::new(),
             on_enter: None,
             on_exit: None,
         }
@@ -464,6 +674,7 @@ impl Act {
             name: name.into(),
             duration,
             tracks: HashMap::new(),
+            stagger_tracks: HashMap::new(),
             on_enter: None,
             on_exit: None,
         }
@@ -475,6 +686,7 @@ impl Act {
             name: name.into(),
             duration,
             tracks: HashMap::new(),
+            stagger_tracks: HashMap::new(),
             on_enter: None,
             on_exit: None,
         }
@@ -539,6 +751,63 @@ impl Act {
         self
     }
 
+    /// Add a staggered animation for multiple items.
+    ///
+    /// Stagger animations apply the same animation to multiple items with
+    /// a delay between each one, creating a wave or cascade effect.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Act::new("panels_enter")
+    ///     .duration(2.0)
+    ///     .stagger("panel_opacity", 5, 0.0f64, 1.0, Easing::EaseOutCubic)
+    /// ```
+    pub fn stagger<T: Animatable>(
+        mut self,
+        property: impl Into<String>,
+        count: usize,
+        from: T,
+        to: T,
+        easing: Easing,
+    ) -> Self {
+        let track = StaggerTrack::simple(count, from, to, easing);
+        self.stagger_tracks.insert(property.into(), Box::new(track));
+        self
+    }
+
+    /// Add a staggered animation with full configuration.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// Act::new("panels_enter")
+    ///     .duration(2.0)
+    ///     .stagger_config("panel_opacity", StaggerConfig::new(5, 0.0f64, 1.0)
+    ///         .delay(0.15)
+    ///         .order(StaggerOrder::CenterOut)
+    ///         .easing(Easing::EaseOutElastic))
+    /// ```
+    pub fn stagger_config<T: Animatable>(
+        mut self,
+        property: impl Into<String>,
+        config: StaggerConfig<T>,
+    ) -> Self {
+        let track = StaggerTrack::new(config);
+        self.stagger_tracks.insert(property.into(), Box::new(track));
+        self
+    }
+
+    /// Add a stagger track directly.
+    pub fn stagger_track<T: Animatable>(
+        mut self,
+        property: impl Into<String>,
+        track: StaggerTrack<T>,
+    ) -> Self {
+        self.stagger_tracks.insert(property.into(), Box::new(track));
+        self
+    }
+
     /// Get the name of this act.
     pub fn name(&self) -> &str {
         &self.name
@@ -552,6 +821,28 @@ impl Act {
     /// Get the value of a property at normalized time t (0.0 to 1.0).
     fn get_value(&self, property: &str, t: f64) -> Option<Box<dyn Any + Send + Sync>> {
         self.tracks.get(property).map(|track| track.value_at(t))
+    }
+
+    /// Get the stagger value for an item at normalized time t (0.0 to 1.0).
+    fn get_stagger_value(
+        &self,
+        property: &str,
+        index: usize,
+        t: f64,
+    ) -> Option<Box<dyn Any + Send + Sync>> {
+        self.stagger_tracks
+            .get(property)
+            .map(|track| track.value_at_index(index, t))
+    }
+
+    /// Get the count of items in a stagger track.
+    fn get_stagger_count(&self, property: &str) -> Option<usize> {
+        self.stagger_tracks.get(property).map(|track| track.count())
+    }
+
+    /// Check if this act has a stagger track for the given property.
+    pub fn has_stagger(&self, property: &str) -> bool {
+        self.stagger_tracks.contains_key(property)
     }
 
     /// Set a callback to fire when entering this act.
@@ -879,6 +1170,57 @@ impl<'a> TimelineState<'a> {
     pub fn get_or<T: Animatable + Clone>(&self, property: &str, default: T) -> T {
         self.get(property).unwrap_or(default)
     }
+
+    /// Get a staggered animation value for a specific item.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let state = timeline.at(1.5);
+    /// for i in 0..5 {
+    ///     let opacity: f64 = state.get_stagger("panel_opacity", i).unwrap_or(0.0);
+    ///     // Use opacity for panel i
+    /// }
+    /// ```
+    pub fn get_stagger<T: Animatable + Clone>(&self, property: &str, index: usize) -> Option<T> {
+        self.act
+            .get_stagger_value(property, index, self.act_progress)
+            .and_then(|boxed| boxed.downcast::<T>().ok())
+            .map(|v| *v)
+    }
+
+    /// Get a staggered animation value with a default.
+    pub fn get_stagger_or<T: Animatable + Clone>(
+        &self,
+        property: &str,
+        index: usize,
+        default: T,
+    ) -> T {
+        self.get_stagger(property, index).unwrap_or(default)
+    }
+
+    /// Get all stagger values as a Vec.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let state = timeline.at(1.5);
+    /// let opacities: Vec<f64> = state.get_stagger_all("panel_opacity", 0.0);
+    /// for (i, opacity) in opacities.iter().enumerate() {
+    ///     // Use opacity for panel i
+    /// }
+    /// ```
+    pub fn get_stagger_all<T: Animatable + Clone>(&self, property: &str, default: T) -> Vec<T> {
+        let count = self.act.get_stagger_count(property).unwrap_or(0);
+        (0..count)
+            .map(|i| self.get_stagger(property, i).unwrap_or_else(|| default.clone()))
+            .collect()
+    }
+
+    /// Get the number of items in a stagger track.
+    pub fn stagger_count(&self, property: &str) -> usize {
+        self.act.get_stagger_count(property).unwrap_or(0)
+    }
 }
 
 // ============================================================================
@@ -920,6 +1262,31 @@ impl PlayingTimeline {
     /// Get an animated value with a default.
     pub fn get_or<T: Animatable + Clone>(&self, property: &str, default: T) -> T {
         self.state().get_or(property, default)
+    }
+
+    /// Get a staggered animation value for a specific item.
+    pub fn get_stagger<T: Animatable + Clone>(&self, property: &str, index: usize) -> Option<T> {
+        self.state().get_stagger(property, index)
+    }
+
+    /// Get a staggered animation value with a default.
+    pub fn get_stagger_or<T: Animatable + Clone>(
+        &self,
+        property: &str,
+        index: usize,
+        default: T,
+    ) -> T {
+        self.state().get_stagger_or(property, index, default)
+    }
+
+    /// Get all stagger values as a Vec.
+    pub fn get_stagger_all<T: Animatable + Clone>(&self, property: &str, default: T) -> Vec<T> {
+        self.state().get_stagger_all(property, default)
+    }
+
+    /// Get the number of items in a stagger track.
+    pub fn stagger_count(&self, property: &str) -> usize {
+        self.state().stagger_count(property)
     }
 
     /// Get the current elapsed time.
@@ -1367,5 +1734,143 @@ mod tests {
         let state = timeline.at(1.0);
         let pos: f64 = state.get("position").unwrap();
         assert!((pos - 100.0).abs() < 5.0);
+    }
+
+    #[test]
+    fn test_stagger_order_forward() {
+        let order = StaggerOrder::Forward;
+        assert_eq!(order.delay_factor(0, 5), 0.0);
+        assert_eq!(order.delay_factor(2, 5), 0.5);
+        assert_eq!(order.delay_factor(4, 5), 1.0);
+    }
+
+    #[test]
+    fn test_stagger_order_reverse() {
+        let order = StaggerOrder::Reverse;
+        assert_eq!(order.delay_factor(0, 5), 1.0);
+        assert_eq!(order.delay_factor(2, 5), 0.5);
+        assert_eq!(order.delay_factor(4, 5), 0.0);
+    }
+
+    #[test]
+    fn test_stagger_order_center_out() {
+        let order = StaggerOrder::CenterOut;
+        // For 5 items, center is index 2
+        assert_eq!(order.delay_factor(2, 5), 0.0); // Center starts first
+        assert_eq!(order.delay_factor(0, 5), 1.0); // Edges start last
+        assert_eq!(order.delay_factor(4, 5), 1.0);
+    }
+
+    #[test]
+    fn test_stagger_order_edges_in() {
+        let order = StaggerOrder::EdgesIn;
+        // For 5 items, edges start first
+        assert_eq!(order.delay_factor(0, 5), 0.0); // Edge starts first
+        assert_eq!(order.delay_factor(4, 5), 0.0);
+        assert_eq!(order.delay_factor(2, 5), 1.0); // Center starts last
+    }
+
+    #[test]
+    fn test_stagger_config_basic() {
+        let config = StaggerConfig::new(3, 0.0f64, 1.0)
+            .delay(0.2)
+            .order(StaggerOrder::Forward);
+
+        // At t=0, first item should start (no delay)
+        // All items should be at 0.0
+        assert!((config.value_at(0, 0.0) - 0.0).abs() < 0.01);
+        assert!((config.value_at(1, 0.0) - 0.0).abs() < 0.01);
+        assert!((config.value_at(2, 0.0) - 0.0).abs() < 0.01);
+
+        // At t=1, all items should be at 1.0
+        assert!((config.value_at(0, 1.0) - 1.0).abs() < 0.01);
+        assert!((config.value_at(1, 1.0) - 1.0).abs() < 0.01);
+        assert!((config.value_at(2, 1.0) - 1.0).abs() < 0.01);
+
+        // At t=0.5, items should be at different stages
+        let v0 = config.value_at(0, 0.5);
+        let v1 = config.value_at(1, 0.5);
+        let v2 = config.value_at(2, 0.5);
+        // Item 0 started first, should be furthest along
+        assert!(v0 > v1);
+        assert!(v1 > v2);
+    }
+
+    #[test]
+    fn test_stagger_track() {
+        let track = StaggerTrack::simple(4, 0.0f64, 100.0, Easing::Linear);
+
+        assert_eq!(track.count(), 4);
+
+        // At t=0, all should be at start
+        for i in 0..4 {
+            assert!((track.value_at(i, 0.0) - 0.0).abs() < 0.1);
+        }
+
+        // At t=1, all should be at end
+        for i in 0..4 {
+            assert!((track.value_at(i, 1.0) - 100.0).abs() < 0.1);
+        }
+    }
+
+    #[test]
+    fn test_act_with_stagger() {
+        let timeline = Timeline::new().act(
+            Act::new("panels_enter")
+                .duration(2.0)
+                .stagger("opacity", 3, 0.0f64, 1.0, Easing::Linear),
+        );
+
+        // At start
+        let state = timeline.at(0.0);
+        assert_eq!(state.stagger_count("opacity"), 3);
+        assert!((state.get_stagger::<f64>("opacity", 0).unwrap() - 0.0).abs() < 0.01);
+
+        // At end
+        let state = timeline.at(2.0);
+        assert!((state.get_stagger::<f64>("opacity", 0).unwrap() - 1.0).abs() < 0.01);
+        assert!((state.get_stagger::<f64>("opacity", 1).unwrap() - 1.0).abs() < 0.01);
+        assert!((state.get_stagger::<f64>("opacity", 2).unwrap() - 1.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_stagger_all() {
+        let timeline = Timeline::new().act(
+            Act::new("fade")
+                .duration(1.0)
+                .stagger("alpha", 4, 0.0f64, 1.0, Easing::Linear),
+        );
+
+        let state = timeline.at(1.0);
+        let values: Vec<f64> = state.get_stagger_all("alpha", 0.0);
+        assert_eq!(values.len(), 4);
+        for v in &values {
+            assert!((v - 1.0).abs() < 0.1);
+        }
+    }
+
+    #[test]
+    fn test_playing_timeline_stagger() {
+        let timeline = Timeline::new().act(
+            Act::new("test")
+                .duration(1.0)
+                .stagger("value", 3, 0.0f64, 100.0, Easing::Linear),
+        );
+
+        let mut playing = timeline.start();
+        playing.seek(1.0);
+
+        assert_eq!(playing.stagger_count("value"), 3);
+
+        let v0: f64 = playing.get_stagger_or("value", 0, 0.0);
+        let v1: f64 = playing.get_stagger_or("value", 1, 0.0);
+        let v2: f64 = playing.get_stagger_or("value", 2, 0.0);
+
+        assert!((v0 - 100.0).abs() < 1.0);
+        assert!((v1 - 100.0).abs() < 1.0);
+        assert!((v2 - 100.0).abs() < 1.0);
+
+        let all: Vec<f64> = playing.get_stagger_all("value", 0.0);
+        assert_eq!(all.len(), 3);
     }
 }
