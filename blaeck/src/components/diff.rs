@@ -136,6 +136,8 @@ pub struct DiffProps {
     pub header_color: Color,
     /// Color for line numbers.
     pub line_num_color: Color,
+    /// Background color for all lines.
+    pub bg_color: Option<Color>,
     /// Whether to show +/- prefixes.
     pub show_prefix: bool,
     /// Whether to dim context lines.
@@ -154,6 +156,7 @@ impl Default for DiffProps {
             context_color: Color::Reset,
             header_color: Color::Cyan,
             line_num_color: Color::DarkGray,
+            bg_color: None,
             show_prefix: true,
             dim_context: true,
             line_num_width: 0,
@@ -290,6 +293,13 @@ impl DiffProps {
     #[must_use]
     pub fn header_color(mut self, color: Color) -> Self {
         self.header_color = color;
+        self
+    }
+
+    /// Set the background color for all lines.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
         self
     }
 
@@ -451,6 +461,10 @@ impl Component for Diff {
                 DiffLineType::Header => {
                     style = style.fg(props.header_color).add_modifier(Modifier::BOLD);
                 }
+            }
+
+            if let Some(bg) = props.bg_color {
+                style = style.bg(bg);
             }
 
             elements.push(Element::Text {

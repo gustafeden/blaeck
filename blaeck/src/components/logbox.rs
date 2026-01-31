@@ -123,6 +123,8 @@ pub struct LogBoxProps {
     pub show_overflow_count: bool,
     /// Color for the overflow count text.
     pub overflow_color: Option<Color>,
+    /// Background color for all lines.
+    pub bg_color: Option<Color>,
     /// Whether to show from bottom (most recent) or top.
     pub show_from_bottom: bool,
     /// Optional indent for all lines.
@@ -161,6 +163,7 @@ impl Default for LogBoxProps {
             max_lines: 5,
             show_overflow_count: true,
             overflow_color: Some(Color::DarkGray),
+            bg_color: None,
             show_from_bottom: true,
             indent: 0,
             tree_style: TreeStyle::None,
@@ -222,6 +225,13 @@ impl LogBoxProps {
     #[must_use]
     pub fn overflow_color(mut self, color: Color) -> Self {
         self.overflow_color = Some(color);
+        self
+    }
+
+    /// Set the background color for all lines.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
         self
     }
 
@@ -316,7 +326,11 @@ impl Component for LogBox {
             };
 
             let content = format!("{}{}", prefix, line.content);
-            elements.push(Element::styled_text(&content, line.style));
+            let mut style = line.style;
+            if let Some(bg) = props.bg_color {
+                style = style.bg(bg);
+            }
+            elements.push(Element::styled_text(&content, style));
         }
 
         // Add overflow indicator
@@ -325,6 +339,9 @@ impl Component for LogBox {
             let mut overflow_style = Style::new();
             if let Some(color) = props.overflow_color {
                 overflow_style = overflow_style.fg(color);
+            }
+            if let Some(bg) = props.bg_color {
+                overflow_style = overflow_style.bg(bg);
             }
             overflow_style = overflow_style.add_modifier(Modifier::DIM);
             elements.push(Element::styled_text(&overflow_text, overflow_style));

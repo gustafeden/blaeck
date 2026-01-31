@@ -63,7 +63,8 @@
 
 use crate::element::{Component, Element};
 use crate::layout::{
-    AlignContent, AlignItems, AlignSelf, FlexDirection, JustifyContent, LayoutStyle,
+    AlignContent, AlignItems, AlignSelf, Display, FlexDirection, FlexWrap, GridAutoFlow,
+    GridPlacement, JustifyContent, LayoutStyle, Overflow, Position, TrackSize,
 };
 use crate::style::Color;
 
@@ -371,6 +372,45 @@ pub struct BoxProps {
     /// How to justify content along main axis
     pub justify_content: Option<JustifyContent>,
 
+    // === Taffy 0.9 Features ===
+
+    /// Display mode (Flex, Grid, Block, None)
+    pub display: Display,
+    /// Position type (Relative, Absolute)
+    pub position: Position,
+    /// Flex wrap behavior
+    pub flex_wrap: FlexWrap,
+    /// Initial flex size before grow/shrink
+    pub flex_basis: Option<f32>,
+    /// Aspect ratio (width / height)
+    pub aspect_ratio: Option<f32>,
+    /// Overflow behavior on X axis
+    pub overflow_x: Overflow,
+    /// Overflow behavior on Y axis
+    pub overflow_y: Overflow,
+
+    // Inset (for absolute positioning)
+    /// Top inset for absolute positioning
+    pub inset_top: Option<f32>,
+    /// Bottom inset for absolute positioning
+    pub inset_bottom: Option<f32>,
+    /// Left inset for absolute positioning
+    pub inset_left: Option<f32>,
+    /// Right inset for absolute positioning
+    pub inset_right: Option<f32>,
+
+    // CSS Grid properties
+    /// Grid template columns (for Display::Grid)
+    pub grid_template_columns: Vec<TrackSize>,
+    /// Grid template rows (for Display::Grid)
+    pub grid_template_rows: Vec<TrackSize>,
+    /// Grid auto flow direction
+    pub grid_auto_flow: GridAutoFlow,
+    /// Grid column placement for this item
+    pub grid_column: GridPlacement,
+    /// Grid row placement for this item
+    pub grid_row: GridPlacement,
+
     // Border properties
     /// Border style
     pub border_style: BorderStyle,
@@ -425,6 +465,23 @@ impl Default for BoxProps {
             align_self: None,
             align_content: None,
             justify_content: None,
+            // Taffy 0.9 features
+            display: Display::Flex,
+            position: Position::Relative,
+            flex_wrap: FlexWrap::NoWrap,
+            flex_basis: None,
+            aspect_ratio: None,
+            overflow_x: Overflow::Visible,
+            overflow_y: Overflow::Visible,
+            inset_top: None,
+            inset_bottom: None,
+            inset_left: None,
+            inset_right: None,
+            grid_template_columns: Vec::new(),
+            grid_template_rows: Vec::new(),
+            grid_auto_flow: GridAutoFlow::Row,
+            grid_column: GridPlacement::auto(),
+            grid_row: GridPlacement::auto(),
             border_style: BorderStyle::default(),
             border_color: None,
             border_colors: BorderColors::default(),
@@ -607,8 +664,27 @@ impl BoxProps {
             align_content: self.align_content,
             justify_content: self.justify_content,
 
-            // Use defaults for all the new Taffy features
-            // (display, position, grid, etc. will be added to BoxProps as needed)
+            // Taffy 0.9 features
+            display: self.display,
+            position: self.position,
+            flex_wrap: self.flex_wrap,
+            flex_basis: self.flex_basis,
+            aspect_ratio: self.aspect_ratio,
+            overflow_x: self.overflow_x,
+            overflow_y: self.overflow_y,
+            inset_top: self.inset_top,
+            inset_bottom: self.inset_bottom,
+            inset_left: self.inset_left,
+            inset_right: self.inset_right,
+            grid_template_columns: self.grid_template_columns.clone(),
+            grid_template_rows: self.grid_template_rows.clone(),
+            grid_auto_columns: Vec::new(),
+            grid_auto_rows: Vec::new(),
+            grid_auto_flow: self.grid_auto_flow,
+            grid_column: self.grid_column.clone(),
+            grid_row: self.grid_row.clone(),
+
+            // Use defaults for remaining fields
             ..Default::default()
         }
     }

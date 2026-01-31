@@ -17,7 +17,7 @@
 //! - [`BarChart`](super::BarChart) — Visual comparison of values
 
 use crate::element::{Component, Element};
-use crate::style::{Color, Modifier, Style};
+use crate::style::{Color, Style};
 
 use super::BorderStyle;
 
@@ -230,6 +230,8 @@ pub struct TableProps {
     pub row_dividers: bool,
     /// Total table width (optional, for percentage calculations).
     pub width: Option<u16>,
+    /// Background color for all cells (lowest priority).
+    pub bg_color: Option<Color>,
 }
 
 impl Default for TableProps {
@@ -252,6 +254,7 @@ impl Default for TableProps {
             selected_bg_color: None,
             row_dividers: false,
             width: None,
+            bg_color: None,
         }
     }
 }
@@ -382,6 +385,13 @@ impl TableProps {
         self
     }
 
+    /// Set background color for all cells.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
+        self
+    }
+
     /// Get the number of columns (from widths, header, or first row).
     fn num_columns(&self) -> usize {
         if !self.widths.is_empty() {
@@ -454,64 +464,56 @@ impl Component for Table {
 
         // Render header
         if let Some(ref header) = props.header {
-            let header_line = render_row_line(header, props, true, false, false);
-            lines.push(header_line);
+            lines.push(render_row_string(header, props));
 
             // Add divider after header
             if props.row_dividers || props.border_style != BorderStyle::None {
-                lines.push(render_divider_line(props, true));
+                lines.push(render_divider_string(props));
             }
         }
 
         // Render data rows
         for (i, row) in props.rows.iter().enumerate() {
-            let is_striped = props.row_style == RowStyle::Striped && i % 2 == 1;
-            let is_selected = props.selected == Some(i);
-
-            let row_line = render_row_line(row, props, false, is_striped, is_selected);
-            lines.push(row_line);
+            lines.push(render_row_string(row, props));
 
             // Add row divider (except after last row)
             if props.row_dividers && i < props.rows.len() - 1 {
-                lines.push(render_divider_line(props, false));
+                lines.push(render_divider_string(props));
             }
         }
 
         let content = lines.join("\n");
-        Element::text(&content)
+
+        // Build style with bg_color
+        let mut style = Style::new();
+        if let Some(bg) = props.bg_color {
+            style = style.bg(bg);
+        }
+
+        Element::styled_text(&content, style)
     }
 }
 
-/// Render a single row as a text line with ANSI styling.
-fn render_row_line(
-    row: &Row,
-    props: &TableProps,
-    is_header: bool,
-    _is_striped: bool,
-    is_selected: bool,
-) -> String {
+/// Render a single row as a string.
+fn render_row_string(row: &Row, props: &TableProps) -> String {
     let num_cols = props.num_columns();
+    let spacing = " ".repeat(props.column_spacing as usize);
     let mut parts: Vec<String> = Vec::new();
 
     for col in 0..num_cols {
         let cell = row.cells.get(col);
-        let cell_text = render_cell_text(cell, col, props, row, is_header, is_selected);
+        let cell_text = render_cell_content(cell, col, props);
         parts.push(cell_text);
     }
 
-    // Join with column spacing
-    let spacing = " ".repeat(props.column_spacing as usize);
     parts.join(&spacing)
 }
 
-/// Render a single cell as styled text.
-fn render_cell_text(
+/// Render cell content (just the padded text, no styling).
+fn render_cell_content(
     cell: Option<&TableCell>,
     col: usize,
     props: &TableProps,
-    row: &Row,
-    is_header: bool,
-    is_selected: bool,
 ) -> String {
     let content = cell.map(|c| c.content.as_str()).unwrap_or("");
     let align = cell
@@ -533,7 +535,7 @@ fn render_cell_text(
 
     // Pad content to width
     let content_len = content.chars().count();
-    let padded = if content_len >= width {
+    if content_len >= width {
         // Truncate if too long
         content.chars().take(width).collect::<String>()
     } else {
@@ -552,69 +554,11 @@ fn render_cell_text(
                 )
             }
         }
-    };
-
-    // Build style
-    let mut style = Style::new();
-
-    // Apply row style first
-    if let Some(ref row_style) = row.style {
-        style = *row_style;
     }
-
-    // Apply header styling
-    if is_header {
-        if let Some(color) = props.header_color {
-            style = style.fg(color);
-        }
-        if props.header_bold {
-            style = style.add_modifier(Modifier::BOLD);
-        }
-    }
-
-    // Apply selection styling
-    if is_selected {
-        if let Some(color) = props.selected_color {
-            style = style.fg(color);
-        }
-    }
-
-    // Apply cell-specific styling (highest priority)
-    if let Some(cell) = cell {
-        if let Some(color) = cell.color {
-            style = style.fg(color);
-        }
-        if let Some(bg) = cell.bg_color {
-            style = style.bg(bg);
-        }
-        if cell.bold {
-            style = style.add_modifier(Modifier::BOLD);
-        }
-        if cell.dim {
-            style = style.add_modifier(Modifier::DIM);
-        }
-        if cell.italic {
-            style = style.add_modifier(Modifier::ITALIC);
-        }
-    }
-
-    // Apply ANSI codes
-    format!("{}{}{}", style.to_ansi_string(), padded, "\x1b[0m")
 }
 
-/// Render a divider line.
-fn render_divider_line(props: &TableProps, is_header_divider: bool) -> String {
-    let char = if is_header_divider {
-        match props.border_style {
-            BorderStyle::Double => '═',
-            BorderStyle::Bold => '━',
-            BorderStyle::Single | BorderStyle::Round | BorderStyle::Classic => '─',
-            BorderStyle::None | BorderStyle::Custom(_) => '─',
-        }
-    } else {
-        '─'
-    };
-
+/// Render a divider line as a string.
+fn render_divider_string(props: &TableProps) -> String {
     // Calculate total width from column widths and spacing
     let num_cols = props.num_columns();
     let total_width: usize = (0..num_cols)
@@ -632,17 +576,7 @@ fn render_divider_line(props: &TableProps, is_header_divider: bool) -> String {
         .sum::<usize>()
         + (num_cols.saturating_sub(1)) * props.column_spacing as usize;
 
-    let line = char.to_string().repeat(total_width);
-
-    let mut style = Style::new();
-    if !is_header_divider {
-        style = style.add_modifier(Modifier::DIM);
-    }
-    if let Some(color) = props.border_color {
-        style = style.fg(color);
-    }
-
-    format!("{}{}{}", style.to_ansi_string(), line, "\x1b[0m")
+    "─".repeat(total_width)
 }
 
 /// State for table selection.

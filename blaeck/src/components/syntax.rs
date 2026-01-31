@@ -34,10 +34,15 @@
 
 use crate::element::{Component, Element};
 use crate::style::{Color, Modifier, Style};
+use std::sync::LazyLock;
 use syntect::easy::HighlightLines;
 use syntect::highlighting::{self, ThemeSet};
 use syntect::parsing::SyntaxSet;
 use syntect::util::LinesWithEndings;
+
+// Cache syntax sets to avoid expensive reloading on every render
+static SYNTAX_SET: LazyLock<SyntaxSet> = LazyLock::new(SyntaxSet::load_defaults_newlines);
+static THEME_SET: LazyLock<ThemeSet> = LazyLock::new(ThemeSet::load_defaults);
 
 /// Built-in syntax themes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -112,6 +117,8 @@ pub struct SyntaxHighlightProps {
     pub start_line: usize,
     /// Line number color.
     pub line_number_color: Option<Color>,
+    /// Background color override.
+    pub bg_color: Option<Color>,
     /// Whether to trim trailing whitespace.
     pub trim_trailing: bool,
     /// Maximum width (for wrapping, 0 = no limit).
@@ -127,6 +134,7 @@ impl Default for SyntaxHighlightProps {
             line_numbers: LineNumberStyle::None,
             start_line: 1,
             line_number_color: Some(Color::DarkGray),
+            bg_color: None,
             trim_trailing: true,
             max_width: 0,
         }
@@ -190,6 +198,13 @@ impl SyntaxHighlightProps {
         self.max_width = width;
         self
     }
+
+    /// Set background color override.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
+        self
+    }
 }
 
 /// Convert syntect color to blaeck color.
@@ -228,8 +243,8 @@ impl Component for SyntaxHighlight {
             return Element::Empty;
         }
 
-        let ps = SyntaxSet::load_defaults_newlines();
-        let ts = ThemeSet::load_defaults();
+        let ps = &*SYNTAX_SET;
+        let ts = &*THEME_SET;
 
         // Find syntax for language
         let syntax = if let Some(ref lang) = props.language {
@@ -256,34 +271,42 @@ impl Component for SyntaxHighlight {
             let line_num = props.start_line + i;
             let mut line_segments: Vec<Element> = Vec::new();
 
+            // Helper to apply bg_color
+            let with_bg = |mut style: Style| -> Style {
+                if let Some(bg) = props.bg_color {
+                    style = style.bg(bg);
+                }
+                style
+            };
+
             // Add line number if enabled
             match props.line_numbers {
                 LineNumberStyle::None => {}
                 LineNumberStyle::Simple => {
                     let num_str = format!("{} ", line_num);
-                    let style = if let Some(color) = props.line_number_color {
+                    let style = with_bg(if let Some(color) = props.line_number_color {
                         Style::new().fg(color)
                     } else {
                         Style::new().add_modifier(Modifier::DIM)
-                    };
+                    });
                     line_segments.push(Element::styled_text(&num_str, style));
                 }
                 LineNumberStyle::Padded => {
                     let num_str = format!("{:>width$} ", line_num, width = line_num_width);
-                    let style = if let Some(color) = props.line_number_color {
+                    let style = with_bg(if let Some(color) = props.line_number_color {
                         Style::new().fg(color)
                     } else {
                         Style::new().add_modifier(Modifier::DIM)
-                    };
+                    });
                     line_segments.push(Element::styled_text(&num_str, style));
                 }
                 LineNumberStyle::WithSeparator => {
                     let num_str = format!("{:>width$} │ ", line_num, width = line_num_width);
-                    let style = if let Some(color) = props.line_number_color {
+                    let style = with_bg(if let Some(color) = props.line_number_color {
                         Style::new().fg(color)
                     } else {
                         Style::new().add_modifier(Modifier::DIM)
-                    };
+                    });
                     line_segments.push(Element::styled_text(&num_str, style));
                 }
             }
@@ -309,7 +332,7 @@ impl Component for SyntaxHighlight {
                         }
                         // Keep whitespace segments - they're important for spacing
                         if !text.is_empty() {
-                            let blaeck_style = syntect_to_blaeck_style(style);
+                            let blaeck_style = with_bg(syntect_to_blaeck_style(style));
                             line_segments.push(Element::styled_text(&text, blaeck_style));
                         }
                     }
@@ -323,7 +346,7 @@ impl Component for SyntaxHighlight {
                     if props.trim_trailing {
                         text = text.trim_end().to_string();
                     }
-                    line_segments.push(Element::text(&text));
+                    line_segments.push(Element::styled_text(&text, with_bg(Style::new())));
                 }
             }
 

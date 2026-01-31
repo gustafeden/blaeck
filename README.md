@@ -6,7 +6,7 @@ A terminal UI framework for Rust. Inline rendering, flexbox/grid layout, 35+ com
 [![Documentation](https://docs.rs/blaeck/badge.svg)](https://docs.rs/blaeck)
 [![License](https://img.shields.io/crates/l/blaeck.svg)](LICENSE)
 
-![Preview](assets/preview.gif)
+![Showcase](assets/showcase.gif)
 
 ## Install
 

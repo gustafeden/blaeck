@@ -212,6 +212,8 @@ pub struct BarChartProps {
     pub label_color: Option<Color>,
     /// Value color.
     pub value_color: Option<Color>,
+    /// Background color.
+    pub bg_color: Option<Color>,
     /// Show brackets around bars: [████    ]
     pub brackets: bool,
     /// Gap between label and bar.
@@ -233,6 +235,7 @@ impl Default for BarChartProps {
             default_color: None,
             label_color: None,
             value_color: None,
+            bg_color: None,
             brackets: false,
             label_gap: 1,
             min_label_width: None,
@@ -313,6 +316,13 @@ impl BarChartProps {
         self
     }
 
+    /// Set background color.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
+        self
+    }
+
     /// Show brackets around bars.
     #[must_use]
     pub fn brackets(mut self, show: bool) -> Self {
@@ -366,6 +376,14 @@ impl Component for BarChart {
         let max_value = props.effective_max();
         let label_width = props.max_label_width();
 
+        // Helper to apply bg_color to a style
+        let with_bg = |mut style: Style| -> Style {
+            if let Some(bg) = props.bg_color {
+                style = style.bg(bg);
+            }
+            style
+        };
+
         let mut lines: Vec<Element> = Vec::new();
 
         for bar in &props.data {
@@ -380,45 +398,45 @@ impl Component for BarChart {
 
             // Label (right-aligned to label_width)
             let label_padded = format!("{:>width$}", bar.label, width = label_width);
-            let label_style = if let Some(color) = props.label_color {
+            let label_style = with_bg(if let Some(color) = props.label_color {
                 Style::new().fg(color)
             } else {
                 Style::new()
-            };
+            });
             segments.push(Element::styled_text(&label_padded, label_style));
 
             // Gap
-            segments.push(Element::text(" ".repeat(props.label_gap)));
+            segments.push(Element::styled_text(" ".repeat(props.label_gap), with_bg(Style::new())));
 
             // Opening bracket
             if props.brackets {
-                segments.push(Element::text("["));
+                segments.push(Element::styled_text("[", with_bg(Style::new())));
             }
 
             // Bar
             let bar_str = props.style.render(props.bar_width, ratio);
             let bar_color = bar.color.or(props.default_color);
-            let bar_style = if let Some(color) = bar_color {
+            let bar_style = with_bg(if let Some(color) = bar_color {
                 Style::new().fg(color)
             } else {
                 Style::new()
-            };
+            });
             segments.push(Element::styled_text(&bar_str, bar_style));
 
             // Closing bracket
             if props.brackets {
-                segments.push(Element::text("]"));
+                segments.push(Element::styled_text("]", with_bg(Style::new())));
             }
 
             // Value
             if props.value_format != ValueFormat::None {
                 let value_str = props.value_format.format(bar.value, max_value);
-                let value_style = if let Some(color) = props.value_color {
+                let value_style = with_bg(if let Some(color) = props.value_color {
                     Style::new().fg(color)
                 } else {
                     Style::new().add_modifier(Modifier::DIM)
-                };
-                segments.push(Element::text(" "));
+                });
+                segments.push(Element::styled_text(" ", with_bg(Style::new())));
                 segments.push(Element::styled_text(&value_str, value_style));
             }
 

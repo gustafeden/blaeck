@@ -30,6 +30,7 @@ pub struct LogUpdate<W: Write> {
     writer: W,
     previous_line_count: usize,
     previous_output: String,
+    cursor_visible: bool,
 }
 
 impl<W: Write> LogUpdate<W> {
@@ -39,12 +40,25 @@ impl<W: Write> LogUpdate<W> {
             writer,
             previous_line_count: 0,
             previous_output: String::new(),
+            cursor_visible: true,
         }
     }
 
     /// Returns the number of lines from the previous render.
     pub fn previous_line_count(&self) -> usize {
         self.previous_line_count
+    }
+
+    /// Sets whether the cursor should be visible after each render.
+    ///
+    /// When set to `false`, the cursor remains hidden after rendering,
+    /// which is useful for fullscreen-style apps or animations where
+    /// a blinking cursor is distracting. The cursor is always hidden
+    /// during rendering regardless of this setting.
+    ///
+    /// Default is `true` (cursor shown after render).
+    pub fn set_cursor_visible(&mut self, visible: bool) {
+        self.cursor_visible = visible;
     }
 
     /// Renders new content, erasing the previous output first.
@@ -95,8 +109,10 @@ impl<W: Write> LogUpdate<W> {
         // Add new content
         buffer.push_str(&output);
 
-        // Show cursor
-        buffer.push_str("\x1b[?25h");
+        // Restore cursor visibility
+        if self.cursor_visible {
+            buffer.push_str("\x1b[?25h");
+        }
 
         // End synchronized output (terminal flushes buffer)
         buffer.push_str("\x1b[?2026l");

@@ -111,6 +111,8 @@ pub struct ProgressProps {
     pub empty_color: Option<Color>,
     /// Color for percentage text.
     pub text_color: Option<Color>,
+    /// Background color.
+    pub bg_color: Option<Color>,
     /// Whether to show brackets around the bar.
     pub brackets: bool,
     /// Whether the filled portion should be bold.
@@ -131,6 +133,7 @@ impl Default for ProgressProps {
             filled_color: None,
             empty_color: None,
             text_color: None,
+            bg_color: None,
             brackets: false,
             bold: false,
             dim_empty: true,
@@ -247,6 +250,13 @@ impl ProgressProps {
         self
     }
 
+    /// Set the background color.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
+        self
+    }
+
     /// Get the characters to use for rendering.
     fn chars(&self) -> ProgressChars {
         self.custom_chars.unwrap_or_else(|| self.style.chars())
@@ -335,6 +345,9 @@ impl Component for Progress {
         let mut style = Style::new();
         if let Some(color) = props.filled_color {
             style = style.fg(color);
+        }
+        if let Some(bg) = props.bg_color {
+            style = style.bg(bg);
         }
         if props.bold {
             style = style.add_modifier(Modifier::BOLD);

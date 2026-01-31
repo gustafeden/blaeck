@@ -162,6 +162,15 @@ impl<W: Write> Blaeck<W> {
         self.min_render_interval = interval;
     }
 
+    /// Sets whether the cursor should be visible after each render.
+    ///
+    /// When set to `false`, the cursor stays hidden between renders,
+    /// preventing cursor blinking in animated or fullscreen-style apps.
+    /// Default is `true`.
+    pub fn set_cursor_visible(&mut self, visible: bool) {
+        self.log_update.set_cursor_visible(visible);
+    }
+
     /// Returns whether this render would be throttled (skipped).
     ///
     /// Useful if you want to skip expensive state updates when
@@ -654,7 +663,7 @@ impl<W: Write> Blaeck<W> {
         Ok(())
     }
 
-    /// Renders a box border with per-side colors and visibility.
+    /// Renders a box with optional background fill and border.
     fn render_box(
         &self,
         output: &mut Output,
@@ -667,6 +676,20 @@ impl<W: Write> Blaeck<W> {
         // If box is hidden, skip rendering (but layout space is preserved)
         if !props.visible {
             return;
+        }
+
+        let x = x as u16;
+        let y = y as u16;
+        let width = width as u16;
+        let height = height as u16;
+
+        // Fill background if specified
+        if let Some(bg_color) = props.background_color {
+            let bg_style = Style::new().bg(bg_color);
+            let space_line = " ".repeat(width as usize);
+            for row in 0..height {
+                output.write(x, y + row, &space_line, bg_style);
+            }
         }
 
         if !props.border_style.has_border() {
@@ -689,11 +712,6 @@ impl<W: Write> Blaeck<W> {
         let bottom_style = make_style(props.bottom_border_color());
         let left_style = make_style(props.left_border_color());
         let right_style = make_style(props.right_border_color());
-
-        let x = x as u16;
-        let y = y as u16;
-        let width = width as u16;
-        let height = height as u16;
 
         if width < 2 || height < 2 {
             return;

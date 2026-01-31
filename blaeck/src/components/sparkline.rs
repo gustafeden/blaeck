@@ -62,6 +62,8 @@ pub struct SparklineProps {
     pub style: SparklineStyle,
     /// Color for the sparkline.
     pub color: Option<Color>,
+    /// Background color.
+    pub bg_color: Option<Color>,
     /// Color for values above a threshold.
     pub high_color: Option<Color>,
     /// Color for values below a threshold.
@@ -82,6 +84,7 @@ impl Default for SparklineProps {
             max: None,
             style: SparklineStyle::Block,
             color: None,
+            bg_color: None,
             high_color: None,
             low_color: None,
             threshold: None,
@@ -133,6 +136,13 @@ impl SparklineProps {
     #[must_use]
     pub fn color(mut self, color: Color) -> Self {
         self.color = Some(color);
+        self
+    }
+
+    /// Set the background color.
+    #[must_use]
+    pub fn bg_color(mut self, color: Color) -> Self {
+        self.bg_color = Some(color);
         self
     }
 
@@ -257,6 +267,9 @@ impl Component for Sparkline {
         let mut style = Style::new();
         if let Some(color) = props.color {
             style = style.fg(color);
+        }
+        if let Some(bg) = props.bg_color {
+            style = style.bg(bg);
         }
 
         Element::styled_text(&content, style)
