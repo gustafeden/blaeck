@@ -211,7 +211,7 @@ The **example_viewer** is an interactive tool for exploring all blaeck examples 
 **Try it now** (no Rust required):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gustafeden/blaeck/main/run-example-viewer.sh | bash
+curl -fsSL https://gustafeden.github.io/blaeck/run-example-viewer.sh | bash
 ```
 
 Or run from source:

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blaeck - Terminal UI Framework</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: transparent;
+            color: #ecf0f1;
+        }
+        .install-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            display: inline-block;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Blaeck</h1>
+    <p>A terminal UI framework for Rust with inline rendering, flexbox/grid layout, and 35+ components.</p>
+
+    <div>
+        <a href="https://crates.io/crates/blaeck" class="badge">
+            <img src="https://img.shields.io/crates/v/blaeck.svg" alt="Crates.io">
+        </a>
+        <a href="https://docs.rs/blaeck" class="badge">
+            <img src="https://docs.rs/blaeck/badge.svg" alt="Documentation">
+        </a>
+        <a href="https://github.com/gustafeden/blaeck" class="badge">
+            <img src="https://img.shields.io/github/stars/gustafeden/blaeck?style=social" alt="GitHub stars">
+        </a>
+    </div>
+
+    <h2>📦 Quick Install</h2>
+    <p>Add to your <code>Cargo.toml</code>:</p>
+    <pre><code>[dependencies]
+blaeck = "0.2"</code></pre>
+
+    <h2>🎮 Try the Interactive Example Viewer</h2>
+    <div class="install-box">
+        <p><strong>Run instantly without Rust installed:</strong></p>
+        <pre><code>curl -fsSL https://gustafeden.github.io/blaeck/run-example-viewer.sh | bash</code></pre>
+    </div>
+    <p>Explore all 44 examples with live previews, source code viewing, and interactive testing in a three-panel interface.</p>
+
+    <h2>🔗 Links</h2>
+    <ul>
+        <li><a href="https://github.com/gustafeden/blaeck">GitHub Repository</a></li>
+        <li><a href="https://docs.rs/blaeck">API Documentation</a></li>
+        <li><a href="https://crates.io/crates/blaeck">Crates.io Page</a></li>
+        <li><a href="./run-example-viewer.sh">Download run-example-viewer.sh</a></li>
+    </ul>
+
+    <h2>✨ Features</h2>
+    <ul>
+        <li><strong>Inline Rendering</strong> — Output stays in terminal scrollback, <code>println!()</code> works before and after</li>
+        <li><strong>Flexbox Layout</strong> — Modern CSS-like layout with Taffy</li>
+        <li><strong>35+ Components</strong> — Text, inputs, tables, charts, spinners, modals, and more</li>
+        <li><strong>Reactive API</strong> — Signals-based state management with automatic re-renders</li>
+        <li><strong>Animation System</strong> — Timeline animations, easing functions, spring physics</li>
+        <li><strong>Async Support</strong> — Works with Tokio for background tasks</li>
+    </ul>
+
+    <footer style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 0.9em;">
+        <p>MIT OR Apache-2.0 License | <a href="https://github.com/gustafeden">@gustafeden</a></p>
+    </footer>
+</body>
+</html>
