@@ -31,7 +31,7 @@ The example_viewer is distributed as a prebuilt binary — lets people explore b
 - [x] `run-example-viewer.sh` — curl-pipe install script
 - [x] Linked from README
 - [x] Add `aarch64-unknown-linux-gnu` target (Linux ARM — Raspberry Pi, cloud instances)
-- [ ] Host `run-example-viewer.sh` on GitHub Pages for stable URL
+- [x] Host `run-example-viewer.sh` on GitHub Pages for stable URL
 - [ ] Consider Homebrew tap for `example_viewer` if adoption warrants it
 
 ## GitHub Discoverability
