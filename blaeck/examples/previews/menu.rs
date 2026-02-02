@@ -26,17 +26,11 @@ pub fn build_ui_with_state(items: &[SelectItem], state: &SelectState) -> Element
                 vec![],
             ),
             Element::text(""),
-            Element::node::<Divider>(
-                DividerProps::new().width(30).color(Color::DarkGray),
-                vec![],
-            ),
+            Element::node::<Divider>(DividerProps::new().width(30).color(Color::DarkGray), vec![]),
             Element::text(""),
             Element::node::<Select>(props, vec![]),
             Element::text(""),
-            Element::node::<Divider>(
-                DividerProps::new().width(30).color(Color::DarkGray),
-                vec![],
-            ),
+            Element::node::<Divider>(DividerProps::new().width(30).color(Color::DarkGray), vec![]),
             Element::text(""),
             Element::node::<Text>(
                 TextProps {

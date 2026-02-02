@@ -30,7 +30,11 @@ pub fn build_ui() -> Element {
                 vec![],
             ),
             Element::node::<KeyHints>(
-                KeyHintsProps::new([("^C", "exit"), ("\u{2191}\u{2193}", "navigate"), ("Enter", "select")]),
+                KeyHintsProps::new([
+                    ("^C", "exit"),
+                    ("\u{2191}\u{2193}", "navigate"),
+                    ("Enter", "select"),
+                ]),
                 vec![],
             ),
             Element::text(""),

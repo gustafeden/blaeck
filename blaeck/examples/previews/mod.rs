@@ -1,3 +1,10 @@
+//! Preview modules for the example viewer
+//!
+//! These modules contain the UI rendering logic for each example.
+//! Some functions may appear unused but are called dynamically via the live preview system.
+
+#![allow(dead_code)]
+
 pub mod animation;
 pub mod async_app;
 pub mod autocomplete;
@@ -15,6 +22,7 @@ pub mod gradient;
 pub mod hello;
 pub mod interactive;
 pub mod keyhints;
+pub mod live;
 pub mod logbox;
 pub mod logbox_command;
 pub mod markdown;
@@ -26,20 +34,19 @@ pub mod polish_demo;
 pub mod preview;
 pub mod quickstart_interactive;
 pub mod reactive_counter;
+pub mod reactive_list;
+pub mod reactive_timeline;
 pub mod select_demo;
 pub mod showcase;
 pub mod sparkline;
-pub mod reactive_list;
-pub mod reactive_timeline;
 pub mod spinner_demo;
 pub mod stagger_demo;
 pub mod statusbar;
-pub mod tabs;
 pub mod syntax;
 pub mod table;
+pub mod tabs;
 pub mod task_runner;
 pub mod timeline_debug;
 pub mod timeline_demo;
 pub mod timer;
 pub mod tree;
-pub mod live;

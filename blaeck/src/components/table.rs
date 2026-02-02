@@ -510,11 +510,7 @@ fn render_row_string(row: &Row, props: &TableProps) -> String {
 }
 
 /// Render cell content (just the padded text, no styling).
-fn render_cell_content(
-    cell: Option<&TableCell>,
-    col: usize,
-    props: &TableProps,
-) -> String {
+fn render_cell_content(cell: Option<&TableCell>, col: usize, props: &TableProps) -> String {
     let content = cell.map(|c| c.content.as_str()).unwrap_or("");
     let align = cell
         .and_then(|c| c.align)

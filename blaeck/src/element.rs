@@ -49,7 +49,7 @@ pub enum Element {
         /// The props as a boxed Any
         props: Box<dyn Any>,
         /// The layout style for this node
-        layout_style: LayoutStyle,
+        layout_style: Box<LayoutStyle>,
         /// Child elements
         children: Vec<Element>,
         /// Render function for this component
@@ -102,7 +102,7 @@ impl Element {
         Element::Node {
             type_id: TypeId::of::<C>(),
             props: Box::new(props),
-            layout_style: LayoutStyle::default(),
+            layout_style: Box::new(LayoutStyle::default()),
             children,
             render_fn: |props_any| {
                 let props = props_any.downcast_ref::<C::Props>().unwrap();
@@ -120,7 +120,7 @@ impl Element {
         Element::Node {
             type_id: TypeId::of::<C>(),
             props: Box::new(props),
-            layout_style,
+            layout_style: Box::new(layout_style),
             children,
             render_fn: |props_any| {
                 let props = props_any.downcast_ref::<C::Props>().unwrap();

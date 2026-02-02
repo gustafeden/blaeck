@@ -366,12 +366,54 @@ pub const SHAPES: [(Shape, &str); 3] = [
 
 /// Color presets
 pub const COLOR_PRESETS: [(Rgb, &str); 6] = [
-    (Rgb { r: 0, g: 200, b: 255 }, "Cyan"),
-    (Rgb { r: 255, g: 100, b: 150 }, "Pink"),
-    (Rgb { r: 150, g: 255, b: 100 }, "Lime"),
-    (Rgb { r: 255, g: 180, b: 50 }, "Orange"),
-    (Rgb { r: 180, g: 100, b: 255 }, "Purple"),
-    (Rgb { r: 255, g: 255, b: 255 }, "White"),
+    (
+        Rgb {
+            r: 0,
+            g: 200,
+            b: 255,
+        },
+        "Cyan",
+    ),
+    (
+        Rgb {
+            r: 255,
+            g: 100,
+            b: 150,
+        },
+        "Pink",
+    ),
+    (
+        Rgb {
+            r: 150,
+            g: 255,
+            b: 100,
+        },
+        "Lime",
+    ),
+    (
+        Rgb {
+            r: 255,
+            g: 180,
+            b: 50,
+        },
+        "Orange",
+    ),
+    (
+        Rgb {
+            r: 180,
+            g: 100,
+            b: 255,
+        },
+        "Purple",
+    ),
+    (
+        Rgb {
+            r: 255,
+            g: 255,
+            b: 255,
+        },
+        "White",
+    ),
 ];
 
 /// Application state
@@ -452,9 +494,18 @@ fn cube_edges(
         .collect();
 
     let edge_defs: [(usize, usize); 12] = [
-        (0, 1), (1, 2), (2, 3), (3, 0),
-        (4, 5), (5, 6), (6, 7), (7, 4),
-        (0, 4), (1, 5), (2, 6), (3, 7),
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0),
+        (4, 5),
+        (5, 6),
+        (6, 7),
+        (7, 4),
+        (0, 4),
+        (1, 5),
+        (2, 6),
+        (3, 7),
     ];
 
     let mut edges = Vec::new();
@@ -556,10 +607,7 @@ fn pyramid_edges(
         .map(|v| v.project().map(|(x, y, _)| (x, y)))
         .collect();
 
-    let edge_indices = [
-        (0, 1), (0, 2), (0, 3),
-        (1, 2), (2, 3), (3, 1),
-    ];
+    let edge_indices = [(0, 1), (0, 2), (0, 3), (1, 2), (2, 3), (3, 1)];
 
     let mut edges = Vec::new();
     for (a, b) in edge_indices {
@@ -669,9 +717,18 @@ fn octahedron_edges(
         .collect();
 
     let edge_indices = [
-        (0, 2), (0, 3), (0, 4), (0, 5),
-        (1, 2), (1, 3), (1, 4), (1, 5),
-        (2, 4), (4, 3), (3, 5), (5, 2),
+        (0, 2),
+        (0, 3),
+        (0, 4),
+        (0, 5),
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (1, 5),
+        (2, 4),
+        (4, 3),
+        (3, 5),
+        (5, 2),
     ];
 
     let mut edges = Vec::new();
@@ -744,9 +801,7 @@ pub fn build_ui_with_state(state: &AppState) -> Element {
     ];
 
     for (line, colors) in frame {
-        let mut segments: Vec<Element> = vec![
-            Element::node::<Text>(TextProps::new("  "), vec![]),
-        ];
+        let mut segments: Vec<Element> = vec![Element::node::<Text>(TextProps::new("  "), vec![])];
 
         let chars: Vec<char> = line.chars().collect();
         for (i, ch) in chars.iter().enumerate() {

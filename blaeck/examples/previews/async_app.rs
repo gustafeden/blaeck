@@ -27,6 +27,7 @@ pub struct AppState {
     /// Spinner start time (for animation)
     pub spinner_start: Instant,
     /// Should exit
+    #[allow(dead_code)]
     pub should_exit: bool,
 }
 

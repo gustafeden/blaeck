@@ -26,6 +26,12 @@ new_key_type! {
     pub struct TimelineId;
 }
 
+/// Type alias for input handler function
+type InputHandler = Box<dyn Fn(&Key)>;
+
+/// Type alias for input handler storage
+type InputHandlerMap = SlotMap<InputHandlerId, InputHandler>;
+
 /// Handle to the runtime, cheaply clonable.
 ///
 /// This is the main entry point for accessing runtime state.
@@ -71,9 +77,7 @@ impl RuntimeHandle {
                 .signals
                 .get_mut(id)
                 .expect("Signal not found - invalid SignalId");
-            *boxed
-                .downcast_mut::<T>()
-                .expect("Signal type mismatch") = value;
+            *boxed.downcast_mut::<T>().expect("Signal type mismatch") = value;
         }
         self.mark_dirty();
     }
@@ -125,10 +129,7 @@ impl RuntimeHandle {
     where
         F: Fn(&Key) + 'static,
     {
-        self.0
-            .borrow_mut()
-            .input_handlers
-            .insert(Box::new(handler))
+        self.0.borrow_mut().input_handlers.insert(Box::new(handler))
     }
 
     /// Check if an input handler with the given ID exists.
@@ -141,7 +142,7 @@ impl RuntimeHandle {
         // Collect handler pointers to avoid borrow issues during dispatch.
         // We need to collect because a handler might trigger state changes
         // that would require borrowing the runtime again.
-        let handlers: Vec<*const Box<dyn Fn(&Key)>> = self
+        let handlers: Vec<*const InputHandler> = self
             .0
             .borrow()
             .input_handlers
@@ -226,7 +227,7 @@ pub struct RuntimeInner {
     pub(crate) current_instance: Option<ComponentId>,
 
     /// Input handlers - maps InputHandlerId to handler functions.
-    pub(crate) input_handlers: SlotMap<InputHandlerId, Box<dyn Fn(&Key)>>,
+    pub(crate) input_handlers: InputHandlerMap,
 
     /// Timeline storage - maps TimelineId to playing timelines.
     pub(crate) timelines: SlotMap<TimelineId, PlayingTimeline>,

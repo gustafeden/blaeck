@@ -34,8 +34,8 @@ fn main() -> std::io::Result<()> {
         .map(|(w, h)| (w as usize, h as usize))
         .unwrap_or((DEFAULT_WIDTH + 4, DEFAULT_HEIGHT + 4));
     // Leave room for border (2) and help text (1), cap at defaults
-    width = width.saturating_sub(4).min(DEFAULT_WIDTH).max(40);
-    height = height.saturating_sub(4).min(DEFAULT_HEIGHT).max(10);
+    width = width.saturating_sub(4).clamp(40, DEFAULT_WIDTH);
+    height = height.saturating_sub(4).clamp(10, DEFAULT_HEIGHT);
 
     crossterm::terminal::enable_raw_mode()?;
 
@@ -43,71 +43,87 @@ fn main() -> std::io::Result<()> {
         if poll(Duration::from_millis(30))? {
             match read()? {
                 Event::Resize(w, h) => {
-                    width = (w as usize).saturating_sub(4).min(DEFAULT_WIDTH).max(40);
-                    height = (h as usize).saturating_sub(4).min(DEFAULT_HEIGHT).max(10);
+                    width = (w as usize).saturating_sub(4).clamp(40, DEFAULT_WIDTH);
+                    height = (h as usize).saturating_sub(4).clamp(10, DEFAULT_HEIGHT);
                     let _ = blaeck.handle_resize(w, h);
                 }
                 Event::Key(key) => {
-                match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => break,
-                    KeyCode::Char('c') if key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) => break,
+                    match key.code {
+                        KeyCode::Char('q') | KeyCode::Esc => break,
+                        KeyCode::Char('c')
+                            if key
+                                .modifiers
+                                .contains(crossterm::event::KeyModifiers::CONTROL) =>
+                        {
+                            break
+                        }
 
-                    // Mode toggle
-                    KeyCode::Char('m') | KeyCode::Tab => {
-                        params.mode = match params.mode {
-                            Mode::Plasma => {
-                                params.theme_idx = 7;
-                                Mode::LavaLamp
+                        // Mode toggle
+                        KeyCode::Char('m') | KeyCode::Tab => {
+                            params.mode = match params.mode {
+                                Mode::Plasma => {
+                                    params.theme_idx = 7;
+                                    Mode::LavaLamp
+                                }
+                                Mode::LavaLamp => {
+                                    params.theme_idx = 0;
+                                    Mode::Plasma
+                                }
+                            };
+                        }
+
+                        // Theme controls
+                        KeyCode::Char('t') | KeyCode::Right => params.next_theme(),
+                        KeyCode::Char('T') | KeyCode::Left => params.prev_theme(),
+
+                        // Preset controls (plasma only)
+                        KeyCode::Char('p') | KeyCode::Down => params.next_preset(),
+                        KeyCode::Char('P') | KeyCode::Up => params.prev_preset(),
+                        KeyCode::Char(c @ '1'..='8') => {
+                            params.apply_preset((c as usize) - ('1' as usize))
+                        }
+
+                        // Randomize
+                        KeyCode::Char('r') => {
+                            params.seed = params.seed.wrapping_add(1);
+                            if params.mode == Mode::Plasma {
+                                params.randomize_plasma();
+                            } else {
+                                lava = LavaLamp::new(params.num_blobs, params.seed);
                             }
-                            Mode::LavaLamp => {
-                                params.theme_idx = 0;
-                                Mode::Plasma
-                            }
-                        };
-                    }
+                        }
 
-                    // Theme controls
-                    KeyCode::Char('t') | KeyCode::Right => params.next_theme(),
-                    KeyCode::Char('T') | KeyCode::Left => params.prev_theme(),
-
-                    // Preset controls (plasma only)
-                    KeyCode::Char('p') | KeyCode::Down => params.next_preset(),
-                    KeyCode::Char('P') | KeyCode::Up => params.prev_preset(),
-                    KeyCode::Char(c @ '1'..='8') => params.apply_preset((c as usize) - ('1' as usize)),
-
-                    // Randomize
-                    KeyCode::Char('r') => {
-                        params.seed = params.seed.wrapping_add(1);
-                        if params.mode == Mode::Plasma {
-                            params.randomize_plasma();
-                        } else {
+                        // Blob count (lava lamp)
+                        KeyCode::Char('b') => {
+                            params.num_blobs = (params.num_blobs + 2).min(20);
                             lava = LavaLamp::new(params.num_blobs, params.seed);
                         }
+                        KeyCode::Char('B') => {
+                            params.num_blobs = (params.num_blobs.saturating_sub(2)).max(2);
+                            lava = LavaLamp::new(params.num_blobs, params.seed);
+                        }
+
+                        // Toggle info
+                        KeyCode::Char('i') => show_info = !show_info,
+
+                        // Speed
+                        KeyCode::Char('+') | KeyCode::Char('=') => {
+                            params.speed = (params.speed + 0.1).min(5.0)
+                        }
+                        KeyCode::Char('-') | KeyCode::Char('_') => {
+                            params.speed = (params.speed - 0.1).max(0.1)
+                        }
+
+                        // Zoom (for lava mode)
+                        KeyCode::Char('z') | KeyCode::Char('[') => {
+                            params.zoom = (params.zoom * 0.85).max(0.1)
+                        }
+                        KeyCode::Char('Z') | KeyCode::Char(']') => {
+                            params.zoom = (params.zoom * 1.15).min(5.0)
+                        }
+
+                        _ => {}
                     }
-
-                    // Blob count (lava lamp)
-                    KeyCode::Char('b') => {
-                        params.num_blobs = (params.num_blobs + 2).min(20);
-                        lava = LavaLamp::new(params.num_blobs, params.seed);
-                    }
-                    KeyCode::Char('B') => {
-                        params.num_blobs = (params.num_blobs.saturating_sub(2)).max(2);
-                        lava = LavaLamp::new(params.num_blobs, params.seed);
-                    }
-
-                    // Toggle info
-                    KeyCode::Char('i') => show_info = !show_info,
-
-                    // Speed
-                    KeyCode::Char('+') | KeyCode::Char('=') => params.speed = (params.speed + 0.1).min(5.0),
-                    KeyCode::Char('-') | KeyCode::Char('_') => params.speed = (params.speed - 0.1).max(0.1),
-
-                    // Zoom (for lava mode)
-                    KeyCode::Char('z') | KeyCode::Char('[') => params.zoom = (params.zoom * 0.85).max(0.1),
-                    KeyCode::Char('Z') | KeyCode::Char(']') => params.zoom = (params.zoom * 1.15).min(5.0),
-
-                    _ => {}
-                }
                 }
                 _ => {}
             }
@@ -144,7 +160,9 @@ fn main() -> std::io::Result<()> {
         };
 
         let help = match params.mode {
-            Mode::Plasma => "m:lava  t/T:theme  p/P:preset  1-8:presets  r:random  +/-:speed  i:info  q:quit",
+            Mode::Plasma => {
+                "m:lava  t/T:theme  p/P:preset  1-8:presets  r:random  +/-:speed  i:info  q:quit"
+            }
             Mode::LavaLamp => "m:plasma  t/T:theme  z/Z:zoom  +/-:speed  i:info  q:quit",
         };
 

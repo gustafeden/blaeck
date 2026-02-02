@@ -486,7 +486,7 @@ impl<W: Write> Blaeck<W> {
                     if let Some(box_props) = props.downcast_ref::<BoxProps>() {
                         box_props.to_layout_style()
                     } else {
-                        layout_style.clone()
+                        (**layout_style).clone()
                     }
                 } else if *type_id == TypeId::of::<crate::components::Spacer>() {
                     if let Some(spacer_props) =
@@ -499,7 +499,7 @@ impl<W: Write> Blaeck<W> {
                         )
                     }
                 } else {
-                    layout_style.clone()
+                    (**layout_style).clone()
                 };
 
                 let node = if child_nodes.is_empty() {

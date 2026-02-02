@@ -335,9 +335,10 @@ pub enum GridAutoFlow {
 }
 
 /// Track sizing function for grid templates.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum TrackSize {
     /// Track size is determined by content (auto)
+    #[default]
     Auto,
     /// Fixed size in pixels/units
     Fixed(f32),
@@ -351,12 +352,6 @@ pub enum TrackSize {
     Flex(f32),
     /// Minmax constraint
     Minmax(Box<TrackSize>, Box<TrackSize>),
-}
-
-impl Default for TrackSize {
-    fn default() -> Self {
-        TrackSize::Auto
-    }
 }
 
 /// Grid placement for a single axis (column or row).
@@ -410,12 +405,12 @@ impl GridPlacement {
         if let Some(span_val) = self.span {
             if self.start.is_some() || self.end.is_some() {
                 // span with start/end - use line
-                self.start.map_or(taffy::GridPlacement::Auto, |n| line(n))
+                self.start.map_or(taffy::GridPlacement::Auto, line)
             } else {
                 taffy_span(span_val)
             }
         } else {
-            self.start.map_or(taffy::GridPlacement::Auto, |n| line(n))
+            self.start.map_or(taffy::GridPlacement::Auto, line)
         }
     }
 
@@ -425,14 +420,14 @@ impl GridPlacement {
 
         if let Some(span_val) = self.span {
             if self.end.is_some() {
-                self.end.map_or(taffy::GridPlacement::Auto, |n| line(n))
+                self.end.map_or(taffy::GridPlacement::Auto, line)
             } else if self.start.is_some() {
                 taffy_span(span_val)
             } else {
                 taffy::GridPlacement::Auto
             }
         } else {
-            self.end.map_or(taffy::GridPlacement::Auto, |n| line(n))
+            self.end.map_or(taffy::GridPlacement::Auto, line)
         }
     }
 }
@@ -538,7 +533,9 @@ impl Default for LayoutTree {
 
 /// Convert a TrackSize to Taffy's TrackSizingFunction
 fn track_size_to_taffy(ts: &TrackSize) -> taffy::TrackSizingFunction {
-    use taffy::style_helpers::{TaffyAuto, TaffyMinContent, TaffyMaxContent, TaffyFitContent, FromLength, FromFr};
+    use taffy::style_helpers::{
+        FromFr, FromLength, TaffyAuto, TaffyFitContent, TaffyMaxContent, TaffyMinContent,
+    };
 
     match ts {
         TrackSize::Auto => taffy::TrackSizingFunction::AUTO,
@@ -562,11 +559,16 @@ fn track_size_to_taffy(ts: &TrackSize) -> taffy::TrackSizingFunction {
                 TrackSize::Fixed(v) => taffy::MaxTrackSizingFunction::from_length(*v),
                 TrackSize::MinContent => taffy::MaxTrackSizingFunction::MIN_CONTENT,
                 TrackSize::MaxContent => taffy::MaxTrackSizingFunction::MAX_CONTENT,
-                TrackSize::FitContent(v) => taffy::MaxTrackSizingFunction::fit_content(taffy::LengthPercentage::length(*v)),
+                TrackSize::FitContent(v) => {
+                    taffy::MaxTrackSizingFunction::fit_content(taffy::LengthPercentage::length(*v))
+                }
                 TrackSize::Flex(fr) => taffy::MaxTrackSizingFunction::from_fr(*fr),
                 TrackSize::Minmax(_, _) => taffy::MaxTrackSizingFunction::AUTO,
             };
-            taffy::TrackSizingFunction { min: min_sizing, max: max_sizing }
+            taffy::TrackSizingFunction {
+                min: min_sizing,
+                max: max_sizing,
+            }
         }
     }
 }
@@ -709,17 +711,41 @@ impl LayoutStyle {
 
             // Inset (for absolute positioning)
             inset: Rect {
-                top: self.inset_top.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
-                bottom: self.inset_bottom.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
-                left: self.inset_left.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
-                right: self.inset_right.map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                top: self
+                    .inset_top
+                    .map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                bottom: self
+                    .inset_bottom
+                    .map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                left: self
+                    .inset_left
+                    .map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
+                right: self
+                    .inset_right
+                    .map_or(LengthPercentageAuto::auto(), LengthPercentageAuto::length),
             },
 
             // Grid Container
-            grid_template_columns: self.grid_template_columns.iter().map(track_size_to_grid_component).collect(),
-            grid_template_rows: self.grid_template_rows.iter().map(track_size_to_grid_component).collect(),
-            grid_auto_columns: self.grid_auto_columns.iter().map(track_size_to_taffy).collect(),
-            grid_auto_rows: self.grid_auto_rows.iter().map(track_size_to_taffy).collect(),
+            grid_template_columns: self
+                .grid_template_columns
+                .iter()
+                .map(track_size_to_grid_component)
+                .collect(),
+            grid_template_rows: self
+                .grid_template_rows
+                .iter()
+                .map(track_size_to_grid_component)
+                .collect(),
+            grid_auto_columns: self
+                .grid_auto_columns
+                .iter()
+                .map(track_size_to_taffy)
+                .collect(),
+            grid_auto_rows: self
+                .grid_auto_rows
+                .iter()
+                .map(track_size_to_taffy)
+                .collect(),
             grid_auto_flow: match self.grid_auto_flow {
                 GridAutoFlow::Row => taffy::GridAutoFlow::Row,
                 GridAutoFlow::Column => taffy::GridAutoFlow::Column,

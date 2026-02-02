@@ -257,7 +257,7 @@ impl Component for SyntaxHighlight {
         .unwrap_or_else(|| ps.find_syntax_plain_text());
 
         // Get theme
-        let theme = props.theme.get_theme(&ts);
+        let theme = props.theme.get_theme(ts);
 
         let mut highlighter = HighlightLines::new(syntax, theme);
         let mut lines: Vec<Element> = Vec::new();
@@ -312,7 +312,7 @@ impl Component for SyntaxHighlight {
             }
 
             // Highlight the line
-            let highlighted = highlighter.highlight_line(line, &ps);
+            let highlighted = highlighter.highlight_line(line, ps);
             match highlighted {
                 Ok(ranges) => {
                     let ranges: Vec<_> = ranges.into_iter().collect();

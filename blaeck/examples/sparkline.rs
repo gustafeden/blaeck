@@ -68,7 +68,13 @@ fn main() -> io::Result<()> {
         }
 
         let ui = previews::sparkline::build_ui_with_data(
-            &cpu_data, cpu_new, &mem_data, mem_new, &net_data, net_new, &audio_data,
+            &cpu_data,
+            cpu_new,
+            &mem_data,
+            mem_new,
+            &net_data,
+            net_new,
+            &audio_data,
         );
         blaeck.render(ui)?;
 

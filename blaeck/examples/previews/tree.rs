@@ -6,25 +6,49 @@ pub fn build_ui() -> Element {
         .child(
             TreeNode::new("src")
                 .icon("\u{1f4c1}")
-                .child(TreeNode::leaf("main.rs").icon("\u{1f4c4}").color(Color::Yellow))
-                .child(TreeNode::leaf("lib.rs").icon("\u{1f4c4}").color(Color::Yellow))
+                .child(
+                    TreeNode::leaf("main.rs")
+                        .icon("\u{1f4c4}")
+                        .color(Color::Yellow),
+                )
+                .child(
+                    TreeNode::leaf("lib.rs")
+                        .icon("\u{1f4c4}")
+                        .color(Color::Yellow),
+                )
                 .child(
                     TreeNode::new("components")
                         .icon("\u{1f4c1}")
                         .child(TreeNode::leaf("mod.rs").icon("\u{1f4c4}"))
                         .child(TreeNode::leaf("box.rs").icon("\u{1f4c4}"))
                         .child(TreeNode::leaf("text.rs").icon("\u{1f4c4}"))
-                        .child(TreeNode::leaf("tree.rs").icon("\u{1f4c4}").color(Color::Green)),
+                        .child(
+                            TreeNode::leaf("tree.rs")
+                                .icon("\u{1f4c4}")
+                                .color(Color::Green),
+                        ),
                 ),
         )
         .child(
             TreeNode::new("examples")
                 .icon("\u{1f4c1}")
-                .child(TreeNode::leaf("tree.rs").icon("\u{1f4c4}").color(Color::Cyan))
+                .child(
+                    TreeNode::leaf("tree.rs")
+                        .icon("\u{1f4c4}")
+                        .color(Color::Cyan),
+                )
                 .child(TreeNode::leaf("timer.rs").icon("\u{1f4c4}")),
         )
-        .child(TreeNode::leaf("Cargo.toml").icon("\u{1f4e6}").color(Color::Blue))
-        .child(TreeNode::leaf("README.md").icon("\u{1f4dd}").color(Color::Magenta));
+        .child(
+            TreeNode::leaf("Cargo.toml")
+                .icon("\u{1f4e6}")
+                .color(Color::Blue),
+        )
+        .child(
+            TreeNode::leaf("README.md")
+                .icon("\u{1f4dd}")
+                .color(Color::Magenta),
+        );
 
     let state = TreeState::new()
         .expand("blaeck")

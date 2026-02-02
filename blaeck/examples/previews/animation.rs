@@ -1,5 +1,6 @@
 use blaeck::prelude::*;
 
+#[allow(dead_code)]
 pub fn build_ui() -> Element {
     build_ui_with_timer(&AnimationTimer::new())
 }
@@ -65,22 +66,11 @@ pub fn build_ui_with_timer(timer: &AnimationTimer) -> Element {
                         },
                         vec![],
                     ),
-                    animated_indicator_colored(
-                        IndicatorStyle::SpinnerDots,
-                        timer,
-                        Color::Cyan,
-                    ),
-                    animated_indicator_colored(
-                        IndicatorStyle::SpinnerLine,
-                        timer,
-                        Color::Magenta,
-                    ),
+                    animated_indicator_colored(IndicatorStyle::SpinnerDots, timer, Color::Cyan),
+                    animated_indicator_colored(IndicatorStyle::SpinnerLine, timer, Color::Magenta),
                     Element::node::<Text>(
                         TextProps {
-                            content: format!(
-                                "Dots{}",
-                                IndicatorStyle::GrowingDots.render(timer)
-                            ),
+                            content: format!("Dots{}", IndicatorStyle::GrowingDots.render(timer)),
                             color: Some(Color::Blue),
                             ..Default::default()
                         },

@@ -370,19 +370,13 @@ impl Animatable for u8 {
 
 impl Animatable for (f32, f32) {
     fn lerp(a: &Self, b: &Self, t: f64) -> Self {
-        (
-            f32::lerp(&a.0, &b.0, t),
-            f32::lerp(&a.1, &b.1, t),
-        )
+        (f32::lerp(&a.0, &b.0, t), f32::lerp(&a.1, &b.1, t))
     }
 }
 
 impl Animatable for (f64, f64) {
     fn lerp(a: &Self, b: &Self, t: f64) -> Self {
-        (
-            f64::lerp(&a.0, &b.0, t),
-            f64::lerp(&a.1, &b.1, t),
-        )
+        (f64::lerp(&a.0, &b.0, t), f64::lerp(&a.1, &b.1, t))
     }
 }
 
@@ -454,16 +448,29 @@ impl<T: Animatable> Track<T> {
     pub fn from_to(from: T, to: T, easing: Easing) -> Self {
         Self {
             keyframes: vec![
-                Keyframe { time: 0.0, value: from, easing: Easing::Linear },
-                Keyframe { time: 1.0, value: to, easing },
+                Keyframe {
+                    time: 0.0,
+                    value: from,
+                    easing: Easing::Linear,
+                },
+                Keyframe {
+                    time: 1.0,
+                    value: to,
+                    easing,
+                },
             ],
         }
     }
 
     /// Add a keyframe at the specified normalized time.
     pub fn keyframe(mut self, time: f64, value: T, easing: Easing) -> Self {
-        self.keyframes.push(Keyframe { time, value, easing });
-        self.keyframes.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
+        self.keyframes.push(Keyframe {
+            time,
+            value,
+            easing,
+        });
+        self.keyframes
+            .sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
         self
     }
 
@@ -1213,7 +1220,10 @@ impl<'a> TimelineState<'a> {
     pub fn get_stagger_all<T: Animatable + Clone>(&self, property: &str, default: T) -> Vec<T> {
         let count = self.act.get_stagger_count(property).unwrap_or(0);
         (0..count)
-            .map(|i| self.get_stagger(property, i).unwrap_or_else(|| default.clone()))
+            .map(|i| {
+                self.get_stagger(property, i)
+                    .unwrap_or_else(|| default.clone())
+            })
             .collect()
     }
 
@@ -1329,7 +1339,8 @@ impl PlayingTimeline {
     /// Resume the timeline.
     pub fn play(&mut self) {
         if self.paused {
-            self.start_time = Instant::now() - std::time::Duration::from_secs_f64(self.paused_at / self.speed);
+            self.start_time =
+                Instant::now() - std::time::Duration::from_secs_f64(self.paused_at / self.speed);
             self.paused = false;
         }
     }
@@ -1348,7 +1359,8 @@ impl PlayingTimeline {
         if self.paused {
             self.paused_at = time;
         } else {
-            self.start_time = Instant::now() - std::time::Duration::from_secs_f64(time / self.speed);
+            self.start_time =
+                Instant::now() - std::time::Duration::from_secs_f64(time / self.speed);
         }
     }
 
@@ -1562,8 +1574,7 @@ impl TimelineDebugInfo {
         let mut result = String::new();
 
         for (i, (_name, duration)) in self.acts.iter().enumerate() {
-            let act_width =
-                ((duration / self.duration) * width as f64).round() as usize;
+            let act_width = ((duration / self.duration) * width as f64).round() as usize;
             let act_width = act_width.max(1);
 
             let char_to_use = if i == self.act_index { '=' } else { '-' };
@@ -1692,10 +1703,12 @@ mod tests {
 
     #[test]
     fn test_timeline_single_act() {
-        let timeline = Timeline::new()
-            .act(Act::new("fade")
-                .duration(2.0)
-                .animate("opacity", 0.0f64, 1.0, Easing::Linear));
+        let timeline = Timeline::new().act(Act::new("fade").duration(2.0).animate(
+            "opacity",
+            0.0f64,
+            1.0,
+            Easing::Linear,
+        ));
 
         let state = timeline.at(0.0);
         assert_eq!(state.act_name, "fade");
@@ -1711,14 +1724,18 @@ mod tests {
     #[test]
     fn test_timeline_multiple_acts() {
         let timeline = Timeline::new()
-            .act(Act::new("fade_in")
-                .duration(1.0)
-                .animate("opacity", 0.0f64, 1.0, Easing::Linear))
-            .act(Act::new("hold")
-                .duration(1.0))
-            .act(Act::new("fade_out")
-                .duration(1.0)
-                .animate("opacity", 1.0f64, 0.0, Easing::Linear));
+            .act(
+                Act::new("fade_in")
+                    .duration(1.0)
+                    .animate("opacity", 0.0f64, 1.0, Easing::Linear),
+            )
+            .act(Act::new("hold").duration(1.0))
+            .act(Act::new("fade_out").duration(1.0).animate(
+                "opacity",
+                1.0f64,
+                0.0,
+                Easing::Linear,
+            ));
 
         // fade_in
         let state = timeline.at(0.5);
@@ -1767,10 +1784,12 @@ mod tests {
 
     #[test]
     fn test_playing_timeline() {
-        let timeline = Timeline::new()
-            .act(Act::new("test")
-                .duration(1.0)
-                .animate("value", 0.0f64, 100.0, Easing::Linear));
+        let timeline = Timeline::new().act(Act::new("test").duration(1.0).animate(
+            "value",
+            0.0f64,
+            100.0,
+            Easing::Linear,
+        ));
 
         let mut playing = timeline.start();
 
@@ -1803,10 +1822,12 @@ mod tests {
         let exited_clone = exited.clone();
 
         let timeline = Timeline::new()
-            .act(Act::new("first")
-                .duration(1.0)
-                .on_enter(move || entered_clone.set(true))
-                .on_exit(move || exited_clone.set(true)))
+            .act(
+                Act::new("first")
+                    .duration(1.0)
+                    .on_enter(move || entered_clone.set(true))
+                    .on_exit(move || exited_clone.set(true)),
+            )
             .act(Act::new("second").duration(1.0));
 
         let mut playing = timeline.start();
@@ -1904,11 +1925,12 @@ mod tests {
 
     #[test]
     fn test_act_with_spring() {
-        let timeline = Timeline::new().act(
-            Act::new("bounce")
-                .duration(1.0)
-                .spring("position", 0.0f64, 100.0, Spring::preset_bouncy()),
-        );
+        let timeline = Timeline::new().act(Act::new("bounce").duration(1.0).spring(
+            "position",
+            0.0f64,
+            100.0,
+            Spring::preset_bouncy(),
+        ));
 
         // At start
         let state = timeline.at(0.0);
@@ -2000,11 +2022,13 @@ mod tests {
 
     #[test]
     fn test_act_with_stagger() {
-        let timeline = Timeline::new().act(
-            Act::new("panels_enter")
-                .duration(2.0)
-                .stagger("opacity", 3, 0.0f64, 1.0, Easing::Linear),
-        );
+        let timeline = Timeline::new().act(Act::new("panels_enter").duration(2.0).stagger(
+            "opacity",
+            3,
+            0.0f64,
+            1.0,
+            Easing::Linear,
+        ));
 
         // At start
         let state = timeline.at(0.0);
@@ -2020,11 +2044,13 @@ mod tests {
 
     #[test]
     fn test_stagger_all() {
-        let timeline = Timeline::new().act(
-            Act::new("fade")
-                .duration(1.0)
-                .stagger("alpha", 4, 0.0f64, 1.0, Easing::Linear),
-        );
+        let timeline = Timeline::new().act(Act::new("fade").duration(1.0).stagger(
+            "alpha",
+            4,
+            0.0f64,
+            1.0,
+            Easing::Linear,
+        ));
 
         let state = timeline.at(1.0);
         let values: Vec<f64> = state.get_stagger_all("alpha", 0.0);
@@ -2036,11 +2062,13 @@ mod tests {
 
     #[test]
     fn test_playing_timeline_stagger() {
-        let timeline = Timeline::new().act(
-            Act::new("test")
-                .duration(1.0)
-                .stagger("value", 3, 0.0f64, 100.0, Easing::Linear),
-        );
+        let timeline = Timeline::new().act(Act::new("test").duration(1.0).stagger(
+            "value",
+            3,
+            0.0f64,
+            100.0,
+            Easing::Linear,
+        ));
 
         let mut playing = timeline.start();
         playing.seek(1.0);
@@ -2081,8 +2109,7 @@ mod tests {
 
     #[test]
     fn test_debug_info_compact_string() {
-        let timeline = Timeline::new()
-            .act(Act::new("test").duration(1.0));
+        let timeline = Timeline::new().act(Act::new("test").duration(1.0));
 
         let mut playing = timeline.start();
         playing.seek(0.5);
@@ -2098,8 +2125,7 @@ mod tests {
 
     #[test]
     fn test_debug_info_progress_bar() {
-        let timeline = Timeline::new()
-            .act(Act::new("test").duration(1.0));
+        let timeline = Timeline::new().act(Act::new("test").duration(1.0));
 
         let mut playing = timeline.start();
         playing.seek(0.5);

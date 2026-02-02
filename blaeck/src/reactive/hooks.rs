@@ -263,7 +263,10 @@ pub fn use_timeline(cx: Scope, timeline: Timeline) -> TimelineHandle {
                 instance.push_hook(HookSlot::Timeline(timeline_id));
             });
 
-            TimelineHandle { id: timeline_id, rt }
+            TimelineHandle {
+                id: timeline_id,
+                rt,
+            }
         }
     }
 }

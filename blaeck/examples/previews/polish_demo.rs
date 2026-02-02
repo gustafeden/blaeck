@@ -247,15 +247,11 @@ pub fn build_ui_with_confirm(confirm: &blaeck::ConfirmProps) -> Element {
             ),
             Element::text(""),
             // Instructions
-            Element::node::<Divider>(
-                DividerProps::new().line_style(DividerStyle::Dotted),
-                vec![],
-            ),
+            Element::node::<Divider>(DividerProps::new().line_style(DividerStyle::Dotted), vec![]),
             Element::node::<Text>(
                 TextProps {
-                    content:
-                        "Left/Right or Y/N to toggle confirm | Enter to submit | Q to quit"
-                            .into(),
+                    content: "Left/Right or Y/N to toggle confirm | Enter to submit | Q to quit"
+                        .into(),
                     dim: true,
                     ..Default::default()
                 },

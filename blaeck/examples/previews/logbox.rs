@@ -14,13 +14,17 @@ const TASKS: &[(&str, Option<Color>)] = &[
 ];
 
 fn make_lines(count: usize) -> Vec<LogLine> {
-    TASKS.iter().take(count).map(|(msg, color)| {
-        if let Some(c) = color {
-            LogLine::new(*msg).color(*c)
-        } else {
-            LogLine::new(*msg)
-        }
-    }).collect()
+    TASKS
+        .iter()
+        .take(count)
+        .map(|(msg, color)| {
+            if let Some(c) = color {
+                LogLine::new(*msg).color(*c)
+            } else {
+                LogLine::new(*msg)
+            }
+        })
+        .collect()
 }
 
 /// Animated preview — lines appear one by one, then shows multi-variant final state.

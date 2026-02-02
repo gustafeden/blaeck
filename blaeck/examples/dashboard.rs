@@ -31,15 +31,19 @@ fn main() -> std::io::Result<()> {
         // Handle input (16ms ≈ 60 FPS target)
         if poll(Duration::from_millis(16))? {
             match read()? {
-                Event::Key(key) => {
-                    match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc => break,
-                        KeyCode::Char('c') if key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) => break,
-                        KeyCode::Char('r') => state.restart_boot(),
-                        KeyCode::Char(' ') => state.paused = !state.paused,
-                        _ => {}
+                Event::Key(key) => match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc => break,
+                    KeyCode::Char('c')
+                        if key
+                            .modifiers
+                            .contains(crossterm::event::KeyModifiers::CONTROL) =>
+                    {
+                        break
                     }
-                }
+                    KeyCode::Char('r') => state.restart_boot(),
+                    KeyCode::Char(' ') => state.paused = !state.paused,
+                    _ => {}
+                },
                 Event::Resize(w, h) => {
                     let _ = blaeck.handle_resize(w, h);
                 }

@@ -38,10 +38,7 @@ pub fn build_ui_with_state(tabs: &[&str], contents: &[&str], state: &TabsState) 
                 vec![],
             ),
             Element::text(""),
-            Element::node::<Divider>(
-                DividerProps::new().width(40).color(Color::DarkGray),
-                vec![],
-            ),
+            Element::node::<Divider>(DividerProps::new().width(40).color(Color::DarkGray), vec![]),
             Element::text(""),
             Element::node::<Box>(
                 BoxProps {

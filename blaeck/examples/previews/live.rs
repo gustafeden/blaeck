@@ -7,8 +7,8 @@
 // We need explicit aliasing to use both.
 use std::boxed::Box as StdBox;
 
-use blaeck::prelude::*;
 use blaeck::input::Key;
+use blaeck::prelude::*;
 use crossterm::event::KeyCode;
 
 // ============================================================================
@@ -179,11 +179,7 @@ struct TabsLive {
 
 impl LivePreview for TabsLive {
     fn render(&mut self) -> Element {
-        super::tabs::build_ui_with_state(
-            super::tabs::TABS,
-            super::tabs::CONTENTS,
-            &self.state,
-        )
+        super::tabs::build_ui_with_state(super::tabs::TABS, super::tabs::CONTENTS, &self.state)
     }
 
     fn handle_key(&mut self, key: &Key) -> bool {
@@ -263,8 +259,12 @@ impl LivePreview for AutocompleteLive {
                 self.state.insert(c);
                 self.update_filtered_count();
             }
-            KeyCode::Left => { self.state.move_left(); }
-            KeyCode::Right => { self.state.move_right(); }
+            KeyCode::Left => {
+                self.state.move_left();
+            }
+            KeyCode::Right => {
+                self.state.move_right();
+            }
             KeyCode::Enter | KeyCode::Tab => {
                 let suggestions = super::autocomplete::SUGGESTIONS;
                 let props = AutocompleteProps::new(suggestions.to_vec())
@@ -330,9 +330,12 @@ impl LivePreview for SparklineLive {
         let mem_current = *self.mem_data.last().unwrap_or(&50.0);
         let net_current = *self.net_data.last().unwrap_or(&30.0);
         super::sparkline::build_ui_with_data(
-            &self.cpu_data, cpu_current,
-            &self.mem_data, mem_current,
-            &self.net_data, net_current,
+            &self.cpu_data,
+            cpu_current,
+            &self.mem_data,
+            mem_current,
+            &self.net_data,
+            net_current,
             &self.audio_data,
         )
     }
@@ -351,19 +354,27 @@ impl LivePreview for SparklineLive {
 
         let cpu_v = (self.pseudo_random() * 30.0 + 35.0).clamp(0.0, 100.0);
         self.cpu_data.push(cpu_v);
-        if self.cpu_data.len() > 20 { self.cpu_data.remove(0); }
+        if self.cpu_data.len() > 20 {
+            self.cpu_data.remove(0);
+        }
 
         let mem_v = (self.pseudo_random() * 10.0 + 55.0).clamp(0.0, 100.0);
         self.mem_data.push(mem_v);
-        if self.mem_data.len() > 20 { self.mem_data.remove(0); }
+        if self.mem_data.len() > 20 {
+            self.mem_data.remove(0);
+        }
 
         let net_v = (self.pseudo_random() * 60.0 + 10.0).clamp(0.0, 100.0);
         self.net_data.push(net_v);
-        if self.net_data.len() > 20 { self.net_data.remove(0); }
+        if self.net_data.len() > 20 {
+            self.net_data.remove(0);
+        }
 
         let audio_v = (self.pseudo_random() * 80.0 + 10.0).clamp(0.0, 100.0);
         self.audio_data.push(audio_v);
-        if self.audio_data.len() > 24 { self.audio_data.remove(0); }
+        if self.audio_data.len() > 24 {
+            self.audio_data.remove(0);
+        }
     }
 }
 
@@ -392,8 +403,15 @@ impl LivePreview for DashboardLive {
         // Get element tree stats from last frame (approximate)
         let node_count = self.state.layout.nodes;
         let tree_depth = self.state.layout.depth;
-        let field_energy = super::dashboard::panel_field_energy(0.5, 0.5, self.state.field_time, &self.params);
-        self.state.update(dt, self.last_render_ms, field_energy, node_count, tree_depth);
+        let field_energy =
+            super::dashboard::panel_field_energy(0.5, 0.5, self.state.field_time, &self.params);
+        self.state.update(
+            dt,
+            self.last_render_ms,
+            field_energy,
+            node_count,
+            tree_depth,
+        );
         self.last_render_ms = render_start.elapsed().as_secs_f32() * 1000.0;
     }
 
@@ -456,7 +474,9 @@ impl LivePreview for PlasmaLive {
                     super::plasma::Mode::LavaLamp => super::plasma::Mode::Plasma,
                 };
             }
-            KeyCode::Char('+') | KeyCode::Char('=') => self.params.speed = (self.params.speed + 0.1).min(5.0),
+            KeyCode::Char('+') | KeyCode::Char('=') => {
+                self.params.speed = (self.params.speed + 0.1).min(5.0)
+            }
             KeyCode::Char('-') => self.params.speed = (self.params.speed - 0.1).max(0.1),
             KeyCode::Char('q') => return true,
             _ => {}
@@ -563,9 +583,10 @@ impl AsyncAppLive {
                 std::thread::sleep(std::time::Duration::from_millis(20));
                 let _ = tx.send(super::async_app::BackgroundEvent::Progress(i));
             }
-            let _ = tx.send(super::async_app::BackgroundEvent::DataChunk(
-                format!("Processed: \"{}\"\n", input),
-            ));
+            let _ = tx.send(super::async_app::BackgroundEvent::DataChunk(format!(
+                "Processed: \"{}\"\n",
+                input
+            )));
             let _ = tx.send(super::async_app::BackgroundEvent::Done);
         });
     }
@@ -679,20 +700,48 @@ impl LivePreview for ReactivePreviewLive {
 pub fn create_live_preview(name: &str) -> Option<StdBox<dyn LivePreview>> {
     match name {
         // === Static (15) ===
-        "banner" => Some(StdBox::new(StaticLive { build_fn: super::banner::build_ui })),
-        "barchart" => Some(StdBox::new(StaticLive { build_fn: super::barchart::build_ui })),
-        "borders" => Some(StdBox::new(StaticLive { build_fn: super::borders::build_ui })),
-        "breadcrumbs" => Some(StdBox::new(StaticLive { build_fn: super::breadcrumbs::build_ui })),
-        "diff" => Some(StdBox::new(StaticLive { build_fn: super::diff::build_ui })),
-        "gradient" => Some(StdBox::new(StaticLive { build_fn: super::gradient::build_ui })),
-        "hello" => Some(StdBox::new(StaticLive { build_fn: super::hello::build_ui })),
-        "keyhints" => Some(StdBox::new(StaticLive { build_fn: super::keyhints::build_ui })),
-        "markdown" => Some(StdBox::new(StaticLive { build_fn: super::markdown::build_ui })),
-        "modal" => Some(StdBox::new(StaticLive { build_fn: super::modal::build_ui })),
-        "statusbar" => Some(StdBox::new(StaticLive { build_fn: super::statusbar::build_ui })),
-        "syntax" => Some(StdBox::new(StaticLive { build_fn: super::syntax::build_ui })),
-        "table" => Some(StdBox::new(StaticLive { build_fn: super::table::build_ui })),
-        "tree" => Some(StdBox::new(StaticLive { build_fn: super::tree::build_ui })),
+        "banner" => Some(StdBox::new(StaticLive {
+            build_fn: super::banner::build_ui,
+        })),
+        "barchart" => Some(StdBox::new(StaticLive {
+            build_fn: super::barchart::build_ui,
+        })),
+        "borders" => Some(StdBox::new(StaticLive {
+            build_fn: super::borders::build_ui,
+        })),
+        "breadcrumbs" => Some(StdBox::new(StaticLive {
+            build_fn: super::breadcrumbs::build_ui,
+        })),
+        "diff" => Some(StdBox::new(StaticLive {
+            build_fn: super::diff::build_ui,
+        })),
+        "gradient" => Some(StdBox::new(StaticLive {
+            build_fn: super::gradient::build_ui,
+        })),
+        "hello" => Some(StdBox::new(StaticLive {
+            build_fn: super::hello::build_ui,
+        })),
+        "keyhints" => Some(StdBox::new(StaticLive {
+            build_fn: super::keyhints::build_ui,
+        })),
+        "markdown" => Some(StdBox::new(StaticLive {
+            build_fn: super::markdown::build_ui,
+        })),
+        "modal" => Some(StdBox::new(StaticLive {
+            build_fn: super::modal::build_ui,
+        })),
+        "statusbar" => Some(StdBox::new(StaticLive {
+            build_fn: super::statusbar::build_ui,
+        })),
+        "syntax" => Some(StdBox::new(StaticLive {
+            build_fn: super::syntax::build_ui,
+        })),
+        "table" => Some(StdBox::new(StaticLive {
+            build_fn: super::table::build_ui,
+        })),
+        "tree" => Some(StdBox::new(StaticLive {
+            build_fn: super::tree::build_ui,
+        })),
 
         // === Timer-animated (9) ===
         "animation" => Some(StdBox::new(TimerLive {
@@ -766,10 +815,22 @@ pub fn create_live_preview(name: &str) -> Option<StdBox<dyn LivePreview>> {
 
         // === Sparkline (1) ===
         "sparkline" => Some(StdBox::new(SparklineLive {
-            cpu_data: vec![30.0, 35.0, 40.0, 38.0, 42.0, 45.0, 50.0, 48.0, 52.0, 55.0, 53.0, 50.0, 47.0, 44.0, 48.0, 52.0, 56.0, 60.0, 58.0, 55.0],
-            mem_data: vec![45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0, 64.0],
-            net_data: vec![10.0, 15.0, 8.0, 20.0, 12.0, 25.0, 18.0, 30.0, 22.0, 35.0, 28.0, 40.0, 32.0, 45.0, 38.0, 50.0, 42.0, 55.0, 48.0, 60.0],
-            audio_data: vec![80.0, 45.0, 60.0, 30.0, 90.0, 50.0, 70.0, 40.0, 85.0, 55.0, 65.0, 35.0, 75.0, 48.0, 88.0, 42.0, 72.0, 58.0, 82.0, 38.0, 68.0, 52.0, 78.0, 46.0],
+            cpu_data: vec![
+                30.0, 35.0, 40.0, 38.0, 42.0, 45.0, 50.0, 48.0, 52.0, 55.0, 53.0, 50.0, 47.0, 44.0,
+                48.0, 52.0, 56.0, 60.0, 58.0, 55.0,
+            ],
+            mem_data: vec![
+                45.0, 46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 57.0, 58.0,
+                59.0, 60.0, 61.0, 62.0, 63.0, 64.0,
+            ],
+            net_data: vec![
+                10.0, 15.0, 8.0, 20.0, 12.0, 25.0, 18.0, 30.0, 22.0, 35.0, 28.0, 40.0, 32.0, 45.0,
+                38.0, 50.0, 42.0, 55.0, 48.0, 60.0,
+            ],
+            audio_data: vec![
+                80.0, 45.0, 60.0, 30.0, 90.0, 50.0, 70.0, 40.0, 85.0, 55.0, 65.0, 35.0, 75.0, 48.0,
+                88.0, 42.0, 72.0, 58.0, 82.0, 38.0, 68.0, 52.0, 78.0, 46.0,
+            ],
             seed: 42,
             elapsed: 0.0,
         })),

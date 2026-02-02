@@ -27,11 +27,11 @@ pub const SHADES: [char; 6] = ['█', '▓', '▒', '░', '·', ' '];
 mod palette {
     use blaeck::prelude::Color;
 
-    pub const TEXT: Color = Color::Rgb(201, 209, 217);         // #c9d1d9
+    pub const TEXT: Color = Color::Rgb(201, 209, 217); // #c9d1d9
 
     // Status colors
-    pub const OK: Color = Color::Rgb(107, 203, 119);           // #6bcb77
-    pub const WARNING: Color = Color::Rgb(255, 201, 60);       // #ffc93c
+    pub const OK: Color = Color::Rgb(107, 203, 119); // #6bcb77
+    pub const WARNING: Color = Color::Rgb(255, 201, 60); // #ffc93c
 }
 
 // ============================================================================
@@ -82,8 +82,8 @@ const LOGO_HEIGHT: usize = 5;
 /// Render the logo with stacked offset stroke effect (NOCTERM style)
 /// Multiple layers with slight offsets create fake 3D depth
 fn render_logo_stacked(
-    opacity: f64,            // 0.0 to 1.0 - overall visibility
-    time: f64,               // for pulse animation
+    opacity: f64, // 0.0 to 1.0 - overall visibility
+    time: f64,    // for pulse animation
     params: &FieldParams,
 ) -> Element {
     if opacity <= 0.0 {
@@ -99,18 +99,18 @@ fn render_logo_stacked(
     // Color palette - stacked purples from dark to light
     // Back layers (darker) -> Front layer (bright)
     let colors: [(f32, f32, f32); 4] = [
-        (95.0, 75.0, 168.0),    // #5F4BA8 - darkest (back)
-        (124.0, 102.0, 201.0),  // #7C66C9
-        (155.0, 132.0, 232.0),  // #9B84E8
+        (95.0, 75.0, 168.0),                                 // #5F4BA8 - darkest (back)
+        (124.0, 102.0, 201.0),                               // #7C66C9
+        (155.0, 132.0, 232.0),                               // #9B84E8
         (183.0 + pulse * 20.0, 156.0 + pulse * 15.0, 255.0), // #B79CFF - brightest (front)
     ];
 
     // Offsets for each layer (creates the stacked extrusion)
     let offsets: [(i32, i32); 4] = [
-        (2, 2),   // back layer - offset down-right
-        (1, 1),   // middle-back
-        (0, 1),   // middle-front
-        (0, 0),   // front layer - no offset
+        (2, 2), // back layer - offset down-right
+        (1, 1), // middle-back
+        (0, 1), // middle-front
+        (0, 0), // front layer - no offset
     ];
 
     // Build a grid that composites all layers
@@ -228,10 +228,10 @@ fn get_memory_usage() -> Option<u64> {
 pub struct RendererStats {
     pub frames: u64,
     pub fps: f32,
-    pub fps_samples: Vec<f32>,  // Rolling window for FPS smoothing
-    pub fps_history: Vec<f32>,  // Longer history for sparkline
+    pub fps_samples: Vec<f32>, // Rolling window for FPS smoothing
+    pub fps_history: Vec<f32>, // Longer history for sparkline
     pub latency_ms: f32,
-    pub latency_samples: Vec<f32>,  // Rolling window for latency smoothing
+    pub latency_samples: Vec<f32>, // Rolling window for latency smoothing
 }
 
 impl RendererStats {
@@ -260,7 +260,7 @@ impl RendererStats {
         self.fps = self.fps_samples.iter().sum::<f32>() / self.fps_samples.len() as f32;
 
         // FPS history for sparkline (sample every ~10 frames)
-        if self.frames % 10 == 0 {
+        if self.frames.is_multiple_of(10) {
             self.fps_history.push(self.fps);
             if self.fps_history.len() > 20 {
                 self.fps_history.remove(0);
@@ -272,25 +272,25 @@ impl RendererStats {
         if self.latency_samples.len() > 30 {
             self.latency_samples.remove(0);
         }
-        self.latency_ms = self.latency_samples.iter().sum::<f32>() / self.latency_samples.len() as f32;
+        self.latency_ms =
+            self.latency_samples.iter().sum::<f32>() / self.latency_samples.len() as f32;
     }
-
 }
 
 #[derive(Clone)]
 pub struct LayoutStats {
     pub nodes: u32,
     pub depth: u8,
-    pub renders: u64,  // Total render count
+    pub renders: u64, // Total render count
 }
 
 #[derive(Clone)]
 pub struct BufferStats {
-    pub total_cells: u32,       // WIDTH * HEIGHT
-    pub field_cells: u32,       // Cells used by field background
-    pub panel_cells: u32,       // Cells used by panels
-    pub fill_pct: f32,          // Percentage of cells with content
-    pub writes_per_frame: u32,  // Estimated write operations
+    pub total_cells: u32,      // WIDTH * HEIGHT
+    pub field_cells: u32,      // Cells used by field background
+    pub panel_cells: u32,      // Cells used by panels
+    pub fill_pct: f32,         // Percentage of cells with content
+    pub writes_per_frame: u32, // Estimated write operations
 }
 
 impl BufferStats {
@@ -310,8 +310,10 @@ impl BufferStats {
         self.field_cells = self.total_cells;
         // Panels overlay some cells (estimate from node count)
         self.panel_cells = node_count * 15; // ~15 chars per node average
-        // Calculate fill percentage (field + panels can overlap)
-        self.fill_pct = ((self.field_cells + self.panel_cells) as f32 / self.total_cells as f32 * 100.0).min(100.0);
+                                            // Calculate fill percentage (field + panels can overlap)
+        self.fill_pct = ((self.field_cells + self.panel_cells) as f32 / self.total_cells as f32
+            * 100.0)
+            .min(100.0);
         // Each node roughly equals one write operation
         self.writes_per_frame = node_count + (HEIGHT as u32); // nodes + field rows
     }
@@ -319,7 +321,11 @@ impl BufferStats {
 
 impl LayoutStats {
     fn new() -> Self {
-        Self { nodes: 0, depth: 0, renders: 0 }
+        Self {
+            nodes: 0,
+            depth: 0,
+            renders: 0,
+        }
     }
 
     fn update(&mut self, node_count: u32, tree_depth: u8) {
@@ -331,7 +337,7 @@ impl LayoutStats {
 
 #[derive(Clone)]
 pub struct MemoryStats {
-    pub baseline_mb: Option<f32>,  // Memory after first render (lazy init)
+    pub baseline_mb: Option<f32>, // Memory after first render (lazy init)
     pub used_mb: f32,
     pub peak_mb: f32,
 }
@@ -364,9 +370,9 @@ impl MemoryStats {
 /// Field energy stats - represents the scalar field's current state
 #[derive(Clone)]
 pub struct FieldStats {
-    pub energy_pct: u8,      // Current field energy as percentage
-    pub avg_intensity: f32,  // Rolling average intensity
-    pub drift: f32,          // Rate of change
+    pub energy_pct: u8,     // Current field energy as percentage
+    pub avg_intensity: f32, // Rolling average intensity
+    pub drift: f32,         // Rate of change
     pub last_energy: f32,
 }
 
@@ -396,6 +402,7 @@ impl FieldStats {
 }
 
 /// Count nodes and max depth in an Element tree
+#[allow(dead_code)]
 pub fn count_element_tree(element: &Element) -> (u32, u8) {
     fn count_recursive(el: &Element, depth: u8) -> (u32, u8) {
         match el {
@@ -451,7 +458,7 @@ impl LayoutPositions {
         let cy = HEIGHT as f32 / 2.0;
         let orbit_w = 28.0;
         let orbit_h = 7.0;
-        let ox = -8.0;  // panel offset
+        let ox = -8.0; // panel offset
         let oy = -2.0;
 
         Self {
@@ -530,19 +537,18 @@ impl LayoutPositions {
         let near = Self::near_logo();
         Self {
             // Each panel starts a few chars further out from its corner
-            buffer: (near.buffer.0 - 3.0, near.buffer.1 - 2.0),           // nudge up-left
+            buffer: (near.buffer.0 - 3.0, near.buffer.1 - 2.0), // nudge up-left
             layout_panel: (near.layout_panel.0 + 3.0, near.layout_panel.1 - 2.0), // nudge up-right
-            process: (near.process.0 - 3.0, near.process.1 + 2.0),        // nudge down-left
-            status: (near.status.0 + 3.0, near.status.1 + 2.0),           // nudge down-right
-            anim_stats: (near.anim_stats.0, near.anim_stats.1 + 3.0),     // nudge down
+            process: (near.process.0 - 3.0, near.process.1 + 2.0), // nudge down-left
+            status: (near.status.0 + 3.0, near.status.1 + 2.0), // nudge down-right
+            anim_stats: (near.anim_stats.0, near.anim_stats.1 + 3.0), // nudge down
         }
     }
 
     /// Interpolate between two layouts
     fn lerp(from: &Self, to: &Self, t: f32) -> Self {
-        let lerp_pos = |a: (f32, f32), b: (f32, f32)| {
-            (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
-        };
+        let lerp_pos =
+            |a: (f32, f32), b: (f32, f32)| (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t);
         Self {
             buffer: lerp_pos(from.buffer, to.buffer),
             layout_panel: lerp_pos(from.layout_panel, to.layout_panel),
@@ -606,22 +612,21 @@ impl DashboardState {
     /// 16-18s: Everything fades out
     /// 18-20s: Logo fades back in
     /// 20-22s: Logo alone (seamless loop back to start)
-
     fn logo_opacity(&self) -> f64 {
         let t = self.cycle_time();
 
         // Logo is visible 0-8s, fades out 8-9s, hidden 9-18s, fades in 18-20s, visible 20-22s
         // This creates seamless loop (ends at 1.0, starts at 1.0)
         if t < 8.0 {
-            1.0  // Full visibility at start (seamless from end of cycle)
+            1.0 // Full visibility at start (seamless from end of cycle)
         } else if t < 9.0 {
-            1.0 - (t - 8.0)  // Fade out
+            1.0 - (t - 8.0) // Fade out
         } else if t < 18.0 {
-            0.0  // Hidden during git tree
+            0.0 // Hidden during git tree
         } else if t < 20.0 {
-            (t - 18.0) / 2.0  // Fade back in
+            (t - 18.0) / 2.0 // Fade back in
         } else {
-            1.0  // Full at end (seamless to start)
+            1.0 // Full at end (seamless to start)
         }
     }
 
@@ -629,15 +634,15 @@ impl DashboardState {
         let t = self.cycle_time();
 
         if t < 2.0 {
-            0.0  // Logo alone
+            0.0 // Logo alone
         } else if t < 4.0 {
-            (t - 2.0) / 2.0  // Fade in
+            (t - 2.0) / 2.0 // Fade in
         } else if t < 16.0 {
-            1.0  // Visible
+            1.0 // Visible
         } else if t < 18.0 {
-            1.0 - (t - 16.0) / 2.0  // Fade out
+            1.0 - (t - 16.0) / 2.0 // Fade out
         } else {
-            0.0  // Hidden during logo return
+            0.0 // Hidden during logo return
         }
     }
 
@@ -645,15 +650,15 @@ impl DashboardState {
         let t = self.cycle_time();
 
         if t < 10.0 {
-            0.0  // Not shown yet
+            0.0 // Not shown yet
         } else if t < 11.0 {
-            t - 10.0  // Fade in
+            t - 10.0 // Fade in
         } else if t < 15.0 {
-            1.0  // Full visibility
+            1.0 // Full visibility
         } else if t < 16.0 {
-            1.0 - (t - 15.0)  // Fade out
+            1.0 - (t - 15.0) // Fade out
         } else {
-            0.0  // Hidden
+            0.0 // Hidden
         }
     }
 
@@ -668,12 +673,16 @@ impl DashboardState {
         // Phase 2 (2-4s): Panels fly in near logo
         if t < 4.0 {
             let progress = ease_snap(((t - 2.0) / 2.0) as f32);
-            return LayoutPositions::lerp(&LayoutPositions::offscreen(), &LayoutPositions::near_logo(), progress);
+            return LayoutPositions::lerp(
+                &LayoutPositions::offscreen(),
+                &LayoutPositions::near_logo(),
+                progress,
+            );
         }
 
         // Phase 3 (4-8s): Orbit around logo
         if t < 8.0 {
-            let orbit_progress = ((t - 4.0) / 4.0) as f32;  // 0 to 1 over 4 seconds
+            let orbit_progress = ((t - 4.0) / 4.0) as f32; // 0 to 1 over 4 seconds
             return LayoutPositions::orbit(orbit_progress);
         }
 
@@ -685,7 +694,11 @@ impl DashboardState {
         // Phase 5 (9-10s): Boxes move to left-aligned
         if t < 10.0 {
             let progress = ease_snap(((t - 9.0) / 1.0) as f32);
-            return LayoutPositions::lerp(&LayoutPositions::orbit(1.0), &LayoutPositions::left_aligned(), progress);
+            return LayoutPositions::lerp(
+                &LayoutPositions::orbit(1.0),
+                &LayoutPositions::left_aligned(),
+                progress,
+            );
         }
 
         // Phase 6 (10-18s): Stay left-aligned while git tree shows
@@ -697,7 +710,14 @@ impl DashboardState {
         LayoutPositions::left_aligned()
     }
 
-    pub fn update(&mut self, dt: f64, render_time_ms: f32, field_energy: f64, node_count: u32, tree_depth: u8) {
+    pub fn update(
+        &mut self,
+        dt: f64,
+        render_time_ms: f32,
+        field_energy: f64,
+        node_count: u32,
+        tree_depth: u8,
+    ) {
         if !self.paused {
             self.field_time += dt * 0.15;
         }
@@ -742,12 +762,19 @@ pub fn panel_field_energy(panel_x: f64, panel_y: f64, time: f64, params: &FieldP
 }
 
 fn value_to_char(v: f64) -> char {
-    if v > 0.6 { SHADES[0] }
-    else if v > 0.3 { SHADES[1] }
-    else if v > 0.0 { SHADES[2] }
-    else if v > -0.3 { SHADES[3] }
-    else if v > -0.6 { SHADES[4] }
-    else { SHADES[5] }
+    if v > 0.6 {
+        SHADES[0]
+    } else if v > 0.3 {
+        SHADES[1]
+    } else if v > 0.0 {
+        SHADES[2]
+    } else if v > -0.3 {
+        SHADES[3]
+    } else if v > -0.6 {
+        SHADES[4]
+    } else {
+        SHADES[5]
+    }
 }
 
 fn field_color(v: f64, time: f64, intensity: f64) -> Color {
@@ -826,7 +853,14 @@ fn render_panel(
     }
 }
 
-fn render_layout_panel(stats: &LayoutStats, field_energy: f64, opacity: f64, time: f64, pos: (f64, f64), params: &FieldParams) -> Element {
+fn render_layout_panel(
+    stats: &LayoutStats,
+    field_energy: f64,
+    opacity: f64,
+    time: f64,
+    pos: (f64, f64),
+    params: &FieldParams,
+) -> Element {
     let text_color = bright_text(field_energy);
     let bg = field_bg_at(pos.0, pos.1, time, params, 1.0);
     let content = element! {
@@ -840,11 +874,22 @@ fn render_layout_panel(stats: &LayoutStats, field_energy: f64, opacity: f64, tim
     render_panel("LAYOUT", content, field_energy, opacity, bg, 17.0)
 }
 
-fn render_memory_panel(stats: &MemoryStats, field_energy: f64, opacity: f64, time: f64, pos: (f64, f64), params: &FieldParams) -> Element {
+fn render_memory_panel(
+    stats: &MemoryStats,
+    field_energy: f64,
+    opacity: f64,
+    time: f64,
+    pos: (f64, f64),
+    params: &FieldParams,
+) -> Element {
     let delta = stats.delta();
     let text_color = bright_text(field_energy);
     let bg = field_bg_at(pos.0, pos.1, time, params, 1.0);
-    let delta_color = if delta > 1.0 { palette::WARNING } else { text_color };
+    let delta_color = if delta > 1.0 {
+        palette::WARNING
+    } else {
+        text_color
+    };
 
     let content = element! {
         Box(flex_direction: FlexDirection::Column) {
@@ -860,7 +905,13 @@ fn render_memory_panel(stats: &MemoryStats, field_energy: f64, opacity: f64, tim
 // FIELD panel commented out for new animation sequence
 // fn render_entropy_panel(...) { ... }
 
-fn render_status_panel(field_energy: f64, opacity: f64, time: f64, pos: (f64, f64), params: &FieldParams) -> Element {
+fn render_status_panel(
+    field_energy: f64,
+    opacity: f64,
+    time: f64,
+    pos: (f64, f64),
+    params: &FieldParams,
+) -> Element {
     // Dormant module occasionally flickers
     let panic_color = if ((time * 3.0).sin() > 0.95) && field_energy > 0.7 {
         palette::WARNING
@@ -927,7 +978,14 @@ fn render_timeline_panel(
     render_panel("TIMELINE", content, field_energy, opacity, bg, 17.0)
 }
 
-fn render_buffer_panel(stats: &BufferStats, field_energy: f64, opacity: f64, time: f64, pos: (f64, f64), params: &FieldParams) -> Element {
+fn render_buffer_panel(
+    stats: &BufferStats,
+    field_energy: f64,
+    opacity: f64,
+    time: f64,
+    pos: (f64, f64),
+    params: &FieldParams,
+) -> Element {
     if opacity <= 0.0 {
         return Element::Empty;
     }
@@ -1042,7 +1100,14 @@ fn render_git_tree(opacity: f64, _time: f64, _params: &FieldParams) -> Element {
 // Field Background Rendering
 // ============================================================================
 
-fn build_field_row(y: usize, width: usize, height: usize, time: f64, params: &FieldParams, intensity: f64) -> Element {
+fn build_field_row(
+    y: usize,
+    width: usize,
+    height: usize,
+    time: f64,
+    params: &FieldParams,
+    intensity: f64,
+) -> Element {
     let ny = y as f64 / height as f64;
 
     let cells: Vec<Element> = (0..width)
@@ -1057,7 +1122,13 @@ fn build_field_row(y: usize, width: usize, height: usize, time: f64, params: &Fi
     Element::row(cells)
 }
 
-fn build_field_background(width: usize, height: usize, time: f64, params: &FieldParams, intensity: f64) -> Element {
+fn build_field_background(
+    width: usize,
+    height: usize,
+    time: f64,
+    params: &FieldParams,
+    intensity: f64,
+) -> Element {
     if intensity <= 0.0 {
         // Black screen
         let rows: Vec<Element> = (0..height)
@@ -1074,7 +1145,7 @@ fn build_field_background(width: usize, height: usize, time: f64, params: &Field
     Element::column(
         (0..height)
             .map(|y| build_field_row(y, width, height, time, params, intensity))
-            .collect()
+            .collect(),
     )
 }
 
@@ -1100,11 +1171,26 @@ pub fn build_dashboard(state: &DashboardState, params: &FieldParams) -> Element 
     let positions = state.current_positions();
 
     // Panel positions for field energy (normalized 0-1)
-    let buffer_pos = (positions.buffer.0 as f64 / WIDTH as f64, positions.buffer.1 as f64 / HEIGHT as f64);
-    let layout_pos = (positions.layout_panel.0 as f64 / WIDTH as f64, positions.layout_panel.1 as f64 / HEIGHT as f64);
-    let memory_pos = (positions.process.0 as f64 / WIDTH as f64, positions.process.1 as f64 / HEIGHT as f64);
-    let status_pos = (positions.status.0 as f64 / WIDTH as f64, positions.status.1 as f64 / HEIGHT as f64);
-    let anim_pos = (positions.anim_stats.0 as f64 / WIDTH as f64, positions.anim_stats.1 as f64 / HEIGHT as f64);
+    let buffer_pos = (
+        positions.buffer.0 as f64 / WIDTH as f64,
+        positions.buffer.1 as f64 / HEIGHT as f64,
+    );
+    let layout_pos = (
+        positions.layout_panel.0 as f64 / WIDTH as f64,
+        positions.layout_panel.1 as f64 / HEIGHT as f64,
+    );
+    let memory_pos = (
+        positions.process.0 as f64 / WIDTH as f64,
+        positions.process.1 as f64 / HEIGHT as f64,
+    );
+    let status_pos = (
+        positions.status.0 as f64 / WIDTH as f64,
+        positions.status.1 as f64 / HEIGHT as f64,
+    );
+    let anim_pos = (
+        positions.anim_stats.0 as f64 / WIDTH as f64,
+        positions.anim_stats.1 as f64 / HEIGHT as f64,
+    );
 
     // Calculate field energy at panel positions
     let buffer_energy = panel_field_energy(buffer_pos.0, buffer_pos.1, time, params);
@@ -1114,20 +1200,56 @@ pub fn build_dashboard(state: &DashboardState, params: &FieldParams) -> Element 
     let anim_energy = panel_field_energy(anim_pos.0, anim_pos.1, time, params);
 
     // Build panels with animated positions
-    let buffer_panel = render_buffer_panel(&state.buffer, buffer_energy, panel_opacity, time, buffer_pos, params);
-    let layout_panel = render_layout_panel(&state.layout, layout_energy, panel_opacity, time, layout_pos, params);
-    let memory_panel = render_memory_panel(&state.memory, memory_energy, panel_opacity, time, memory_pos, params);
+    let buffer_panel = render_buffer_panel(
+        &state.buffer,
+        buffer_energy,
+        panel_opacity,
+        time,
+        buffer_pos,
+        params,
+    );
+    let layout_panel = render_layout_panel(
+        &state.layout,
+        layout_energy,
+        panel_opacity,
+        time,
+        layout_pos,
+        params,
+    );
+    let memory_panel = render_memory_panel(
+        &state.memory,
+        memory_energy,
+        panel_opacity,
+        time,
+        memory_pos,
+        params,
+    );
     let status_panel = render_status_panel(status_energy, panel_opacity, time, status_pos, params);
 
     // Timeline panel (shows current phase)
     let cycle_time = state.cycle_time();
-    let phase_name = if cycle_time < 2.0 { "logo" }
-        else if cycle_time < 4.0 { "fly-in" }
-        else if cycle_time < 8.0 { "orbit" }
-        else if cycle_time < 10.0 { "settle" }
-        else if cycle_time < 16.0 { "tree" }
-        else { "outro" };
-    let anim_panel = render_timeline_panel(phase_name, cycle_time, anim_energy, panel_opacity, time, anim_pos, params);
+    let phase_name = if cycle_time < 2.0 {
+        "logo"
+    } else if cycle_time < 4.0 {
+        "fly-in"
+    } else if cycle_time < 8.0 {
+        "orbit"
+    } else if cycle_time < 10.0 {
+        "settle"
+    } else if cycle_time < 16.0 {
+        "tree"
+    } else {
+        "outro"
+    };
+    let anim_panel = render_timeline_panel(
+        phase_name,
+        cycle_time,
+        anim_energy,
+        panel_opacity,
+        time,
+        anim_pos,
+        params,
+    );
 
     // Git tree (right side, during tree phase)
     let git_tree = render_git_tree(git_tree_opacity, time, params);
@@ -1162,7 +1284,6 @@ pub fn build_dashboard(state: &DashboardState, params: &FieldParams) -> Element 
         let label_bg = field_color(v, time, field_intensity);
         element! { Text(content: format!("{:.0} fps", state.renderer.fps), color: label_color, bg_color: label_bg) }
     };
-
 
     // Absolute positioned panels
     let panels_layout = element! {

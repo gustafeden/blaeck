@@ -4,11 +4,7 @@ use blaeck::prelude::*;
 pub fn render(opacity: f64, scale: f64, act_name: &str, elapsed: f64, paused: bool) -> Element {
     let bar_width = 30;
     let filled = (opacity * bar_width as f64) as usize;
-    let bar = format!(
-        "[{}{}]",
-        "█".repeat(filled),
-        "░".repeat(bar_width - filled)
-    );
+    let bar = format!("[{}{}]", "█".repeat(filled), "░".repeat(bar_width - filled));
 
     let scale_width = (scale * 20.0) as usize;
     let scale_bar = "▓".repeat(scale_width);
@@ -73,7 +69,12 @@ pub fn build_ui_with_timer(timer: &AnimationTimer) -> Element {
         // pulse
         let p = (t - 3.5) / 1.0;
         let opacity = 1.0 - 0.4 * (p * std::f64::consts::PI).sin();
-        (opacity, 1.0 + 0.1 * (p * std::f64::consts::PI).sin(), "pulse", t - 3.5)
+        (
+            opacity,
+            1.0 + 0.1 * (p * std::f64::consts::PI).sin(),
+            "pulse",
+            t - 3.5,
+        )
     } else {
         // fade_out
         let p = (t - 4.5) / 1.5;

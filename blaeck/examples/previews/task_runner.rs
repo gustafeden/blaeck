@@ -60,7 +60,14 @@ pub fn build_ui_with_timer(timer: &AnimationTimer) -> Element {
         if frame_idx < accumulated_frames + frames {
             // We're in this task
             let frame = frame_idx - accumulated_frames;
-            return build_running_ui(&completed, task_idx, task_name, *task_duration, frame, frames);
+            return build_running_ui(
+                &completed,
+                task_idx,
+                task_name,
+                *task_duration,
+                frame,
+                frames,
+            );
         }
 
         accumulated_frames += frames;
@@ -100,17 +107,15 @@ fn build_running_ui(
         });
     }
 
-    let mut task_box_children: Vec<Element> = vec![
-        element! {
-            Box(flex_direction: FlexDirection::Row) {
-                Text(content: format!("{} {}...", spinner, task_name),
-                    color: Color::Yellow, bold: true)
-                Spacer
-                Text(content: format_duration(elapsed),
-                    color: Color::Cyan, dim: true)
-            }
-        },
-    ];
+    let mut task_box_children: Vec<Element> = vec![element! {
+        Box(flex_direction: FlexDirection::Row) {
+            Text(content: format!("{} {}...", spinner, task_name),
+                color: Color::Yellow, bold: true)
+            Spacer
+            Text(content: format_duration(elapsed),
+                color: Color::Cyan, dim: true)
+        }
+    }];
 
     if task_idx == 3 {
         task_box_children.push(element! {

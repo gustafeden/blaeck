@@ -6,7 +6,9 @@
 
 use blaeck::prelude::*;
 
+#[allow(dead_code)]
 pub const DEFAULT_WIDTH: usize = 120;
+#[allow(dead_code)]
 pub const DEFAULT_HEIGHT: usize = 30;
 
 pub const LOGO: &[&str] = &[
@@ -31,20 +33,114 @@ pub const SHADES: [char; 6] = ['█', '▓', '▒', '░', '·', ' '];
 #[derive(Clone, Copy)]
 pub struct ColorTheme {
     pub name: &'static str,
-    pub r_mult: f64, pub g_mult: f64, pub b_mult: f64,
-    pub r_base: f64, pub g_base: f64, pub b_base: f64,
-    pub r_phase: f64, pub g_phase: f64, pub b_phase: f64,
+    pub r_mult: f64,
+    pub g_mult: f64,
+    pub b_mult: f64,
+    pub r_base: f64,
+    pub g_base: f64,
+    pub b_base: f64,
+    pub r_phase: f64,
+    pub g_phase: f64,
+    pub b_phase: f64,
 }
 
 pub const THEMES: &[ColorTheme] = &[
-    ColorTheme { name: "Nocturne", r_mult: 60.0, g_mult: 40.0, b_mult: 80.0, r_base: 80.0, g_base: 30.0, b_base: 140.0, r_phase: 0.0, g_phase: 2.0, b_phase: 4.0 },
-    ColorTheme { name: "Ocean", r_mult: 20.0, g_mult: 60.0, b_mult: 80.0, r_base: 10.0, g_base: 80.0, b_base: 160.0, r_phase: 0.0, g_phase: 1.0, b_phase: 2.0 },
-    ColorTheme { name: "Inferno", r_mult: 100.0, g_mult: 60.0, b_mult: 20.0, r_base: 150.0, g_base: 50.0, b_base: 10.0, r_phase: 0.0, g_phase: 0.5, b_phase: 1.0 },
-    ColorTheme { name: "Matrix", r_mult: 15.0, g_mult: 80.0, b_mult: 25.0, r_base: 0.0, g_base: 120.0, b_base: 20.0, r_phase: 0.0, g_phase: 0.0, b_phase: 3.0 },
-    ColorTheme { name: "Sunset", r_mult: 80.0, g_mult: 50.0, b_mult: 60.0, r_base: 180.0, g_base: 80.0, b_base: 100.0, r_phase: 0.0, g_phase: 1.5, b_phase: 3.0 },
-    ColorTheme { name: "Aurora", r_mult: 50.0, g_mult: 70.0, b_mult: 90.0, r_base: 60.0, g_base: 140.0, b_base: 120.0, r_phase: 2.0, g_phase: 0.0, b_phase: 4.0 },
-    ColorTheme { name: "Synthwave", r_mult: 90.0, g_mult: 30.0, b_mult: 90.0, r_base: 150.0, g_base: 20.0, b_base: 180.0, r_phase: 0.0, g_phase: 3.0, b_phase: 1.0 },
-    ColorTheme { name: "Lava", r_mult: 80.0, g_mult: 40.0, b_mult: 10.0, r_base: 180.0, g_base: 60.0, b_base: 0.0, r_phase: 0.0, g_phase: 0.3, b_phase: 0.6 },
+    ColorTheme {
+        name: "Nocturne",
+        r_mult: 60.0,
+        g_mult: 40.0,
+        b_mult: 80.0,
+        r_base: 80.0,
+        g_base: 30.0,
+        b_base: 140.0,
+        r_phase: 0.0,
+        g_phase: 2.0,
+        b_phase: 4.0,
+    },
+    ColorTheme {
+        name: "Ocean",
+        r_mult: 20.0,
+        g_mult: 60.0,
+        b_mult: 80.0,
+        r_base: 10.0,
+        g_base: 80.0,
+        b_base: 160.0,
+        r_phase: 0.0,
+        g_phase: 1.0,
+        b_phase: 2.0,
+    },
+    ColorTheme {
+        name: "Inferno",
+        r_mult: 100.0,
+        g_mult: 60.0,
+        b_mult: 20.0,
+        r_base: 150.0,
+        g_base: 50.0,
+        b_base: 10.0,
+        r_phase: 0.0,
+        g_phase: 0.5,
+        b_phase: 1.0,
+    },
+    ColorTheme {
+        name: "Matrix",
+        r_mult: 15.0,
+        g_mult: 80.0,
+        b_mult: 25.0,
+        r_base: 0.0,
+        g_base: 120.0,
+        b_base: 20.0,
+        r_phase: 0.0,
+        g_phase: 0.0,
+        b_phase: 3.0,
+    },
+    ColorTheme {
+        name: "Sunset",
+        r_mult: 80.0,
+        g_mult: 50.0,
+        b_mult: 60.0,
+        r_base: 180.0,
+        g_base: 80.0,
+        b_base: 100.0,
+        r_phase: 0.0,
+        g_phase: 1.5,
+        b_phase: 3.0,
+    },
+    ColorTheme {
+        name: "Aurora",
+        r_mult: 50.0,
+        g_mult: 70.0,
+        b_mult: 90.0,
+        r_base: 60.0,
+        g_base: 140.0,
+        b_base: 120.0,
+        r_phase: 2.0,
+        g_phase: 0.0,
+        b_phase: 4.0,
+    },
+    ColorTheme {
+        name: "Synthwave",
+        r_mult: 90.0,
+        g_mult: 30.0,
+        b_mult: 90.0,
+        r_base: 150.0,
+        g_base: 20.0,
+        b_base: 180.0,
+        r_phase: 0.0,
+        g_phase: 3.0,
+        b_phase: 1.0,
+    },
+    ColorTheme {
+        name: "Lava",
+        r_mult: 80.0,
+        g_mult: 40.0,
+        b_mult: 10.0,
+        r_base: 180.0,
+        g_base: 60.0,
+        b_base: 0.0,
+        r_phase: 0.0,
+        g_phase: 0.3,
+        b_phase: 0.6,
+    },
 ];
 
 // ============================================================================
@@ -54,19 +150,78 @@ pub const THEMES: &[ColorTheme] = &[
 #[derive(Clone, Copy)]
 pub struct WavePreset {
     pub name: &'static str,
-    pub freq1: f64, pub freq2: f64, pub freq3: f64, pub freq4: f64,
+    pub freq1: f64,
+    pub freq2: f64,
+    pub freq3: f64,
+    pub freq4: f64,
     pub speed: f64,
 }
 
 pub const PRESETS: &[WavePreset] = &[
-    WavePreset { name: "Classic", freq1: 12.0, freq2: 10.0, freq3: 8.0, freq4: 15.0, speed: 1.0 },
-    WavePreset { name: "Slow Flow", freq1: 6.0, freq2: 5.0, freq3: 4.0, freq4: 8.0, speed: 0.5 },
-    WavePreset { name: "Ripples", freq1: 3.0, freq2: 3.0, freq3: 2.0, freq4: 25.0, speed: 1.2 },
-    WavePreset { name: "Turbulent", freq1: 20.0, freq2: 18.0, freq3: 15.0, freq4: 22.0, speed: 1.5 },
-    WavePreset { name: "Waves", freq1: 15.0, freq2: 4.0, freq3: 10.0, freq4: 5.0, speed: 0.8 },
-    WavePreset { name: "Vortex", freq1: 5.0, freq2: 5.0, freq3: 3.0, freq4: 35.0, speed: 2.0 },
-    WavePreset { name: "Gentle", freq1: 4.0, freq2: 3.0, freq3: 2.0, freq4: 6.0, speed: 0.3 },
-    WavePreset { name: "Chaotic", freq1: 17.0, freq2: 13.0, freq3: 19.0, freq4: 11.0, speed: 1.8 },
+    WavePreset {
+        name: "Classic",
+        freq1: 12.0,
+        freq2: 10.0,
+        freq3: 8.0,
+        freq4: 15.0,
+        speed: 1.0,
+    },
+    WavePreset {
+        name: "Slow Flow",
+        freq1: 6.0,
+        freq2: 5.0,
+        freq3: 4.0,
+        freq4: 8.0,
+        speed: 0.5,
+    },
+    WavePreset {
+        name: "Ripples",
+        freq1: 3.0,
+        freq2: 3.0,
+        freq3: 2.0,
+        freq4: 25.0,
+        speed: 1.2,
+    },
+    WavePreset {
+        name: "Turbulent",
+        freq1: 20.0,
+        freq2: 18.0,
+        freq3: 15.0,
+        freq4: 22.0,
+        speed: 1.5,
+    },
+    WavePreset {
+        name: "Waves",
+        freq1: 15.0,
+        freq2: 4.0,
+        freq3: 10.0,
+        freq4: 5.0,
+        speed: 0.8,
+    },
+    WavePreset {
+        name: "Vortex",
+        freq1: 5.0,
+        freq2: 5.0,
+        freq3: 3.0,
+        freq4: 35.0,
+        speed: 2.0,
+    },
+    WavePreset {
+        name: "Gentle",
+        freq1: 4.0,
+        freq2: 3.0,
+        freq3: 2.0,
+        freq4: 6.0,
+        speed: 0.3,
+    },
+    WavePreset {
+        name: "Chaotic",
+        freq1: 17.0,
+        freq2: 13.0,
+        freq3: 19.0,
+        freq4: 11.0,
+        speed: 1.8,
+    },
 ];
 
 // ============================================================================
@@ -75,8 +230,8 @@ pub const PRESETS: &[WavePreset] = &[
 
 #[derive(Clone)]
 pub struct Blob {
-    pub x: f64,      // 0.0 to 1.0
-    pub y: f64,      // 0.0 to 1.0
+    pub x: f64, // 0.0 to 1.0
+    pub y: f64, // 0.0 to 1.0
     pub vx: f64,
     pub vy: f64,
     pub radius: f64, // blob size
@@ -106,7 +261,7 @@ impl LavaLamp {
                     y: (row as f64) / (num_blobs as f64 / 3.0) + rng() * 0.1,
                     vx: 0.0,
                     vy: 0.0,
-                    radius: 0.06 + rng() * 0.06,  // Smaller blobs
+                    radius: 0.06 + rng() * 0.06, // Smaller blobs
                 }
             })
             .collect();
@@ -174,7 +329,7 @@ impl LavaLamp {
 
             // Cooling at top - blobs slow down and sink
             if blob.y < 0.15 {
-                blob.vy += 0.002;  // Push down
+                blob.vy += 0.002; // Push down
             }
 
             // Gentle convection: warm center rises, cool edges sink
@@ -182,9 +337,9 @@ impl LavaLamp {
 
             // Target vertical velocity based on horizontal position
             let target_vy = if center_dist < 0.15 {
-                -0.015  // Rise in center (slower)
+                -0.015 // Rise in center (slower)
             } else if center_dist > 0.35 {
-                0.012  // Sink at edges
+                0.012 // Sink at edges
             } else {
                 let t = (center_dist - 0.15) / 0.2;
                 -0.015 + t * 0.027
@@ -213,9 +368,10 @@ impl LavaLamp {
             blob.vy += (wobble_phase * 0.7).cos() * 0.0005;
 
             // Random thermal kicks (simulates heat convection turbulence)
-            let thermal = ((self.time * 5.0 + blob.x * 13.0 + blob.y * 17.0).sin() * 12345.6789).fract();
+            let thermal =
+                ((self.time * 5.0 + blob.x * 13.0 + blob.y * 17.0).sin() * 12345.6789).fract();
             if thermal > 0.98 {
-                blob.vy -= 0.003;  // Occasional upward kick
+                blob.vy -= 0.003; // Occasional upward kick
             }
 
             // Damping
@@ -260,7 +416,7 @@ impl LavaLamp {
         let mut field = 0.0;
         for blob in &self.blobs {
             let dx = x - blob.x;
-            let dy = (y - blob.y) * 2.0;  // Stretch vertically (terminal chars are taller)
+            let dy = (y - blob.y) * 2.0; // Stretch vertically (terminal chars are taller)
             let dist_sq = dx * dx + dy * dy + 0.001;
             field += (blob.radius * blob.radius) / dist_sq;
         }
@@ -282,14 +438,17 @@ pub enum Mode {
 pub struct Params {
     pub mode: Mode,
     // Plasma params
-    pub freq1: f64, pub freq2: f64, pub freq3: f64, pub freq4: f64,
+    pub freq1: f64,
+    pub freq2: f64,
+    pub freq3: f64,
+    pub freq4: f64,
     pub speed: f64,
     pub theme_idx: usize,
     pub preset_idx: usize,
     pub seed: u64,
     // Lava lamp params
     pub num_blobs: usize,
-    pub zoom: f64,  // 1.0 = default, higher = zoomed in (bigger blobs), lower = zoomed out
+    pub zoom: f64, // 1.0 = default, higher = zoomed in (bigger blobs), lower = zoomed out
 }
 
 impl Params {
@@ -297,7 +456,10 @@ impl Params {
         let p = &PRESETS[0];
         Self {
             mode: Mode::Plasma,
-            freq1: p.freq1, freq2: p.freq2, freq3: p.freq3, freq4: p.freq4,
+            freq1: p.freq1,
+            freq2: p.freq2,
+            freq3: p.freq3,
+            freq4: p.freq4,
             speed: p.speed,
             theme_idx: 0,
             preset_idx: 0,
@@ -307,20 +469,43 @@ impl Params {
         }
     }
 
-    pub fn theme(&self) -> &'static ColorTheme { &THEMES[self.theme_idx] }
-    pub fn preset(&self) -> &'static WavePreset { &PRESETS[self.preset_idx] }
+    pub fn theme(&self) -> &'static ColorTheme {
+        &THEMES[self.theme_idx]
+    }
+    pub fn preset(&self) -> &'static WavePreset {
+        &PRESETS[self.preset_idx]
+    }
 
     pub fn apply_preset(&mut self, idx: usize) {
         self.preset_idx = idx % PRESETS.len();
         let p = &PRESETS[self.preset_idx];
-        self.freq1 = p.freq1; self.freq2 = p.freq2; self.freq3 = p.freq3; self.freq4 = p.freq4;
+        self.freq1 = p.freq1;
+        self.freq2 = p.freq2;
+        self.freq3 = p.freq3;
+        self.freq4 = p.freq4;
         self.speed = p.speed;
     }
 
-    pub fn next_theme(&mut self) { self.theme_idx = (self.theme_idx + 1) % THEMES.len(); }
-    pub fn prev_theme(&mut self) { self.theme_idx = if self.theme_idx == 0 { THEMES.len() - 1 } else { self.theme_idx - 1 }; }
-    pub fn next_preset(&mut self) { self.apply_preset(self.preset_idx + 1); }
-    pub fn prev_preset(&mut self) { self.apply_preset(if self.preset_idx == 0 { PRESETS.len() - 1 } else { self.preset_idx - 1 }); }
+    pub fn next_theme(&mut self) {
+        self.theme_idx = (self.theme_idx + 1) % THEMES.len();
+    }
+    pub fn prev_theme(&mut self) {
+        self.theme_idx = if self.theme_idx == 0 {
+            THEMES.len() - 1
+        } else {
+            self.theme_idx - 1
+        };
+    }
+    pub fn next_preset(&mut self) {
+        self.apply_preset(self.preset_idx + 1);
+    }
+    pub fn prev_preset(&mut self) {
+        self.apply_preset(if self.preset_idx == 0 {
+            PRESETS.len() - 1
+        } else {
+            self.preset_idx - 1
+        });
+    }
 
     pub fn randomize_plasma(&mut self) {
         self.seed = self.seed.wrapping_mul(6364136223846793005).wrapping_add(1);
@@ -352,14 +537,15 @@ pub fn plasma_value(nx: f64, ny: f64, time: f64, p: &Params) -> f64 {
 /// Lava lamp mode - slow, blobby plasma with gentle movement
 pub fn lava_plasma_value(nx: f64, ny: f64, time: f64, p: &Params) -> f64 {
     // Zoom: higher = bigger blobs (lower frequency), lower = smaller blobs
-    let scale = 3.0 / p.zoom;  // Base frequency divided by zoom
-    let slow_time = time * 0.06;  // Very slow animation
+    let scale = 3.0 / p.zoom; // Base frequency divided by zoom
+    let slow_time = time * 0.06; // Very slow animation
 
     // Big, slow-moving blobs
     let v1 = (nx * scale + slow_time).sin();
     let v2 = (ny * scale * 0.8 - slow_time * 0.7).cos();
     let v3 = ((nx + ny) * scale * 0.7 + slow_time * 0.5).sin();
-    let v4 = ((nx * scale * 0.15).sin() * 2.0 + (ny * scale * 0.15).cos() * 2.0 + slow_time * 0.3).cos();
+    let v4 =
+        ((nx * scale * 0.15).sin() * 2.0 + (ny * scale * 0.15).cos() * 2.0 + slow_time * 0.3).cos();
 
     // Radial blob component - creates round shapes
     let cx = nx - 0.5;
@@ -371,28 +557,45 @@ pub fn lava_plasma_value(nx: f64, ny: f64, time: f64, p: &Params) -> f64 {
 }
 
 pub fn value_to_char(v: f64) -> char {
-    if v > 0.6 { SHADES[0] }
-    else if v > 0.3 { SHADES[1] }
-    else if v > 0.0 { SHADES[2] }
-    else if v > -0.3 { SHADES[3] }
-    else if v > -0.6 { SHADES[4] }
-    else { SHADES[5] }
+    if v > 0.6 {
+        SHADES[0]
+    } else if v > 0.3 {
+        SHADES[1]
+    } else if v > 0.0 {
+        SHADES[2]
+    } else if v > -0.3 {
+        SHADES[3]
+    } else if v > -0.6 {
+        SHADES[4]
+    } else {
+        SHADES[5]
+    }
 }
 
 #[allow(dead_code)]
 pub fn lava_to_char(field: f64) -> char {
-    if field > 1.5 { SHADES[0] }
-    else if field > 1.0 { SHADES[1] }
-    else if field > 0.6 { SHADES[2] }
-    else if field > 0.3 { SHADES[3] }
-    else if field > 0.15 { SHADES[4] }
-    else { SHADES[5] }
+    if field > 1.5 {
+        SHADES[0]
+    } else if field > 1.0 {
+        SHADES[1]
+    } else if field > 0.6 {
+        SHADES[2]
+    } else if field > 0.3 {
+        SHADES[3]
+    } else if field > 0.15 {
+        SHADES[4]
+    } else {
+        SHADES[5]
+    }
 }
 
 pub fn plasma_color(v: f64, time: f64, theme: &ColorTheme) -> Color {
-    let r = ((v * 3.0 + time + theme.r_phase).sin() * theme.r_mult + theme.r_base).clamp(0.0, 255.0) as u8;
-    let g = ((v * 3.0 + time + theme.g_phase).sin() * theme.g_mult + theme.g_base).clamp(0.0, 255.0) as u8;
-    let b = ((v * 3.0 + time + theme.b_phase).sin() * theme.b_mult + theme.b_base).clamp(0.0, 255.0) as u8;
+    let r = ((v * 3.0 + time + theme.r_phase).sin() * theme.r_mult + theme.r_base).clamp(0.0, 255.0)
+        as u8;
+    let g = ((v * 3.0 + time + theme.g_phase).sin() * theme.g_mult + theme.g_base).clamp(0.0, 255.0)
+        as u8;
+    let b = ((v * 3.0 + time + theme.b_phase).sin() * theme.b_mult + theme.b_base).clamp(0.0, 255.0)
+        as u8;
     Color::Rgb(r, g, b)
 }
 
@@ -401,8 +604,10 @@ pub fn lava_color(field: f64, time: f64, theme: &ColorTheme) -> Color {
     // Brighter in blob centers
     let intensity = (field.min(2.0) / 2.0).sqrt();
     let pulse = (time * 0.5).sin() * 0.1 + 0.9;
-    let r = (theme.r_base * intensity * pulse + theme.r_mult * (1.0 - intensity) * 0.3).clamp(0.0, 255.0) as u8;
-    let g = (theme.g_base * intensity * pulse + theme.g_mult * (1.0 - intensity) * 0.2).clamp(0.0, 255.0) as u8;
+    let r = (theme.r_base * intensity * pulse + theme.r_mult * (1.0 - intensity) * 0.3)
+        .clamp(0.0, 255.0) as u8;
+    let g = (theme.g_base * intensity * pulse + theme.g_mult * (1.0 - intensity) * 0.2)
+        .clamp(0.0, 255.0) as u8;
     let b = (theme.b_base * intensity * pulse * 0.5).clamp(0.0, 255.0) as u8;
     Color::Rgb(r, g, b)
 }
@@ -427,7 +632,14 @@ pub fn get_logo_char(x: usize, y: usize, width: usize, height: usize) -> Option<
     }
 }
 
-pub fn build_row(y: usize, width: usize, height: usize, time: f64, p: &Params, _lava: &LavaLamp) -> Element {
+pub fn build_row(
+    y: usize,
+    width: usize,
+    height: usize,
+    time: f64,
+    p: &Params,
+    _lava: &LavaLamp,
+) -> Element {
     let ny = y as f64 / height as f64;
     let theme = p.theme();
 
@@ -460,8 +672,18 @@ pub fn build_row(y: usize, width: usize, height: usize, time: f64, p: &Params, _
     Element::row(cells)
 }
 
-pub fn build_display(width: usize, height: usize, time: f64, p: &Params, lava: &LavaLamp) -> Element {
-    Element::column((0..height).map(|y| build_row(y, width, height, time, p, lava)).collect())
+pub fn build_display(
+    width: usize,
+    height: usize,
+    time: f64,
+    p: &Params,
+    lava: &LavaLamp,
+) -> Element {
+    Element::column(
+        (0..height)
+            .map(|y| build_row(y, width, height, time, p, lava))
+            .collect(),
+    )
 }
 
 pub fn build_info(p: &Params) -> Element {

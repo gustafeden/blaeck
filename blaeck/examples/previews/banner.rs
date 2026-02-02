@@ -11,7 +11,9 @@ pub fn build_ui() -> Element {
             // Blaeck ASCII art banner
             Element::node::<Text>(
                 TextProps {
-                    content: " \u{2597}\u{2584}\u{2584}\u{2584}\u{2584}\u{2584}\u{2584}\u{2584}\u{2596}".into(),
+                    content:
+                        " \u{2597}\u{2584}\u{2584}\u{2584}\u{2584}\u{2584}\u{2584}\u{2584}\u{2596}"
+                            .into(),
                     color: Some(Color::Rgb(100, 200, 255)),
                     ..Default::default()
                 },
@@ -28,7 +30,9 @@ pub fn build_ui() -> Element {
             ),
             Element::node::<Text>(
                 TextProps {
-                    content: " \u{259d}\u{2580}\u{2580}\u{2580}\u{2580}\u{2580}\u{2580}\u{2580}\u{2598}".into(),
+                    content:
+                        " \u{259d}\u{2580}\u{2580}\u{2580}\u{2580}\u{2580}\u{2580}\u{2580}\u{2598}"
+                            .into(),
                     color: Some(Color::Rgb(100, 200, 255)),
                     ..Default::default()
                 },

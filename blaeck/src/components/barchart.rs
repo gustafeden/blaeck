@@ -406,7 +406,10 @@ impl Component for BarChart {
             segments.push(Element::styled_text(&label_padded, label_style));
 
             // Gap
-            segments.push(Element::styled_text(" ".repeat(props.label_gap), with_bg(Style::new())));
+            segments.push(Element::styled_text(
+                " ".repeat(props.label_gap),
+                with_bg(Style::new()),
+            ));
 
             // Opening bracket
             if props.brackets {

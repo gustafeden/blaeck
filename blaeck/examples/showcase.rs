@@ -52,7 +52,13 @@ fn main() -> std::io::Result<()> {
             match read()? {
                 Event::Key(key) => match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => break,
-                    KeyCode::Char('c') if key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) => break,
+                    KeyCode::Char('c')
+                        if key
+                            .modifiers
+                            .contains(crossterm::event::KeyModifiers::CONTROL) =>
+                    {
+                        break
+                    }
                     KeyCode::Char(' ') => state.toggle_pause(),
                     KeyCode::Char('t') => state.next_theme(),
                     KeyCode::Char('r') => state.restart(),

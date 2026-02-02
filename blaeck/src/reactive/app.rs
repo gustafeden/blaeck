@@ -255,10 +255,7 @@ mod tests {
     #[test]
     fn test_exit_reason_eq() {
         assert_eq!(ReactiveExitReason::UserExit, ReactiveExitReason::UserExit);
-        assert_ne!(
-            ReactiveExitReason::UserExit,
-            ReactiveExitReason::Completed
-        );
+        assert_ne!(ReactiveExitReason::UserExit, ReactiveExitReason::Completed);
     }
 
     #[test]

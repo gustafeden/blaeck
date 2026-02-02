@@ -12,33 +12,31 @@ pub fn task_selector(cx: Scope) -> Element {
     let status_handler = status.clone();
     let task_count = tasks.len();
 
-    use_input(cx, move |key| {
-        match key.code {
-            KeyCode::Up => {
-                let current = selected_handler.get();
-                if current > 0 {
-                    selected_handler.set(current - 1);
-                    status_handler.set("Select a task...");
-                }
+    use_input(cx, move |key| match key.code {
+        KeyCode::Up => {
+            let current = selected_handler.get();
+            if current > 0 {
+                selected_handler.set(current - 1);
+                status_handler.set("Select a task...");
             }
-            KeyCode::Down => {
-                let current = selected_handler.get();
-                if current < task_count - 1 {
-                    selected_handler.set(current + 1);
-                    status_handler.set("Select a task...");
-                }
-            }
-            KeyCode::Enter => {
-                status_handler.set("Running...");
-            }
-            _ => {}
         }
+        KeyCode::Down => {
+            let current = selected_handler.get();
+            if current < task_count - 1 {
+                selected_handler.set(current + 1);
+                status_handler.set("Select a task...");
+            }
+        }
+        KeyCode::Enter => {
+            status_handler.set("Running...");
+        }
+        _ => {}
     });
 
     let current = selected.get();
     let current_status = status.get();
 
-    render_task_selector(&tasks, current, &current_status)
+    render_task_selector(&tasks, current, current_status)
 }
 
 /// Render the task selector UI given tasks, selection, and status.

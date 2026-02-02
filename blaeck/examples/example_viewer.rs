@@ -23,8 +23,8 @@ mod previews;
 
 use std::boxed::Box as StdBox;
 
-use blaeck::prelude::*;
 use blaeck::input::Key;
+use blaeck::prelude::*;
 use crossterm::event::{poll, read, Event, KeyCode, KeyModifiers};
 use previews::live::{self, LivePreview};
 use std::io::{BufRead, BufReader};
@@ -109,7 +109,7 @@ fn strip_ansi(text: &str) -> String {
             // Skip ESC[...X sequences
             if chars.peek() == Some(&'[') {
                 chars.next(); // consume '['
-                // Consume until we hit a letter (the final byte)
+                              // Consume until we hit a letter (the final byte)
                 while let Some(&c) = chars.peek() {
                     chars.next();
                     if c.is_ascii_alphabetic() || c == '~' || c == 'H' || c == 'J' {
@@ -145,7 +145,6 @@ fn spawn_example(capture: &Arc<Capture>, name: &str, is_async: bool) {
 
     let cap = capture.clone();
     let name = name.to_string();
-    let is_async = is_async;
 
     std::thread::spawn(move || {
         // Build first
@@ -201,13 +200,11 @@ fn spawn_example(capture: &Arc<Capture>, name: &str, is_async: bool) {
         let cap_out = cap.clone();
         let out_thread = std::thread::spawn(move || {
             let reader = BufReader::new(stdout);
-            for line in reader.lines() {
-                if let Ok(line) = line {
-                    let clean = strip_ansi(&line);
-                    if !clean.trim().is_empty() {
-                        cap_out.append(&clean);
-                        cap_out.append("\n");
-                    }
+            for line in reader.lines().map_while(Result::ok) {
+                let clean = strip_ansi(&line);
+                if !clean.trim().is_empty() {
+                    cap_out.append(&clean);
+                    cap_out.append("\n");
                 }
             }
         });
@@ -215,13 +212,11 @@ fn spawn_example(capture: &Arc<Capture>, name: &str, is_async: bool) {
         let cap_err = cap.clone();
         let err_thread = std::thread::spawn(move || {
             let reader = BufReader::new(stderr);
-            for line in reader.lines() {
-                if let Ok(line) = line {
-                    let clean = strip_ansi(&line);
-                    if !clean.trim().is_empty() {
-                        cap_err.append(&clean);
-                        cap_err.append("\n");
-                    }
+            for line in reader.lines().map_while(Result::ok) {
+                let clean = strip_ansi(&line);
+                if !clean.trim().is_empty() {
+                    cap_err.append(&clean);
+                    cap_err.append("\n");
                 }
             }
         });
@@ -349,17 +344,25 @@ impl ViewerState {
     fn load_code(&mut self) {
         if let Some(ex) = self.examples.get(self.selected) {
             // If there's a preview module with the real UI code, show that
-            let preview_path = ex.path.parent().unwrap().join("previews").join(&format!("{}.rs", ex.name));
+            let preview_path = ex
+                .path
+                .parent()
+                .unwrap()
+                .join("previews")
+                .join(format!("{}.rs", ex.name));
             if preview_path.exists() {
                 let main_code = std::fs::read_to_string(&ex.path).unwrap_or_default();
                 let preview_code = std::fs::read_to_string(&preview_path).unwrap_or_default();
                 self.current_code = format!(
                     "// === {} (main) ===\n{}\n\n// === previews/{}.rs (UI code) ===\n{}",
-                    ex.name, main_code.trim(), ex.name, preview_code.trim()
+                    ex.name,
+                    main_code.trim(),
+                    ex.name,
+                    preview_code.trim()
                 );
             } else {
-                self.current_code =
-                    std::fs::read_to_string(&ex.path).unwrap_or_else(|_| "Error reading file".into());
+                self.current_code = std::fs::read_to_string(&ex.path)
+                    .unwrap_or_else(|_| "Error reading file".into());
             }
         }
         self.code_scroll = 0;
@@ -383,7 +386,8 @@ impl ViewerState {
             .map(|line| {
                 let char_count = line.chars().count();
                 if char_count > max_chars {
-                    let truncated: String = line.chars().take(max_chars.saturating_sub(1)).collect();
+                    let truncated: String =
+                        line.chars().take(max_chars.saturating_sub(1)).collect();
                     format!("{}…", truncated)
                 } else {
                     line.to_string()
@@ -417,7 +421,8 @@ impl ViewerState {
                 // Auto: show last N lines
                 lines.len().saturating_sub(max_lines)
             } else {
-                self.output_scroll.min(lines.len().saturating_sub(max_lines))
+                self.output_scroll
+                    .min(lines.len().saturating_sub(max_lines))
             };
             let end = (start + max_lines).min(lines.len());
             lines[start..end].join("\n")
@@ -558,8 +563,7 @@ impl ViewerState {
                 if count == 0 {
                     self.status_msg = "No files marked for deletion".into();
                 } else {
-                    self.status_msg =
-                        format!("Delete {} files? Press 'y' to confirm", count);
+                    self.status_msg = format!("Delete {} files? Press 'y' to confirm", count);
                 }
             }
             KeyCode::Char('y') => {
@@ -743,7 +747,11 @@ fn try_render_preview(name: &str, timer: &AnimationTimer) -> Option<Element> {
 }
 
 fn render_output(state: &mut ViewerState) -> Element {
-    let name = state.examples.get(state.selected).map(|e| e.name.as_str()).unwrap_or("");
+    let name = state
+        .examples
+        .get(state.selected)
+        .map(|e| e.name.as_str())
+        .unwrap_or("");
 
     // Focus mode: render the live interactive preview
     if state.focus_mode {
@@ -796,7 +804,11 @@ fn render_output(state: &mut ViewerState) -> Element {
     }
 
     let running = state.capture.is_running();
-    let header_text = if running { " Output (running) " } else { " Output " };
+    let header_text = if running {
+        " Output (running) "
+    } else {
+        " Output "
+    };
     let header_color = if running { Color::Green } else { Color::Cyan };
 
     let lines: Vec<Element> = output
@@ -818,7 +830,11 @@ fn render_output(state: &mut ViewerState) -> Element {
 
 fn render_status(state: &ViewerState) -> Element {
     if state.focus_mode {
-        let name = state.examples.get(state.selected).map(|e| e.name.as_str()).unwrap_or("");
+        let name = state
+            .examples
+            .get(state.selected)
+            .map(|e| e.name.as_str())
+            .unwrap_or("");
         let status = format!(
             " LIVE: {}  │  [Esc] Exit  [Keys] Interact  [/] Resize",
             name
@@ -829,11 +845,7 @@ fn render_status(state: &ViewerState) -> Element {
     }
 
     let marked_count = state.examples.iter().filter(|e| e.marked).count();
-    let scroll_info = format!(
-        " L{}/{}",
-        state.code_scroll + 1,
-        state.code_line_count()
-    );
+    let scroll_info = format!(" L{}/{}", state.code_scroll + 1, state.code_line_count());
 
     let marked_info = if marked_count > 0 {
         format!(" | {}✗", marked_count)
@@ -869,8 +881,16 @@ fn build_ui(state: &mut ViewerState) -> Element {
     let output = render_output(state);
     let status = render_status(state);
 
-    let right_border_color = if state.focus_mode { Color::Yellow } else { Color::DarkGray };
-    let right_border_style = if state.focus_mode { BorderStyle::Double } else { BorderStyle::Single };
+    let right_border_color = if state.focus_mode {
+        Color::Yellow
+    } else {
+        Color::DarkGray
+    };
+    let right_border_style = if state.focus_mode {
+        BorderStyle::Double
+    } else {
+        BorderStyle::Single
+    };
 
     // Compute fixed widths based on preview ratio
     let remaining = state.term_width as f32 - LIST_WIDTH;

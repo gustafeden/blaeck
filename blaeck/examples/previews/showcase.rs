@@ -45,58 +45,58 @@ pub const LOGO_HEIGHT: usize = 5;
 pub struct Theme {
     #[allow(dead_code)]
     pub name: &'static str,
-    pub bg: (u8, u8, u8),        // Background / field base
-    pub panel: (u8, u8, u8),     // Panel background
-    pub text: (u8, u8, u8),      // Primary text
-    pub dim: (u8, u8, u8),       // Dim/secondary text
-    pub accent: (u8, u8, u8),    // Accent color (OK status, highlights)
+    pub bg: (u8, u8, u8),     // Background / field base
+    pub panel: (u8, u8, u8),  // Panel background
+    pub text: (u8, u8, u8),   // Primary text
+    pub dim: (u8, u8, u8),    // Dim/secondary text
+    pub accent: (u8, u8, u8), // Accent color (OK status, highlights)
 }
 
 pub const THEMES: [Theme; 5] = [
     // Forest - deep greens with mint accent
     Theme {
         name: "forest",
-        bg: (0x00, 0x1A, 0x23),      // #001A23 - deep blue-black
-        panel: (0x31, 0x49, 0x3C),   // #31493C - dark forest
-        text: (0xE8, 0xF1, 0xF2),    // #E8F1F2 - off-white
-        dim: (0x7A, 0x9E, 0x7E),     // #7A9E7E - sage
-        accent: (0xB3, 0xEF, 0xB2),  // #B3EFB2 - mint
+        bg: (0x00, 0x1A, 0x23),     // #001A23 - deep blue-black
+        panel: (0x31, 0x49, 0x3C),  // #31493C - dark forest
+        text: (0xE8, 0xF1, 0xF2),   // #E8F1F2 - off-white
+        dim: (0x7A, 0x9E, 0x7E),    // #7A9E7E - sage
+        accent: (0xB3, 0xEF, 0xB2), // #B3EFB2 - mint
     },
     // Steel - cool blues and grays
     Theme {
         name: "steel",
-        bg: (0x55, 0x46, 0x40),      // #554640 - dark taupe
-        panel: (0x70, 0x70, 0x78),   // #707078 - gray
-        text: (0xCD, 0xE6, 0xF5),    // #CDE6F5 - light blue
-        dim: (0x87, 0x91, 0x9E),     // #87919E - blue-gray
-        accent: (0x8D, 0xA7, 0xBE),  // #8DA7BE - steel blue
+        bg: (0x55, 0x46, 0x40),     // #554640 - dark taupe
+        panel: (0x70, 0x70, 0x78),  // #707078 - gray
+        text: (0xCD, 0xE6, 0xF5),   // #CDE6F5 - light blue
+        dim: (0x87, 0x91, 0x9E),    // #87919E - blue-gray
+        accent: (0x8D, 0xA7, 0xBE), // #8DA7BE - steel blue
     },
     // Terracotta - warm earth tones
     Theme {
         name: "terra",
-        bg: (0x4F, 0x6D, 0x7A),      // #4F6D7A - dark teal
-        panel: (0x5A, 0x78, 0x85),   // slightly lighter teal
-        text: (0xEA, 0xEA, 0xEA),    // #EAEAEA - off-white
-        dim: (0xE8, 0xDA, 0xB2),     // #E8DAB2 - tan
-        accent: (0xDD, 0x6E, 0x42),  // #DD6E42 - terracotta
+        bg: (0x4F, 0x6D, 0x7A),     // #4F6D7A - dark teal
+        panel: (0x5A, 0x78, 0x85),  // slightly lighter teal
+        text: (0xEA, 0xEA, 0xEA),   // #EAEAEA - off-white
+        dim: (0xE8, 0xDA, 0xB2),    // #E8DAB2 - tan
+        accent: (0xDD, 0x6E, 0x42), // #DD6E42 - terracotta
     },
     // Garden - fresh greens with peach
     Theme {
         name: "garden",
-        bg: (0x3A, 0x5A, 0x40),      // darker sage (adjusted for contrast)
-        panel: (0x6A, 0x8D, 0x73),   // #6A8D73 - sage green
-        text: (0xF4, 0xFD, 0xD9),    // #F4FDD9 - cream
-        dim: (0xE4, 0xFF, 0xE1),     // #E4FFE1 - light mint
-        accent: (0xF0, 0xA8, 0x68),  // #F0A868 - peach
+        bg: (0x3A, 0x5A, 0x40),     // darker sage (adjusted for contrast)
+        panel: (0x6A, 0x8D, 0x73),  // #6A8D73 - sage green
+        text: (0xF4, 0xFD, 0xD9),   // #F4FDD9 - cream
+        dim: (0xE4, 0xFF, 0xE1),    // #E4FFE1 - light mint
+        accent: (0xF0, 0xA8, 0x68), // #F0A868 - peach
     },
     // Mauve - elegant purples and charcoal (harmonized palette)
     Theme {
         name: "mauve",
-        bg: (0x2E, 0x2C, 0x2F),      // #2E2C2F - charcoal
-        panel: (0x47, 0x5B, 0x63),   // #475B63 - dark slate
-        text: (0xF3, 0xE8, 0xEE),    // #F3E8EE - light mauve
-        dim: (0x7A, 0x6F, 0x80),     // #7A6F80 - dusty mauve shadow (warm, not blue)
-        accent: (0xCF, 0xA9, 0xFF),  // #CFA9FF - soft electric lavender
+        bg: (0x2E, 0x2C, 0x2F),     // #2E2C2F - charcoal
+        panel: (0x47, 0x5B, 0x63),  // #475B63 - dark slate
+        text: (0xF3, 0xE8, 0xEE),   // #F3E8EE - light mauve
+        dim: (0x7A, 0x6F, 0x80),    // #7A6F80 - dusty mauve shadow (warm, not blue)
+        accent: (0xCF, 0xA9, 0xFF), // #CFA9FF - soft electric lavender
     },
 ];
 
@@ -168,10 +168,6 @@ pub fn plasma_effective_bg(v: f64, theme: &Theme, intensity: f64, pulse: f64) ->
         fg
     }
 }
-
-
-
-
 
 // =============================================================================
 // Animation State
@@ -307,8 +303,9 @@ impl ShowcaseState {
         self.render_ms = render_ms;
 
         // Update memory stats every 30 frames (~0.5s at 60fps)
-        if self.frame_count % 30 == 0 {
-            self.sys.refresh_processes(ProcessesToUpdate::Some(&[self.pid]), true);
+        if self.frame_count.is_multiple_of(30) {
+            self.sys
+                .refresh_processes(ProcessesToUpdate::Some(&[self.pid]), true);
             if let Some(proc) = self.sys.process(self.pid) {
                 let new_mem = proc.memory() as f64 / 1024.0 / 1024.0;
                 self.memory_delta = new_mem - self.last_memory_mb;
@@ -318,7 +315,7 @@ impl ShowcaseState {
         }
 
         // Update sparkline with slight variation
-        if self.frame_count % 5 == 0 {
+        if self.frame_count.is_multiple_of(5) {
             self.sparkline_data.remove(0);
             let last = *self.sparkline_data.last().unwrap_or(&0.5);
             let new = (last + (self.time().sin() * 0.2) + 0.1).clamp(0.1, 1.0);
@@ -430,14 +427,35 @@ impl ShowcaseState {
 
     pub fn showcase_phase(&self) -> usize {
         let t = self.cycle_time();
-        if t < 3.2 { 0 }
-        else if t < 5.2 { 1 }    // Progress
-        else if t < 7.2 { 2 }    // Spinner + LogBox
-        else if t < 9.2 { 3 }    // Sparkline + BarChart
-        else if t < 11.2 { 4 }   // Syntax
-        else if t < 13.2 { 5 }   // Table
-        else if t < 15.2 { 6 }   // Diff
-        else { 0 }
+        if t < 3.2 {
+            0
+        } else if t < 5.2 {
+            1
+        }
+        // Progress
+        else if t < 7.2 {
+            2
+        }
+        // Spinner + LogBox
+        else if t < 9.2 {
+            3
+        }
+        // Sparkline + BarChart
+        else if t < 11.2 {
+            4
+        }
+        // Syntax
+        else if t < 13.2 {
+            5
+        }
+        // Table
+        else if t < 15.2 {
+            6
+        }
+        // Diff
+        else {
+            0
+        }
     }
 
     pub fn showcase_opacity(&self) -> f64 {
@@ -457,10 +475,13 @@ impl ShowcaseState {
 
     pub fn progress_value(&self) -> f64 {
         let t = self.cycle_time();
-        if t < 3.2 { 0.0 }
-        else if t < 5.2 {
+        if t < 3.2 {
+            0.0
+        } else if t < 5.2 {
             ease_out_cubic((t - 3.2) / 2.0)
-        } else { 1.0 }
+        } else {
+            1.0
+        }
     }
 
     pub fn spinner_frame(&self) -> usize {
@@ -512,7 +533,6 @@ pub fn ease_out_bounce_once(t: f64) -> f64 {
 pub fn lerp(a: f64, b: f64, t: f64) -> f64 {
     a + (b - a) * t
 }
-
 
 // =============================================================================
 // Rendering
@@ -576,8 +596,8 @@ pub fn render_logo(state: &ShowcaseState, logo_x: f64, logo_y: f64) -> Element {
 
     // Get theme colors for the logo layers (use panel/dim/accent)
     let (pr, pg, pb) = theme.panel;
-    let (dr, dg, db) = theme.dim;     // Warm mauve shadow
-    let (ar, ag, ab) = theme.accent;  // Lavender glow
+    let (dr, dg, db) = theme.dim; // Warm mauve shadow
+    let (ar, ag, ab) = theme.accent; // Lavender glow
 
     // Glow multiplier - less aggressive, more atmospheric
     let glow = 1.0 + pulse_anim * 0.6;
@@ -600,10 +620,10 @@ pub fn render_logo(state: &ShowcaseState, logo_x: f64, logo_y: f64) -> Element {
 
     // Offsets for each layer (creates the stacked extrusion)
     let offsets: [(i32, i32); 4] = [
-        (2, 2),   // back layer - offset down-right
-        (1, 1),   // middle-back
-        (0, 1),   // middle-front
-        (0, 0),   // front layer - no offset
+        (2, 2), // back layer - offset down-right
+        (1, 1), // middle-back
+        (0, 1), // middle-front
+        (0, 0), // front layer - no offset
     ];
 
     // Build a grid that composites all layers
@@ -729,7 +749,7 @@ pub fn render_showcase(state: &ShowcaseState) -> Element {
     let theme = state.theme();
 
     // Box colors
-    let box_bg = Color::Rgb(20, 20, 28);  // Dark terminal-like background
+    let box_bg = Color::Rgb(20, 20, 28); // Dark terminal-like background
     let border_color = Color::Rgb(
         (theme.dim.0 as f64 * opacity) as u8,
         (theme.dim.1 as f64 * opacity) as u8,
@@ -891,10 +911,8 @@ pub fn render_showcase(state: &ShowcaseState) -> Element {
                 DiffLine::added("    let x = new();"),
                 DiffLine::context("}"),
             ];
-            let diff = Element::node::<Diff>(
-                DiffProps::with_lines(diff_lines).bg_color(box_bg),
-                vec![],
-            );
+            let diff =
+                Element::node::<Diff>(DiffProps::with_lines(diff_lines).bg_color(box_bg), vec![]);
 
             element! {
                 Box(flex_direction: FlexDirection::Column, align_items: AlignItems::Center, background_color: box_bg) {
@@ -933,25 +951,44 @@ pub fn build_showcase(state: &ShowcaseState) -> Element {
     let x_off = state.panels_x_offset();
 
     // Metric panels
-    let render_panel_left = render_panel("RENDER", vec![
-        ("fps", format!("{:.0}", state.fps)),
-        ("lat", format!("{:.1}ms", state.render_ms)),
-    ], state);
+    let render_panel_left = render_panel(
+        "RENDER",
+        vec![
+            ("fps", format!("{:.0}", state.fps)),
+            ("lat", format!("{:.1}ms", state.render_ms)),
+        ],
+        state,
+    );
 
-    let buffer_panel = render_panel("BUFFER", vec![
-        ("cells", format!("{}", WIDTH * HEIGHT)),
-        ("writes", format!("{}", state.frame_count % 100)),
-    ], state);
+    let buffer_panel = render_panel(
+        "BUFFER",
+        vec![
+            ("cells", format!("{}", WIDTH * HEIGHT)),
+            ("writes", format!("{}", state.frame_count % 100)),
+        ],
+        state,
+    );
 
-    let layout_panel = render_panel("LAYOUT", vec![
-        ("nodes", format!("{}", 42 + (state.time() * 2.0) as u32 % 20)),
-        ("depth", format!("{}", 4 + (state.time() * 0.5) as u32 % 3)),
-    ], state);
+    let layout_panel = render_panel(
+        "LAYOUT",
+        vec![
+            (
+                "nodes",
+                format!("{}", 42 + (state.time() * 2.0) as u32 % 20),
+            ),
+            ("depth", format!("{}", 4 + (state.time() * 0.5) as u32 % 3)),
+        ],
+        state,
+    );
 
-    let memory_panel = render_panel("MEMORY", vec![
-        ("rss", format!("{:.1}MB", state.memory_mb)),
-        ("Δ", format!("{:+.2}MB", state.memory_delta)),
-    ], state);
+    let memory_panel = render_panel(
+        "MEMORY",
+        vec![
+            ("rss", format!("{:.1}MB", state.memory_mb)),
+            ("Δ", format!("{:+.2}MB", state.memory_delta)),
+        ],
+        state,
+    );
 
     let showcase = render_showcase(state);
 

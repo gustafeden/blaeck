@@ -10,21 +10,24 @@ pub fn debug_dashboard(cx: Scope) -> Element {
                 .duration(2.0)
                 .animate("progress", 0.0f64, 1.0, Easing::EaseOutCubic),
         )
-        .act(
-            Act::new("main_sequence")
-                .duration(4.0)
-                .animate("progress", 0.0f64, 1.0, Easing::Linear),
-        )
-        .act(
-            Act::new("transition")
-                .duration(1.5)
-                .animate("progress", 0.0f64, 1.0, Easing::EaseInOutCubic),
-        )
-        .act(
-            Act::new("finale")
-                .duration(2.5)
-                .animate("progress", 0.0f64, 1.0, Easing::EaseOutElastic),
-        )
+        .act(Act::new("main_sequence").duration(4.0).animate(
+            "progress",
+            0.0f64,
+            1.0,
+            Easing::Linear,
+        ))
+        .act(Act::new("transition").duration(1.5).animate(
+            "progress",
+            0.0f64,
+            1.0,
+            Easing::EaseInOutCubic,
+        ))
+        .act(Act::new("finale").duration(2.5).animate(
+            "progress",
+            0.0f64,
+            1.0,
+            Easing::EaseOutElastic,
+        ))
         .loop_from("main_sequence");
 
     let timeline = use_timeline(cx.clone(), timeline_def);

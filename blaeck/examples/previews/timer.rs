@@ -112,6 +112,7 @@ pub fn build_ui_with_timer(timer: &AnimationTimer) -> Element {
 }
 
 /// Final "complete" state.
+#[allow(dead_code)]
 pub fn build_final_ui() -> Element {
     Element::node::<Box>(
         BoxProps {

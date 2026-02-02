@@ -373,7 +373,6 @@ pub struct BoxProps {
     pub justify_content: Option<JustifyContent>,
 
     // === Taffy 0.9 Features ===
-
     /// Display mode (Flex, Grid, Block, None)
     pub display: Display,
     /// Position type (Relative, Absolute)
