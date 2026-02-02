@@ -12,7 +12,7 @@ A terminal UI framework for Rust. Inline rendering, flexbox/grid layout, 35+ com
 
 ```toml
 [dependencies]
-blaeck = "0.2"
+blaeck = "0.3"
 ```
 
 ---
