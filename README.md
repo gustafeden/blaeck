@@ -208,6 +208,14 @@ See [all examples](blaeck/examples/) or [API docs](https://docs.rs/blaeck).
 
 The **example_viewer** is an interactive tool for exploring all blaeck examples in a single interface. It provides a three-panel layout with live previews, source code viewing, and interactive testing.
 
+**Try it now** (no Rust required):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gustafeden/blaeck/main/run-example-viewer.sh | bash
+```
+
+Or run from source:
+
 ```bash
 cargo run --example example_viewer
 ```
