@@ -1,395 +1,346 @@
-# RFC: Animation Timeline System for Blaeck
+# Animation Timeline System for Blaeck
 
-## Problem
+## Status: Implemented
 
-Building complex animated sequences in blaeck currently requires manual state management:
+This document describes the declarative animation timeline system in blaeck.
 
+## Overview
+
+The timeline system replaces manual state-based animation code with a declarative API inspired by video editing software, CSS animations, and game engines.
+
+**Before (manual timing):**
 ```rust
-// Current approach - manual timing hell
 fn logo_opacity(&self) -> f64 {
-    let boot = self.boot_time();
-    if boot < 0.5 { boot * 2.0 }
-    else if boot < 4.0 { 1.0 }
-    else if boot < 5.0 { 1.0 - (boot - 4.0) }
+    let t = self.boot_time();
+    if t < 0.5 { t * 2.0 }
+    else if t < 4.0 { 1.0 }
+    else if t < 5.0 { 1.0 - (t - 4.0) }
     else { 0.0 }
 }
-
-fn current_positions(&self) -> LayoutPositions {
-    let boot = self.boot_time();
-    if boot < 2.0 { return LayoutPositions::offscreen(); }
-    if boot < 4.0 { /* lerp logic */ }
-    if boot < 5.0 { return LayoutPositions::around_logo(); }
-    if boot < 6.0 { /* more lerp logic */ }
-    // ... cycling logic
-}
 ```
 
-This is:
-- **Error-prone**: Easy to get timing overlaps wrong
-- **Hard to visualize**: Can't see the sequence at a glance
-- **Not reusable**: Every animation needs custom state
-- **Rigid**: Changing timing requires editing multiple places
-
-## Proposal: Declarative Animation Timeline
-
-A timeline-based animation system inspired by video editing NLEs, CSS animations, and game engines.
-
-### Core Concepts
-
-#### 1. Timeline
-
-A sequence of **Acts** that play in order. Can loop.
-
+**After (declarative timeline):**
 ```rust
-let intro = Timeline::new()
-    .act("logo_alone", 2.0)      // 2 seconds
-    .act("panels_fly_in", 2.0)   // 2 seconds
-    .act("logo_fade_out", 1.0)   // 1 second
-    .act("panels_move", 1.0)     // 1 second
-    .then_loop("cycling");       // Continue to cycling timeline
+let timeline = Timeline::new()
+    .act(Act::new("fade_in").duration(0.5)
+        .animate("opacity", 0.0, 1.0, Easing::EaseOutCubic))
+    .act(Act::hold("visible", 3.5))
+    .act(Act::new("fade_out").duration(1.0)
+        .animate("opacity", 1.0, 0.0, Easing::EaseInCubic));
+
+// Query at any time
+let opacity: f64 = timeline.at(2.0).get("opacity").unwrap_or(1.0);
 ```
 
-#### 2. Acts
+## Core Types
 
-Named time segments. Multiple properties can animate within an act.
+### Timeline
+
+A sequence of **Acts** that play in order, with optional looping.
 
 ```rust
-Act::new("logo_alone")
+use blaeck::timeline::*;
+use blaeck::animation::Easing;
+
+let sequence = Timeline::new()
+    .act(Act::new("intro").duration(2.0)
+        .animate("opacity", 0.0, 1.0, Easing::EaseOutCubic))
+    .act(Act::new("main").duration(5.0))
+    .act(Act::new("outro").duration(2.0)
+        .animate("opacity", 1.0, 0.0, Easing::EaseInCubic))
+    .loop_forever();  // or .loop_from("main")
+```
+
+**Loop behaviors:**
+- `loop_forever()` - Loop from the beginning
+- `loop_from("act_name")` - Play intro once, then loop from specified act
+
+### Act
+
+A named time segment containing animated properties.
+
+```rust
+Act::new("panels_enter")
     .duration(2.0)
-    .on_enter(|cx| cx.set("logo_opacity", 0.0))
-    .animate("logo_opacity", 0.0, 1.0, Easing::OutCubic)
-    .hold("logo_opacity", 1.0)  // Stay at 1.0 for remainder
+    // Simple from→to animation
+    .animate("opacity", 0.0, 1.0, Easing::EaseOutCubic)
+    // Spring physics
+    .spring("position", 0.0, 100.0, Spring::preset_bouncy())
+    // Staggered animation for multiple items
+    .stagger("panel_alpha", 5, 0.0, 1.0, Easing::EaseOutCubic)
+    // Callbacks
+    .on_enter(|| println!("Act started"))
+    .on_exit(|| println!("Act ended"))
 ```
 
-#### 3. Tracks
+**Convenience constructors:**
+- `Act::new(name)` - Standard act
+- `Act::hold(name, duration)` - No animations, just wait
+- `Act::transition(name, duration)` - Semantic alias for transitions
 
-Parallel animation channels for different properties.
+### Track
+
+Keyframe-based animation for a single property. Created automatically via `.animate()` or manually for complex sequences:
+
+```rust
+let track = Track::new()
+    .keyframe(0.0, 0.0f64, Easing::Linear)    // Start at 0
+    .keyframe(0.3, 1.0, Easing::EaseOutCubic)  // Quick rise
+    .keyframe(0.7, 0.8, Easing::Linear)        // Slight dip
+    .keyframe(1.0, 1.0, Easing::EaseInCubic);  // Return to full
+
+Act::new("complex")
+    .duration(2.0)
+    .track("custom_prop", track)
+```
+
+### Animatable Trait
+
+Values that can be interpolated. Built-in implementations:
+
+```rust
+pub trait Animatable: Clone + Send + Sync + 'static {
+    fn lerp(a: &Self, b: &Self, t: f64) -> Self;
+}
+
+// Implemented for:
+// - f32, f64, i32, u8
+// - (f32, f32), (f64, f64) - positions
+// - (u8, u8, u8) - RGB
+// - (u8, u8, u8, u8) - RGBA
+```
+
+## Advanced Features
+
+### Spring Physics
+
+Natural, physics-based motion:
+
+```rust
+Act::new("bounce")
+    .duration(1.5)
+    .spring("y_position", 0.0, 100.0, Spring::preset_bouncy())
+```
+
+**Spring presets:**
+- `Spring::preset_gentle()` - Smooth, minimal overshoot
+- `Spring::preset_bouncy()` - Playful with visible overshoot
+- `Spring::preset_stiff()` - Quick, snappy motion
+- `Spring::preset_slow()` - Heavy, deliberate movement
+
+**Custom springs:**
+```rust
+Spring::new(stiffness, damping)  // mass defaults to 1.0
+Spring::with_mass(stiffness, damping, mass)
+```
+
+### Stagger Animations
+
+Animate multiple items with cascading delays:
+
+```rust
+Act::new("list_enter")
+    .duration(1.0)
+    .stagger("item_opacity", 5, 0.0, 1.0, Easing::EaseOutCubic)
+    .stagger_config("item_opacity", |cfg| cfg
+        .delay(0.1)  // 10% of duration between items
+        .order(StaggerOrder::Forward))
+```
+
+**Stagger orders:**
+- `Forward` - First to last (0, 1, 2, ...)
+- `Reverse` - Last to first
+- `CenterOut` - Center items first, edges last
+- `EdgesIn` - Edge items first, center last
+- `Random` - Deterministic pseudo-random
+
+**Retrieving stagger values:**
+```rust
+let item_3_opacity: f64 = state.get_stagger("item_opacity", 3).unwrap_or(0.0);
+let all_opacities: Vec<f64> = state.get_stagger_all("item_opacity", 5);
+```
+
+### Timeline Callbacks
 
 ```rust
 Timeline::new()
-    .track("logo", logo_track)
-    .track("panels", panels_track)
-    .track("positions", position_track)
+    .act(Act::new("intro")
+        .on_enter(|| log("intro started"))
+        .on_exit(|| log("intro ended")))
+    .on_loop(|count| log(&format!("Loop #{}", count)))
+    .on_act_enter(|name| log(&format!("Entered: {}", name)))
+    .on_act_exit(|name| log(&format!("Exited: {}", name)))
 ```
 
-#### 4. Keyframes
+## Usage
 
-Define values at specific times within an act.
+### Static Queries
+
+Query timeline state at any point:
 
 ```rust
-Act::new("panels_fly_in")
-    .keyframe(0.0, "panel_opacity", 0.0)
-    .keyframe(0.3, "panel_opacity", 1.0)  // Fade in first 30%
-    .keyframe(0.0, "panel_pos", Position::offscreen())
-    .keyframe(1.0, "panel_pos", Position::around_logo())
-    .easing(Easing::OutBack)  // Overshoot on position
+let timeline = Timeline::new()
+    .act(Act::new("fade").duration(1.0)
+        .animate("opacity", 0.0, 1.0, Easing::Linear));
+
+let state = timeline.at(0.5);  // Halfway through
+let opacity: f64 = state.get("opacity").unwrap_or(0.0);
+assert_eq!(opacity, 0.5);
 ```
 
-#### 5. Easing Library
+### Playing Timeline
 
-Built-in easing functions:
+For real-time animation:
 
 ```rust
-enum Easing {
-    Linear,
-    InQuad, OutQuad, InOutQuad,
-    InCubic, OutCubic, InOutCubic,
-    InBack, OutBack, InOutBack,  // Overshoot
-    InElastic, OutElastic,        // Bounce
-    InBounce, OutBounce,
-    Custom(fn(f32) -> f32),
-}
+let mut playing = timeline.start();
+
+// In render loop:
+let state = playing.state();
+let opacity: f64 = state.get("opacity").unwrap_or(0.0);
+
+// Controls
+playing.pause();
+playing.play();
+playing.toggle_pause();
+playing.seek(1.5);       // Jump to 1.5 seconds
+playing.restart();
+playing.set_speed(2.0);  // 2x playback
+
+// Queries
+playing.elapsed();       // Current time in seconds
+playing.progress();      // 0.0-1.0 for non-looping
+playing.current_act();   // "fade"
+playing.act_progress();  // Progress within current act
+playing.is_paused();
 ```
 
-### API Design
+### Reactive Hook
 
-#### Declarative Timeline Builder
-
-```rust
-use blaeck::animation::*;
-
-let intro_sequence = Timeline::new()
-    // Act 1: Logo fades in alone
-    .act(Act::new("logo_intro")
-        .duration(2.0)
-        .animate("logo_opacity", 0.0 => 1.0)
-        .easing(Easing::OutCubic)
-        .hold_at_end())
-
-    // Act 2: Panels fly in (logo stays visible)
-    .act(Act::new("panels_enter")
-        .duration(2.0)
-        .animate("panel_opacity", 0.0 => 1.0)
-        .animate("panel_positions", Positions::OFFSCREEN => Positions::AROUND_LOGO)
-        .easing(Easing::OutBack))
-
-    // Act 3: Logo fades out (panels stay)
-    .act(Act::new("logo_exit")
-        .duration(1.0)
-        .animate("logo_opacity", 1.0 => 0.0)
-        .easing(Easing::InCubic))
-
-    // Act 4: Panels move to first layout
-    .act(Act::new("panels_arrange")
-        .duration(1.0)
-        .animate("panel_positions", Positions::AROUND_LOGO => Positions::LEFT)
-        .easing(Easing::InOutCubic));
-
-let cycling = Timeline::new()
-    .act(Act::hold("left", 5.0))
-    .act(Act::transition("left_to_center", 1.4)
-        .animate("panel_positions", Positions::LEFT => Positions::CENTER))
-    .act(Act::hold("center", 5.0))
-    .act(Act::transition("center_to_spread", 1.4)
-        .animate("panel_positions", Positions::CENTER => Positions::SPREAD))
-    .act(Act::hold("spread", 5.0))
-    .act(Act::transition("spread_to_left", 1.4)
-        .animate("panel_positions", Positions::SPREAD => Positions::LEFT))
-    .loop_to("left");
-
-let full_sequence = intro_sequence.then(cycling);
-```
-
-#### Using in Components
+For use with blaeck's reactive system:
 
 ```rust
-fn my_app(cx: Scope) -> Element {
-    let timeline = use_timeline(cx, full_sequence);
+use blaeck::reactive::*;
 
-    // Get current animated values
-    let logo_opacity = timeline.get::<f64>("logo_opacity");
-    let panel_positions = timeline.get::<Positions>("panel_positions");
-    let current_act = timeline.current_act();
+fn animated_component(cx: Scope) -> Element {
+    let timeline = use_timeline(cx, Timeline::new()
+        .act(Act::new("pulse").duration(2.0)
+            .animate("scale", 1.0, 1.2, Easing::EaseInOutCubic))
+        .loop_forever());
+
+    let scale: f64 = timeline.get_or("scale", 1.0);
 
     element! {
-        Box {
-            // Logo with animated opacity
-            Box(opacity: logo_opacity) {
-                #(render_logo())
-            }
-            // Panels with animated positions
-            #(render_panels(panel_positions))
+        Box(width: 10.0 * scale as f32) {
+            Text(content: "Pulsing!")
         }
     }
 }
 ```
 
-#### Timeline Events
-
+**TimelineHandle methods:**
 ```rust
-let timeline = Timeline::new()
-    .act(Act::new("intro")
-        .on_start(|| println!("Intro started"))
-        .on_complete(|| println!("Intro done")))
-    .on_loop(|count| println!("Loop iteration: {}", count));
+// Values
+timeline.get::<T>(property)
+timeline.get_or::<T>(property, default)
+timeline.get_stagger::<T>(property, index)
+timeline.get_stagger_all::<T>(property, count)
+
+// State
+timeline.elapsed()
+timeline.current_act()
+timeline.act_progress()
+timeline.progress()
+timeline.loop_count()
+
+// Controls
+timeline.pause()
+timeline.play()
+timeline.toggle_pause()
+timeline.seek(time)
+timeline.restart()
+timeline.set_speed(multiplier)
+
+// Debug
+timeline.debug_info()  // For visualization
+timeline.update()      // Fire pending callbacks
 ```
 
-### Advanced Features
-
-#### 1. Stagger Animations
-
-Animate multiple items with delay between each:
+### Chaining Timelines
 
 ```rust
-Act::new("panels_enter")
-    .stagger("panel_opacity", 0.0 => 1.0)
-    .stagger_delay(0.15)  // 150ms between each panel
-    .stagger_order(StaggerOrder::LeftToRight)
+let intro = Timeline::new()
+    .act(Act::new("logo").duration(2.0));
+
+let main = Timeline::new()
+    .act(Act::new("content").duration(5.0))
+    .loop_forever();
+
+let full = intro.then(main);  // Plays intro, then loops main
 ```
 
-#### 2. Spring Physics
+## Debug Visualization
 
-For more natural motion:
+The `TimelineDebugInfo` struct provides data for building debug UIs:
 
 ```rust
-Act::new("bounce_in")
-    .spring("position", target, Spring {
-        stiffness: 100.0,
-        damping: 10.0,
-        mass: 1.0,
-    })
+let debug = timeline.debug_info();
+
+debug.elapsed           // Current time
+debug.total_duration    // Full timeline length
+debug.current_act_name  // Active act
+debug.current_act_index // Active act index
+debug.act_progress      // Progress in current act
+debug.loop_count        // Times looped
+debug.is_paused         // Playback state
+debug.speed             // Playback speed
+debug.acts              // Vec of (name, start_time, duration)
 ```
 
-#### 3. Relative Timing
+## Examples
 
-Acts relative to others:
-
+**Basic fade sequence:**
 ```rust
 Timeline::new()
-    .act(Act::new("a").duration(2.0))
-    .act(Act::new("b").starts_at("a", 0.5))  // Start 0.5s into "a"
-    .act(Act::new("c").starts_after("a", 0.2))  // Start 0.2s after "a" ends
+    .act(Act::new("in").duration(0.5)
+        .animate("opacity", 0.0, 1.0, Easing::EaseOutCubic))
+    .act(Act::hold("visible", 3.0))
+    .act(Act::new("out").duration(0.5)
+        .animate("opacity", 1.0, 0.0, Easing::EaseInCubic))
 ```
 
-#### 4. Conditional Branching
-
+**Staggered list with spring:**
 ```rust
 Timeline::new()
-    .act(intro)
-    .branch(|state| {
-        if state.user_skipped {
-            Act::instant("skip_to_main")
-        } else {
-            Act::new("full_intro").duration(3.0)
-        }
-    })
+    .act(Act::new("enter").duration(1.5)
+        .stagger("y", 10, -50.0, 0.0, Easing::EaseOutCubic)
+        .stagger_config("y", |c| c.delay(0.08).order(StaggerOrder::Forward))
+        .stagger("opacity", 10, 0.0, 1.0, Easing::EaseOutCubic))
 ```
 
-#### 5. Timeline Controls
-
+**Looping ambient animation:**
 ```rust
-let timeline = use_timeline(cx, sequence);
-
-// Playback control
-timeline.play();
-timeline.pause();
-timeline.seek(3.5);  // Jump to 3.5 seconds
-timeline.set_speed(2.0);  // 2x speed
-timeline.reverse();
-
-// State queries
-timeline.elapsed();      // Current time
-timeline.progress();     // 0.0 - 1.0
-timeline.current_act();  // "panels_enter"
-timeline.is_playing();
+Timeline::new()
+    .act(Act::new("breathe_in").duration(2.0)
+        .animate("scale", 1.0, 1.05, Easing::EaseInOutCubic))
+    .act(Act::new("breathe_out").duration(2.0)
+        .animate("scale", 1.05, 1.0, Easing::EaseInOutCubic))
+    .loop_forever()
 ```
 
-### Data Types
+## Files
 
-```rust
-/// Animated value that can be interpolated
-pub trait Animatable: Clone {
-    fn lerp(a: &Self, b: &Self, t: f32) -> Self;
-}
+- `blaeck/src/timeline.rs` - Core module
+- `blaeck/src/reactive/hooks.rs` - `use_timeline` hook
+- `blaeck/examples/timeline_demo.rs` - Basic example
+- `blaeck/examples/reactive_timeline.rs` - Reactive example
+- `blaeck/examples/stagger_demo.rs` - Stagger example
+- `blaeck/examples/timeline_debug.rs` - Debug visualization
 
-// Built-in implementations
-impl Animatable for f32 { ... }
-impl Animatable for f64 { ... }
-impl Animatable for Color { ... }
-impl Animatable for (f32, f32) { ... }  // Positions
-impl Animatable for LayoutPositions { ... }
+## Future Work
 
-/// Custom positions struct
-#[derive(Animatable)]
-struct PanelPositions {
-    buffer: (f32, f32),
-    layout: (f32, f32),
-    process: (f32, f32),
-    // ...
-}
-```
-
-### Integration with Reactive System
-
-```rust
-fn dashboard(cx: Scope) -> Element {
-    // Timeline as a signal
-    let timeline = use_timeline(cx, dashboard_sequence);
-
-    // Derived values automatically update
-    let logo_opacity = timeline.get("logo_opacity");
-    let positions = timeline.get("positions");
-
-    // Timeline state in UI
-    let act_name = timeline.current_act();
-    let progress = timeline.progress();
-
-    // Manual control
-    use_input(cx, move |key| {
-        if key.is_char('r') {
-            timeline.restart();
-        }
-        if key.is_char(' ') {
-            timeline.toggle_pause();
-        }
-    });
-
-    element! { ... }
-}
-```
-
-### File Format (Optional)
-
-For complex sequences, support loading from a file:
-
-```yaml
-# animation.timeline.yaml
-timeline:
-  - act: logo_intro
-    duration: 2s
-    tracks:
-      logo_opacity:
-        from: 0
-        to: 1
-        easing: out-cubic
-
-  - act: panels_fly_in
-    duration: 2s
-    tracks:
-      panel_opacity:
-        from: 0
-        to: 1
-      panel_positions:
-        from: offscreen
-        to: around_logo
-        easing: out-back
-
-  - act: logo_exit
-    duration: 1s
-    tracks:
-      logo_opacity:
-        from: 1
-        to: 0
-
-cycling:
-  loop: true
-  acts:
-    - hold: left
-      duration: 5s
-    - transition: left_to_center
-      duration: 1.4s
-    # ...
-```
-
-## Implementation Plan
-
-### Phase 1: Core Timeline Engine
-- [ ] `Timeline` struct with acts
-- [ ] `Act` struct with duration and keyframes
-- [ ] Basic easing functions
-- [ ] `Animatable` trait for interpolation
-
-### Phase 2: Reactive Integration
-- [ ] `use_timeline` hook
-- [ ] Automatic re-render on value changes
-- [ ] Timeline controls (play/pause/seek)
-
-### Phase 3: Advanced Features
-- [ ] Stagger animations
-- [ ] Parallel tracks
-- [ ] Timeline events/callbacks
-- [ ] Spring physics
-
-### Phase 4: Developer Experience
-- [ ] Timeline visualization/debugger
-- [ ] Hot-reload timeline changes
-- [ ] YAML/JSON file format
-
-## Prior Art
-
-- **CSS Animations**: Keyframes, easing, fill-mode
-- **Framer Motion**: Declarative React animations
-- **GSAP**: JavaScript animation timeline
-- **After Effects**: Composition-based timeline
-- **Unity Animator**: State machine + timeline hybrid
-
-## Open Questions
-
-1. Should timelines be serializable for persistence?
-2. How to handle timeline interruption (user input during animation)?
-3. Should we support procedural/physics-based animation alongside keyframes?
-4. Integration with existing `AnimationTimer` in blaeck?
-
----
-
-*This RFC proposes making animation a first-class citizen in blaeck, reducing boilerplate and enabling complex choreographed sequences with a declarative API.*
+- [ ] Timeline serialization (YAML/JSON)
+- [ ] Timeline interruption/blending
+- [ ] Parallel tracks (multiple properties animating independently)
+- [ ] Derive macro for custom Animatable types
+- [ ] Timeline editor/visualizer tool

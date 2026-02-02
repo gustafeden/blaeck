@@ -33,7 +33,7 @@ pub struct Scope {
 
 impl Scope {
     /// Create a new scope for a component.
-    pub(crate) fn new(rt: RuntimeHandle, component_id: ComponentId) -> Self {
+    pub fn new(rt: RuntimeHandle, component_id: ComponentId) -> Self {
         Self { rt, component_id }
     }
 

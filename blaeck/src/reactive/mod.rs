@@ -136,6 +136,6 @@ mod signal;
 pub use app::{ReactiveApp, ReactiveAppConfig, ReactiveAppResult};
 pub use hooks::{use_input, use_state, use_timeline, TimelineHandle};
 pub use instance::{ComponentInstance, HookSlot};
-pub use runtime::{RuntimeHandle, RuntimeInner};
+pub use runtime::{ComponentId, RuntimeHandle, RuntimeInner};
 pub use scope::Scope;
 pub use signal::Signal;

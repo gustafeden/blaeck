@@ -7,6 +7,14 @@ cargo run --example <name>
 cargo run --example <name> --features async  # for async examples
 ```
 
+**Or explore all examples interactively:**
+
+```bash
+cargo run --example example_viewer
+```
+
+The example viewer provides a three-panel interface with live previews, source code viewing, and interactive testing. Press `Enter` on any example to interact with it in focus mode. See the main [README](../README.md#example-viewer) for details.
+
 ---
 
 ## Learning Path
@@ -24,7 +32,7 @@ cargo run --example <name> --features async  # for async examples
 | Example | What it teaches |
 |---------|-----------------|
 | `spinner_demo` | Animated spinners, render loop timing |
-| `progress` | Progress bars, state updates |
+| `timer` | Stopwatch and countdown, state updates |
 | `select_demo` | Arrow key navigation, SelectState |
 | `form_demo` | Text input, checkboxes, form state |
 | `table` | Data tables, column alignment |
@@ -34,7 +42,7 @@ cargo run --example <name> --features async  # for async examples
 | Example | What it teaches |
 |---------|-----------------|
 | `dashboard` | Multi-panel layouts, flexbox composition |
-| `async_demo` | Tokio integration, background tasks |
+| `async_app` | Tokio integration, background tasks |
 | `focus_demo` | Tab navigation, focus management |
 | `task_runner` | Real-world pattern: progress + status |
 
@@ -47,7 +55,6 @@ cargo run --example <name> --features async  # for async examples
 - **hello** — "Hello World" — simplest possible Blaeck app
 - **interactive** — Keyboard input with App event loop
 - **borders** — Box border styles (Single, Double, Round, etc.)
-- **nested_test** — Deeply nested element trees
 
 ### Input Components
 
@@ -67,9 +74,7 @@ cargo run --example <name> --features async  # for async examples
 ### Feedback
 
 - **spinner_demo** — All 15 spinner styles
-- **progress** — Progress bars with different styles
 - **timer** — Stopwatch and countdown timers
-- **countdown** — Countdown with color warnings
 - **logbox** — Scrolling log viewer
 - **logbox_command** — Log viewer with live command output
 
@@ -95,19 +100,16 @@ cargo run --example <name> --features async  # for async examples
 ### Layout
 
 - **dashboard** — Multi-panel flexbox layout
-- **components_demo** — Component showcase
 - **polish_demo** — Polished UI patterns
 
 ### Animation
 
 - **animation** — Animation timer, easing functions
-- **cube3d** — 3D rotating cube (advanced)
 - **cube3d_braille** — 3D cube with braille rendering
 
 ### Async
 
-- **async_demo** — Basic async/await with tokio
-- **async_app** — AsyncApp with background tasks
+- **async_app** — AsyncApp with background tasks and tokio integration
 
 ---
 

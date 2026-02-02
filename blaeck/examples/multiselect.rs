@@ -2,6 +2,9 @@
 //!
 //! Run with: cargo run --example multiselect
 
+#[path = "previews/mod.rs"]
+mod previews;
+
 use blaeck::input::poll_key;
 use blaeck::prelude::*;
 use blaeck::Blaeck;
@@ -12,93 +15,13 @@ use std::time::Duration;
 fn main() -> io::Result<()> {
     let mut blaeck = Blaeck::new(io::stdout())?;
 
-    let items = vec![
-        "Rust",
-        "Python",
-        "JavaScript",
-        "TypeScript",
-        "Go",
-        "Java",
-        "C++",
-        "Ruby",
-    ];
-
+    let items = previews::multiselect::ITEMS;
     let mut state = MultiSelectState::new(items.len());
 
     enable_raw_mode()?;
 
     loop {
-        let props = MultiSelectProps::new(items.clone())
-            .cursor(state.cursor)
-            .selected(state.selected.clone())
-            .scroll_offset(state.scroll_offset)
-            .cursor_color(Color::Cyan)
-            .selected_color(Color::Green)
-            .style(MultiSelectStyle::Bracket);
-
-        let selected_count = state.selected_count();
-        let total = items.len();
-
-        let ui = Element::node::<Box>(
-            BoxProps {
-                flex_direction: FlexDirection::Column,
-                padding: 1.0,
-                border_style: BorderStyle::Round,
-                ..Default::default()
-            },
-            vec![
-                // Title
-                Element::node::<Text>(
-                    TextProps {
-                        content: "MultiSelect Demo".into(),
-                        bold: true,
-                        color: Some(Color::Cyan),
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-                Element::text(""),
-                Element::node::<Text>(
-                    TextProps {
-                        content: "Select your favorite languages:".into(),
-                        dim: true,
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-                Element::text(""),
-                // MultiSelect
-                Element::node::<MultiSelect>(props, vec![]),
-                Element::text(""),
-                // Selection count
-                Element::node::<Text>(
-                    TextProps {
-                        content: format!("{}/{} selected", selected_count, total),
-                        color: Some(Color::DarkGray),
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-                Element::text(""),
-                // Instructions
-                Element::node::<Divider>(
-                    DividerProps::new()
-                        .width(40)
-                        .line_style(DividerStyle::Dashed)
-                        .color(Color::DarkGray),
-                    vec![],
-                ),
-                Element::node::<Text>(
-                    TextProps {
-                        content: "↑/↓ move • Space toggle • a all • Enter done".into(),
-                        dim: true,
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-            ],
-        );
-
+        let ui = previews::multiselect::build_ui_with_state(items, &state);
         blaeck.render(ui)?;
 
         if let Some(key) = poll_key(Duration::from_millis(50))? {
@@ -143,7 +66,6 @@ fn main() -> io::Result<()> {
     disable_raw_mode()?;
     blaeck.unmount()?;
 
-    // Show results
     if state.has_selection() {
         let selected: Vec<_> = state.selected_indices().iter().map(|&i| items[i]).collect();
         println!("Selected: {}", selected.join(", "));

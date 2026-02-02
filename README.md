@@ -192,7 +192,7 @@ fn main() -> std::io::Result<()> {
 
 ```bash
 cargo run --example demo_inline      # Inline rendering demo
-cargo run --example demo_form        # Interactive form
+cargo run --example form_demo        # Interactive form
 cargo run --example reactive_counter # Counter with signals
 cargo run --example reactive_list    # List navigation
 cargo run --example dashboard        # Multi-panel layout
@@ -201,6 +201,47 @@ cargo run --example spinner_demo     # 15 spinner styles
 ```
 
 See [all examples](blaeck/examples/) or [API docs](https://docs.rs/blaeck).
+
+---
+
+## Example Viewer
+
+The **example_viewer** is an interactive tool for exploring all blaeck examples in a single interface. It provides a three-panel layout with live previews, source code viewing, and interactive testing.
+
+```bash
+cargo run --example example_viewer
+```
+
+### Features
+
+- **Live Previews** - See rendered output for all 44 examples in real-time
+- **Interactive Mode** - Press `Enter` to interact with any example in focus mode
+- **Source Code Viewer** - View both the example wrapper and UI implementation code
+- **Background Execution** - Build and run examples with captured output
+- **Resizable Panels** - Adjust layout with `[` and `]` keys
+- **Example Management** - Mark and batch-delete examples for cleanup
+
+### Controls
+
+| Key | Action |
+|-----|--------|
+| `↑`/`↓` or `k`/`j` | Navigate example list |
+| `Enter` | Enter live interactive preview (focus mode) |
+| `Esc` | Exit focus mode / Quit |
+| `[` / `]` | Resize preview panel (shrink/grow) |
+| `PageUp`/`PageDown` or `K`/`J` | Scroll source code |
+| `r` | Run selected example (capture output) |
+| `s` | Stop running example |
+| `b` | Build selected example |
+| `d` | Toggle mark for deletion |
+| `x` | Execute deletions (with confirmation) |
+| `q` | Quit |
+
+Perfect for:
+- Exploring the full component library
+- Testing examples without running them individually
+- Comparing UI implementations
+- Learning blaeck patterns
 
 ---
 
