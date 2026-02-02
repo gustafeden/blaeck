@@ -18,9 +18,12 @@ case "$OS-$ARCH" in
   darwin-arm64)
     ARTIFACT="example_viewer-macos-arm64"
     ;;
+  linux-aarch64)
+    ARTIFACT="example_viewer-linux-arm64"
+    ;;
   *)
     echo "❌ Unsupported platform: $OS-$ARCH"
-    echo "Supported: Linux x86_64, macOS x86_64, macOS ARM64"
+    echo "Supported: Linux x86_64, Linux ARM64, macOS x86_64, macOS ARM64"
     exit 1
     ;;
 esac
