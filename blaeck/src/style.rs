@@ -3,7 +3,100 @@
 //! This module provides Color, Modifier, and Style types for styling text
 //! in the terminal, following patterns from Ratatui.
 
+use std::sync::OnceLock;
+
 use bitflags::bitflags;
+
+/// Cached result of truecolor support detection.
+static TRUECOLOR_SUPPORT: OnceLock<bool> = OnceLock::new();
+
+/// Detects whether the terminal supports 24-bit truecolor.
+///
+/// Checks `COLORTERM` and `TERM_PROGRAM` environment variables.
+/// The result is cached after the first call using `OnceLock`.
+pub fn supports_truecolor() -> bool {
+    *TRUECOLOR_SUPPORT.get_or_init(|| {
+        if let Ok(ct) = std::env::var("COLORTERM") {
+            if ct == "truecolor" || ct == "24bit" {
+                return true;
+            }
+        }
+        if let Ok(prog) = std::env::var("TERM_PROGRAM") {
+            return matches!(
+                prog.as_str(),
+                "iTerm.app" | "WezTerm" | "Hyper" | "vscode"
+            );
+        }
+        false
+    })
+}
+
+/// Converts an RGB color to the nearest 256-color palette index.
+///
+/// Uses the 6x6x6 color cube (indices 16-231) and the 24-shade grayscale
+/// ramp (indices 232-255), choosing whichever is closer.
+pub fn rgb_to_256(r: u8, g: u8, b: u8) -> u8 {
+    // Check if it's close to grayscale
+    let gray_avg = (r as u16 + g as u16 + b as u16) / 3;
+    let gray_diff = (r as i16 - gray_avg as i16).unsigned_abs()
+        + (g as i16 - gray_avg as i16).unsigned_abs()
+        + (b as i16 - gray_avg as i16).unsigned_abs();
+
+    // Map to 6x6x6 cube
+    let cube_r = rgb_channel_to_cube(r);
+    let cube_g = rgb_channel_to_cube(g);
+    let cube_b = rgb_channel_to_cube(b);
+    let cube_index = 16 + 36 * cube_r + 6 * cube_g + cube_b;
+
+    // Compute cube color distance
+    let cube_rv = cube_value(cube_r);
+    let cube_gv = cube_value(cube_g);
+    let cube_bv = cube_value(cube_b);
+    let cube_dist = color_distance(r, g, b, cube_rv, cube_gv, cube_bv);
+
+    // Map to grayscale ramp (232-255, 24 shades from 8 to 238)
+    let gray_index = if gray_avg < 4 {
+        0u8
+    } else if gray_avg > 243 {
+        23
+    } else {
+        ((gray_avg as f32 - 8.0) / 10.0).round() as u8
+    };
+    let gray_value = 8 + 10 * gray_index;
+    let gray_dist = color_distance(r, g, b, gray_value, gray_value, gray_value);
+
+    // Use grayscale only if the color is actually grayish and grayscale is closer
+    if gray_diff < 20 && gray_dist < cube_dist {
+        232 + gray_index
+    } else {
+        cube_index
+    }
+}
+
+fn rgb_channel_to_cube(v: u8) -> u8 {
+    if v < 48 {
+        0
+    } else if v < 115 {
+        1
+    } else {
+        ((v as u16 - 35) / 40) as u8
+    }
+}
+
+fn cube_value(idx: u8) -> u8 {
+    if idx == 0 {
+        0
+    } else {
+        55 + 40 * idx
+    }
+}
+
+fn color_distance(r1: u8, g1: u8, b1: u8, r2: u8, g2: u8, b2: u8) -> u32 {
+    let dr = r1 as i32 - r2 as i32;
+    let dg = g1 as i32 - g2 as i32;
+    let db = b1 as i32 - b2 as i32;
+    (dr * dr + dg * dg + db * db) as u32
+}
 
 /// ANSI Color for terminal rendering.
 ///
@@ -74,7 +167,13 @@ impl Color {
             Color::LightBlue => Some("94".to_string()),
             Color::LightMagenta => Some("95".to_string()),
             Color::LightCyan => Some("96".to_string()),
-            Color::Rgb(r, g, b) => Some(format!("38;2;{};{};{}", r, g, b)),
+            Color::Rgb(r, g, b) => {
+                if supports_truecolor() {
+                    Some(format!("38;2;{};{};{}", r, g, b))
+                } else {
+                    Some(format!("38;5;{}", rgb_to_256(r, g, b)))
+                }
+            }
             Color::Indexed(n) => Some(format!("38;5;{}", n)),
         }
     }
@@ -100,7 +199,13 @@ impl Color {
             Color::LightBlue => Some("104".to_string()),
             Color::LightMagenta => Some("105".to_string()),
             Color::LightCyan => Some("106".to_string()),
-            Color::Rgb(r, g, b) => Some(format!("48;2;{};{};{}", r, g, b)),
+            Color::Rgb(r, g, b) => {
+                if supports_truecolor() {
+                    Some(format!("48;2;{};{};{}", r, g, b))
+                } else {
+                    Some(format!("48;5;{}", rgb_to_256(r, g, b)))
+                }
+            }
             Color::Indexed(n) => Some(format!("48;5;{}", n)),
         }
     }

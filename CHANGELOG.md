@@ -5,6 +5,22 @@ All notable changes to Blaeck will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-02-04
+
+### Added
+
+**Color Utilities**
+- `supports_truecolor()` - Detects 24-bit color terminal support from environment variables
+- `rgb_to_256()` - Converts RGB colors to nearest 256-color palette index
+
+### Changed
+
+- RGB colors now automatically fall back to 256-color palette on terminals without truecolor support
+
+### Removed
+
+- Removed `DISTRIBUTION.md` and `POSTS.md` from repository
+
 ## [0.3.0] - 2026-02-02
 
 ### Added

@@ -192,7 +192,7 @@ pub use layout::{
 pub use log_update::LogUpdate;
 pub use output::{Output, OutputResult};
 pub use renderer::Blaeck;
-pub use style::{Color, Modifier, Style};
+pub use style::{rgb_to_256, supports_truecolor, Color, Modifier, Style};
 pub use timeline::{
     Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, StaggerConfig,
     StaggerOrder, StaggerTrack, Timeline, TimelineDebugInfo, TimelineState, Track,
@@ -268,7 +268,7 @@ pub mod prelude {
         GridPlacement, JustifyContent, LayoutResult, LayoutStyle, Overflow, Position, TrackSize,
     };
     pub use crate::renderer::Blaeck;
-    pub use crate::style::{Color, Modifier, Style};
+    pub use crate::style::{rgb_to_256, supports_truecolor, Color, Modifier, Style};
     pub use crate::timeline::{
         Act, Animatable, LoopBehavior, PlayingTimeline, Spring, SpringTrack, StaggerConfig,
         StaggerOrder, StaggerTrack, Timeline, TimelineDebugInfo, Track,
